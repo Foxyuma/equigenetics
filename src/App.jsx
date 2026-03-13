@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from './components/layout/AppLayout';
 import Stable from './pages/Stable';
 import HorseDetail from './pages/HorseDetail';
+import Training from './pages/Training';
 import Breeding from './pages/Breeding';
 import Pedigree from './pages/Pedigree';
 import Competitions from './pages/Competitions';
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
       <Route element={<AppLayout />}>
         <Route path="/Stable" element={<Stable />} />
         <Route path="/HorseDetail" element={<HorseDetail />} />
+        <Route path="/Training" element={<Training />} />
         <Route path="/Breeding" element={<Breeding />} />
         <Route path="/Pedigree" element={<Pedigree />} />
         <Route path="/Competitions" element={<Competitions />} />

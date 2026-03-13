@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, Users, Calculator } from 'lucide-react';
+import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package } from 'lucide-react';
 
 const navItems = [
   { path: "/Stable", label: "Écurie", icon: Home },
   { path: "/Breeding", label: "Élevage", icon: Heart },
   { path: "/Competitions", label: "Compétitions", icon: Trophy },
-  { path: "/Pedigree", label: "Pedigree", icon: Users },
-  { path: "/GeneticPredictor", label: "Prédictions", icon: Calculator },
   { path: "/Market", label: "Marché", icon: ShoppingCart },
   { path: "/Shop", label: "Boutique", icon: Store },
   { path: "/Inventory", label: "Inventaire", icon: Package },

@@ -14,8 +14,6 @@ import Competitions from './pages/Competitions';
 import Market from './pages/Market';
 import Shop from './pages/Shop';
 import Inventory from './pages/Inventory';
-import Pedigree from './pages/Pedigree';
-import GeneticPredictor from './pages/GeneticPredictor';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -48,8 +46,6 @@ const AuthenticatedApp = () => {
         <Route path="/HorseDetail" element={<HorseDetail />} />
         <Route path="/Breeding" element={<Breeding />} />
         <Route path="/Competitions" element={<Competitions />} />
-        <Route path="/Pedigree" element={<Pedigree />} />
-        <Route path="/GeneticPredictor" element={<GeneticPredictor />} />
         <Route path="/Market" element={<Market />} />
         <Route path="/Shop" element={<Shop />} />
         <Route path="/Inventory" element={<Inventory />} />

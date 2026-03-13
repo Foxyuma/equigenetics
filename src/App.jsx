@@ -12,6 +12,8 @@ import HorseDetail from './pages/HorseDetail';
 import Breeding from './pages/Breeding';
 import Competitions from './pages/Competitions';
 import Market from './pages/Market';
+import Shop from './pages/Shop';
+import Inventory from './pages/Inventory';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -45,6 +47,8 @@ const AuthenticatedApp = () => {
         <Route path="/Breeding" element={<Breeding />} />
         <Route path="/Competitions" element={<Competitions />} />
         <Route path="/Market" element={<Market />} />
+        <Route path="/Shop" element={<Shop />} />
+        <Route path="/Inventory" element={<Inventory />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

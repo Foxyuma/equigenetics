@@ -10,6 +10,7 @@ import AppLayout from './components/layout/AppLayout';
 import Stable from './pages/Stable';
 import HorseDetail from './pages/HorseDetail';
 import Breeding from './pages/Breeding';
+import Pedigree from './pages/Pedigree';
 import Competitions from './pages/Competitions';
 import Market from './pages/Market';
 import Shop from './pages/Shop';
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
         <Route path="/Stable" element={<Stable />} />
         <Route path="/HorseDetail" element={<HorseDetail />} />
         <Route path="/Breeding" element={<Breeding />} />
+        <Route path="/Pedigree" element={<Pedigree />} />
         <Route path="/Competitions" element={<Competitions />} />
         <Route path="/Market" element={<Market />} />
         <Route path="/Shop" element={<Shop />} />

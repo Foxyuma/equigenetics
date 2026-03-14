@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin } from 'lucide-react';
+import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft } from 'lucide-react';
 
 const menuGroups = [
   {
@@ -28,6 +28,8 @@ const menuGroups = [
     items: [
       { path: "/Market", label: "Marché", icon: ShoppingCart },
       { path: "/Shop", label: "Boutique", icon: Store },
+      { path: "/Messages", label: "Messagerie", icon: Mail },
+      { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
     ]
   }
 ];

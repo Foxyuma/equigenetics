@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
+import HorseVisualizer from '../components/horse/HorseVisualizer';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -87,15 +88,15 @@ export default function HorseDetail() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3">
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-amber-50 to-stone-100">
-            {horse.image_url ? (
-              <img src={horse.image_url} alt={horse.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-8xl opacity-20">🐴</span>
-              </div>
-            )}
-          </div>
+          <Card className="border-0 bg-gradient-to-br from-amber-50 to-stone-100 overflow-hidden">
+            <CardContent className="p-6">
+              <HorseVisualizer 
+                genotype={horse.genotype} 
+                coatColor={horse.coat_color}
+                size={400}
+              />
+            </CardContent>
+          </Card>
         </div>
 
         <div className="lg:w-2/3 space-y-4">

@@ -17,6 +17,7 @@ import Rankings from './pages/Rankings';
 import Market from './pages/Market';
 import Shop from './pages/Shop';
 import Inventory from './pages/Inventory';
+import VetClinic from './pages/VetClinic';
 import Messages from './pages/Messages';
 import Trades from './pages/Trades';
 
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
         <Route path="/Market" element={<Market />} />
         <Route path="/Shop" element={<Shop />} />
         <Route path="/Inventory" element={<Inventory />} />
+        <Route path="/VetClinic" element={<VetClinic />} />
         <Route path="/Messages" element={<Messages />} />
         <Route path="/Trades" element={<Trades />} />
       </Route>

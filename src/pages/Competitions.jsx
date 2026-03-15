@@ -51,6 +51,14 @@ export default function Competitions() {
     queryFn: () => base44.entities.Competition.list('-created_date', 50),
   });
 
+  const { data: seasons = [] } = useQuery({
+    queryKey: ['seasons-comp'],
+    queryFn: () => base44.entities.Season.list('-created_date', 1),
+  });
+
+  const currentSeason = seasons[0];
+  const availableCompetitions = currentSeason?.available_competitions || DISCIPLINES.map(d => d.id);
+
   const selectedHorse = horses.find(h => h.id === selectedHorseId);
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
@@ -116,6 +124,8 @@ export default function Competitions() {
         <p className="text-stone-500 mt-1">Engagez vos chevaux dans des épreuves olympiques et non-olympiques</p>
       </div>
 
+      <SeasonManager compact />
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="compete">Participer</TabsTrigger>
@@ -127,27 +137,38 @@ export default function Competitions() {
           <div>
             <h3 className="font-semibold text-stone-700 mb-3">Choisissez une discipline</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {DISCIPLINES.map(d => (
-                <button
-                  key={d.id}
-                  onClick={() => setSelectedDiscipline(d.id)}
-                  className={`p-4 rounded-xl text-left transition-all duration-300 border ${
-                    selectedDiscipline === d.id
-                      ? 'bg-stone-800 text-white border-stone-800 shadow-lg shadow-stone-300/30'
-                      : 'bg-white/80 border-stone-200 hover:border-stone-300 hover:shadow-md'
-                  }`}
-                >
-                  <span className="text-2xl block mb-2">{d.icon}</span>
-                  <span className="font-medium text-sm block">{d.name}</span>
-                  {d.olympic && (
-                    <Badge className={`mt-1 text-xs border-0 ${
-                      selectedDiscipline === d.id ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      Olympique
-                    </Badge>
-                  )}
-                </button>
-              ))}
+              {DISCIPLINES.map(d => {
+                const isAvailable = availableCompetitions.includes(d.id);
+                return (
+                  <button
+                    key={d.id}
+                    onClick={() => isAvailable && setSelectedDiscipline(d.id)}
+                    disabled={!isAvailable}
+                    className={`p-4 rounded-xl text-left transition-all duration-300 border ${
+                      selectedDiscipline === d.id
+                        ? 'bg-stone-800 text-white border-stone-800 shadow-lg shadow-stone-300/30'
+                        : isAvailable
+                        ? 'bg-white/80 border-stone-200 hover:border-stone-300 hover:shadow-md'
+                        : 'bg-stone-100/50 border-stone-200 opacity-50 cursor-not-allowed'
+                    }`}
+                  >
+                    <span className="text-2xl block mb-2">{d.icon}</span>
+                    <span className="font-medium text-sm block">{d.name}</span>
+                    {!isAvailable && (
+                      <Badge className="mt-1 text-xs border-0 bg-stone-300 text-stone-600">
+                        Hors saison
+                      </Badge>
+                    )}
+                    {d.olympic && isAvailable && (
+                      <Badge className={`mt-1 text-xs border-0 ${
+                        selectedDiscipline === d.id ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        Olympique
+                      </Badge>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

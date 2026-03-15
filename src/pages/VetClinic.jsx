@@ -10,6 +10,7 @@ import { Activity, Heart, AlertTriangle, Pill, Syringe, CheckCircle, XCircle, Tr
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
+import SeasonManager from '../components/season/SeasonManager';
 
 const ILLNESSES = [
   { name: "Colique", severity: "severe", symptoms: ["Douleur abdominale", "Refus de manger", "Transpiration"], energyPenalty: 40, performancePenalty: 60, treatment: ["Anti-douleur", "Antispasmodique"], duration: 3 },
@@ -67,12 +68,20 @@ export default function VetClinic() {
     enabled: !!currentUser,
   });
 
+  const { data: seasons = [] } = useQuery({
+    queryKey: ['seasons-vet'],
+    queryFn: () => base44.entities.Season.list('-created_date', 1),
+  });
+
+  const currentSeason = seasons[0];
+  const illnessProbability = (currentSeason?.illness_probability || 15) / 100;
+
   const checkupMutation = useMutation({
     mutationFn: async (horse) => {
       const existingRecord = healthRecords.find(r => r.horse_id === horse.id);
       
-      // Random chance of illness if no current illness
-      const hasIllness = !existingRecord?.current_illness && Math.random() < 0.15;
+      // Random chance of illness based on season
+      const hasIllness = !existingRecord?.current_illness && Math.random() < illnessProbability;
       const illness = hasIllness ? ILLNESSES[Math.floor(Math.random() * ILLNESSES.length)] : null;
 
       const data = {
@@ -247,6 +256,8 @@ export default function VetClinic() {
         <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Clinique Vétérinaire</h1>
         <p className="text-stone-500 mt-1">Soignez vos chevaux et maintenez-les en bonne santé</p>
       </div>
+
+      <SeasonManager compact />
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card className="border-0 bg-blue-50">

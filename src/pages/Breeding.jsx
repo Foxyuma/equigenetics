@@ -12,6 +12,8 @@ import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases
 import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
+import SeasonManager from '../components/season/SeasonManager';
+import { toast } from 'sonner';
 
 export default function Breeding() {
   const [fatherId, setFatherId] = useState('');
@@ -32,6 +34,14 @@ export default function Breeding() {
     queryFn: () => base44.entities.BreedingRecord.list('-created_date', 20),
   });
 
+  const { data: seasons = [] } = useQuery({
+    queryKey: ['seasons'],
+    queryFn: () => base44.entities.Season.list('-created_date', 1),
+  });
+
+  const currentSeason = seasons[0];
+  const fertilityModifier = currentSeason?.fertility_modifier || 100;
+
   const males = horses.filter(h => h.sex === 'male');
   const females = horses.filter(h => h.sex === 'female');
   const father = males.find(h => h.id === fatherId);
@@ -39,6 +49,14 @@ export default function Breeding() {
 
   const simulateBreeding = () => {
     if (!father || !mother) return;
+    
+    // Check fertility based on season
+    const successChance = fertilityModifier / 100;
+    if (Math.random() > successChance) {
+      toast.error(`Échec de la reproduction ! (Fertilité: ${fertilityModifier}%)`);
+      setFoalPreview(null);
+      return;
+    }
     
     const childGenotype = breedGenotype(father.genotype, mother.genotype);
     const childStats = generateRandomStats(father.stats, mother.stats);
@@ -53,6 +71,7 @@ export default function Breeding() {
       sex: Math.random() > 0.5 ? 'male' : 'female',
       breed: father.breed === mother.breed ? father.breed : `${father.breed} x ${mother.breed}`,
     });
+    toast.success('Croisement réussi !');
   };
 
   const createFoalMutation = useMutation({
@@ -112,6 +131,8 @@ export default function Breeding() {
         <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Élevage</h1>
         <p className="text-stone-500 mt-1">Croisez vos chevaux et découvrez les résultats génétiques</p>
       </div>
+
+      <SeasonManager compact />
 
       {/* Parent Selection */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const menuGroups = [
   {
@@ -39,6 +41,19 @@ export default function AppLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user-nav'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: messages = [] } = useQuery({
+    queryKey: ['messages-nav'],
+    queryFn: () => base44.entities.Message.filter({ recipient_email: currentUser?.email }),
+    enabled: !!currentUser,
+  });
+
+  const unreadCount = messages.filter(m => !m.is_read).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-50">
@@ -82,6 +97,7 @@ export default function AppLayout() {
                         {group.items.map(item => {
                           const ItemIcon = item.icon;
                           const isActive = location.pathname === item.path;
+                          const showBadge = item.path === '/Messages' && unreadCount > 0;
                           return (
                             <Link
                               key={item.path}
@@ -94,6 +110,11 @@ export default function AppLayout() {
                             >
                               <ItemIcon className="w-4 h-4" />
                               {item.label}
+                              {showBadge && (
+                                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                  {unreadCount}
+                                </span>
+                              )}
                             </Link>
                           );
                         })}
@@ -126,6 +147,7 @@ export default function AppLayout() {
                     {group.items.map(item => {
                       const ItemIcon = item.icon;
                       const isActive = location.pathname === item.path;
+                      const showBadge = item.path === '/Messages' && unreadCount > 0;
                       return (
                         <Link
                           key={item.path}
@@ -137,6 +159,11 @@ export default function AppLayout() {
                         >
                           <ItemIcon className="w-4 h-4" />
                           {item.label}
+                          {showBadge && (
+                            <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                              {unreadCount}
+                            </span>
+                          )}
                         </Link>
                       );
                     })}

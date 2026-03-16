@@ -11,6 +11,7 @@ import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
 import HorseVisualizer from '../components/horse/HorseVisualizer';
+import CareerPanel from '../components/horse/CareerPanel';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -191,7 +192,7 @@ export default function HorseDetail() {
           <TabsTrigger value="stats">Compétences</TabsTrigger>
           <TabsTrigger value="genetics">Génétique</TabsTrigger>
           <TabsTrigger value="health">Santé</TabsTrigger>
-          <TabsTrigger value="history">Historique</TabsTrigger>
+          <TabsTrigger value="career">Carrière</TabsTrigger>
         </TabsList>
         <TabsContent value="stats" className="mt-4">
           <Card className="border-0 bg-white/60">
@@ -218,30 +219,8 @@ export default function HorseDetail() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="history" className="mt-4">
-          <Card className="border-0 bg-white/60">
-            <CardHeader><CardTitle className="text-lg">Compétitions</CardTitle></CardHeader>
-            <CardContent>
-              {competitions.length === 0 ? (
-                <p className="text-stone-400 text-sm text-center py-6">Aucune compétition pour le moment</p>
-              ) : (
-                <div className="space-y-2">
-                  {competitions.map(c => (
-                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-stone-50">
-                      <div>
-                        <p className="font-medium text-stone-700 text-sm">{c.name}</p>
-                        <p className="text-xs text-stone-400">{c.discipline?.replace(/_/g, ' ')} — {c.level}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-stone-800">{c.score?.toFixed(1)} pts</p>
-                        <Badge variant="outline" className="text-xs">#{c.rank}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="career" className="mt-4">
+          <CareerPanel competitions={competitions} />
         </TabsContent>
       </Tabs>
     </div>

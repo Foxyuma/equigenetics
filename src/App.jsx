@@ -19,6 +19,7 @@ import Shop from './pages/Shop';
 import Inventory from './pages/Inventory';
 import VetClinic from './pages/VetClinic';
 import SeasonCalendar from './pages/SeasonCalendar';
+import Paddocks from './pages/Paddocks';
 import Messages from './pages/Messages';
 import Trades from './pages/Trades';
 
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
         <Route path="/Inventory" element={<Inventory />} />
         <Route path="/VetClinic" element={<VetClinic />} />
         <Route path="/SeasonCalendar" element={<SeasonCalendar />} />
+        <Route path="/Paddocks" element={<Paddocks />} />
         <Route path="/Messages" element={<Messages />} />
         <Route path="/Trades" element={<Trades />} />
       </Route>

@@ -26,14 +26,20 @@ const menuGroups = [
     ]
   },
   {
+    label: "Messagerie",
+    icon: Mail,
+    items: [
+      { path: "/Messages", label: "Messages", icon: Mail },
+      { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
+    ]
+  },
+  {
     label: "Ville",
     icon: MapPin,
     items: [
-      { path: "/Market", label: "Marché", icon: ShoppingCart },
+      { path: "/Market", label: "Marché & Enchères", icon: ShoppingCart },
       { path: "/Shop", label: "Boutique", icon: Store },
       { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },
-      { path: "/Messages", label: "Messagerie", icon: Mail },
-      { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
     ]
   }
 ];

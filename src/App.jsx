@@ -22,6 +22,7 @@ import SeasonCalendar from './pages/SeasonCalendar';
 import Paddocks from './pages/Paddocks';
 import Messages from './pages/Messages';
 import Trades from './pages/Trades';
+import Staff from './pages/Staff';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
         <Route path="/Paddocks" element={<Paddocks />} />
         <Route path="/Messages" element={<Messages />} />
         <Route path="/Trades" element={<Trades />} />
+        <Route path="/Staff" element={<Staff />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

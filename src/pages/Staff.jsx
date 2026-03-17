@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,8 +39,9 @@ export default function Staff() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finances'] }),
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoading && finances.length === 0) initFinancesMutation.mutate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, finances.length]);
 
   const hireMutation = useMutation({

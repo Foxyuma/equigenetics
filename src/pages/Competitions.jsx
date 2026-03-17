@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Medal, Zap, Star } from 'lucide-react';
 import { getCompetitionScore } from '../components/genetics/GeneticsEngine';
+import SeasonManager from '../components/season/SeasonManager';
 
 const DISCIPLINES = [
   { id: "dressage", name: "Dressage", olympic: true, icon: "🎩" },

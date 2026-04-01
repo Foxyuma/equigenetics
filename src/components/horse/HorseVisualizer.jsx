@@ -2,179 +2,163 @@ import React from 'react';
 
 const BASE_IMAGE = "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/be5f70039_228d75cd-d270-459c-ba6f-9549efdcc916.png";
 
-// Returns CSS filter + SVG overlay config based on genotype
+// Derive coat background color + image filter from genotype
+// Base image is a BAY horse (brown body + black mane/legs)
+// mix-blend-mode:multiply on image × background color = tinted result
 const getCoatStyle = (genotype) => {
-  if (!genotype) return { filter: 'none', overlay: null };
+  if (!genotype) return { bg: '#c47a3a', imgFilter: 'none' };
 
-  const isBlack = genotype.extension !== "ee";
+  const isBlack  = genotype.extension !== "ee";
   const hasAgouti = genotype.agouti !== "aa";
-  const hasCream = genotype.cream === "Crn";
+  const hasCream  = genotype.cream === "Crn";
   const doubleCream = genotype.cream === "CrCr";
+  const isGrey    = genotype.grey === "GG" || genotype.grey === "Gg";
   const hasChampagne = genotype.champagne === "CHn" || genotype.champagne === "CHCH";
   const hasSilver = genotype.silver === "Zz" || genotype.silver === "ZZ";
-  const isGrey = genotype.grey === "GG" || genotype.grey === "Gg";
-  const hasTobiano = genotype.tobiano !== "nn" && genotype.tobiano;
-  const hasRoan = genotype.roan === "RNn" || genotype.roan === "RNRN";
-  const hasDun = genotype.dun !== "dd" && genotype.dun;
+  const hasDun    = genotype.dun === "Dd" || genotype.dun === "DD";
+  const hasTobiano = genotype.tobiano && genotype.tobiano !== "nn";
+  const hasRoan   = genotype.roan === "RNn" || genotype.roan === "RNRN";
 
-  let filter = 'none';
-  let overlays = [];
-
-  // Base color via CSS filter (base image is bay)
-  if (!isBlack) {
-    // Chestnut: remove black pigment → warm red-brown, mane same as body
-    filter = 'sepia(0.6) saturate(1.4) hue-rotate(-10deg) brightness(1.05)';
-    if (hasCream) {
-      // Palomino
-      filter = 'sepia(0.8) saturate(1.6) hue-rotate(15deg) brightness(1.45)';
-    }
-    if (doubleCream) {
-      // Cremello
-      filter = 'sepia(0.3) saturate(0.5) brightness(2.1)';
-    }
-  } else if (hasAgouti) {
-    // Bay (default image) — minimal adjustments
-    filter = 'saturate(1.1) brightness(1.0)';
-    if (hasCream) {
-      // Buckskin
-      filter = 'sepia(0.3) saturate(1.1) brightness(1.35)';
-    }
-    if (doubleCream) {
-      // Perlino
-      filter = 'sepia(0.15) saturate(0.4) brightness(2.0)';
-    }
-    if (hasSilver) {
-      // Silver bay: mane/tail turn silvery (overlay)
-      filter = 'saturate(0.9) brightness(1.05)';
-      overlays.push({ type: 'silver' });
-    }
-  } else {
-    // Black
-    filter = 'saturate(0.15) brightness(0.45)';
-    if (hasCream) {
-      // Smoky black
-      filter = 'saturate(0.1) brightness(0.55)';
-    }
-    if (doubleCream) {
-      // Smoky cream
-      filter = 'sepia(0.2) saturate(0.3) brightness(1.7)';
-    }
-    if (hasSilver) {
-      filter = 'saturate(0.2) brightness(0.5)';
-      overlays.push({ type: 'silver' });
-    }
-  }
-
-  if (hasChampagne) {
-    filter += ' sepia(0.4) hue-rotate(20deg) brightness(1.2)';
-  }
+  let bg = '#c47a3a';           // Default bay-ish tint
+  let imgFilter = 'none';
 
   if (isGrey) {
-    filter = 'saturate(0.1) brightness(1.3) contrast(0.85)';
+    bg = '#e0ddd8';
+    imgFilter = 'saturate(0.05) brightness(1.2)';
+  } else if (!isBlack) {
+    // Chestnut family (no black pigment → no black mane)
+    if (doubleCream) {
+      bg = '#fff8e7';
+      imgFilter = 'saturate(0.25) brightness(1.6) sepia(0.15)';
+    } else if (hasCream) {
+      bg = '#f0c060';           // Palomino gold
+      imgFilter = 'saturate(0.6) brightness(1.3) sepia(0.3)';
+    } else if (hasChampagne) {
+      bg = '#d4a840';
+      imgFilter = 'saturate(0.8) brightness(1.15) sepia(0.25)';
+    } else {
+      bg = '#c46030';           // Chestnut
+      imgFilter = 'saturate(1.1) brightness(1.0) hue-rotate(-8deg)';
+    }
+  } else if (hasAgouti) {
+    // Bay family
+    if (doubleCream) {
+      bg = '#f0e0b8';
+      imgFilter = 'saturate(0.3) brightness(1.7)';
+    } else if (hasCream) {
+      bg = '#d4b870';           // Buckskin
+      imgFilter = 'saturate(0.7) brightness(1.25)';
+    } else if (hasChampagne) {
+      bg = '#c89040';
+      imgFilter = 'saturate(0.9) brightness(1.1) sepia(0.15)';
+    } else if (hasSilver) {
+      bg = '#a08050';
+      imgFilter = 'saturate(0.6) brightness(1.05)';
+    } else {
+      bg = '#c47a3a';           // Bay (base, minimal tint)
+      imgFilter = 'saturate(1.05) brightness(1.0)';
+    }
+  } else {
+    // Black family
+    if (doubleCream) {
+      bg = '#e8d5c0';
+      imgFilter = 'saturate(0.15) brightness(1.6)';
+    } else if (hasCream) {
+      bg = '#505050';           // Smoky black
+      imgFilter = 'saturate(0.1) brightness(0.75)';
+    } else {
+      bg = '#383838';           // Black
+      imgFilter = 'saturate(0.05) brightness(0.5)';
+    }
   }
 
-  if (hasTobiano) overlays.push({ type: 'tobiano' });
-  if (hasRoan) overlays.push({ type: 'roan' });
-  if (hasDun) overlays.push({ type: 'dun' });
+  if (hasDun && !isGrey) {
+    imgFilter += ' contrast(1.05)';
+  }
 
-  return { filter, overlays };
+  return { bg, imgFilter, hasTobiano, hasRoan, hasDun, hasSilver, hasCream, doubleCream };
 };
 
 const GENE_LABELS = {
-  extension: { label: "Extension (E)", visible: true },
-  agouti: { label: "Agouti (A)", visible: true },
-  cream: { label: "Crème (Cr)", visible: true },
-  grey: { label: "Gris (G)", visible: true },
-  tobiano: { label: "Tobiano (TO)", visible: true },
-  roan: { label: "Rouan (RN)", visible: true },
-  dun: { label: "Dun (D)", visible: true },
-  champagne: { label: "Champagne (CH)", visible: false },
-  silver: { label: "Silver (Z)", visible: false },
+  extension:  { label: "Extension (E)",  visible: true  },
+  agouti:     { label: "Agouti (A)",      visible: true  },
+  cream:      { label: "Crème (Cr)",      visible: true  },
+  grey:       { label: "Gris (G)",        visible: true  },
+  tobiano:    { label: "Tobiano (TO)",    visible: true  },
+  roan:       { label: "Rouan (RN)",      visible: true  },
+  dun:        { label: "Dun (D)",         visible: true  },
+  champagne:  { label: "Champagne (CH)",  visible: false },
+  silver:     { label: "Silver (Z)",      visible: false },
 };
 
-const isNeutralAllele = (key, value) => {
-  const neutrals = { extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg', tobiano: 'nn', roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz' };
-  return value === neutrals[key];
+const NEUTRAL = {
+  extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg',
+  tobiano: 'nn', roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
 };
 
 export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
-  const { filter, overlays } = getCoatStyle(genotype);
-
-  const hasTobiano = overlays?.some(o => o.type === 'tobiano');
-  const hasRoan = overlays?.some(o => o.type === 'roan');
-  const hasDun = overlays?.some(o => o.type === 'dun');
-  const hasSilver = overlays?.some(o => o.type === 'silver');
+  const style = getCoatStyle(genotype);
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Horse image with genetic overlays */}
-      <div className="relative" style={{ width: size, height: size }}>
-        {/* Base image */}
+      {/* Horse with genetic color */}
+      <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ width: size, height: size, background: style.bg }}>
+
+        {/* Tobiano: white patches behind the image */}
+        {style.hasTobiano && (
+          <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full">
+            <ellipse cx="200" cy="190" rx="95" ry="60" fill="white" opacity="0.95" />
+            <ellipse cx="140" cy="310" rx="32" ry="52" fill="white" opacity="0.95" />
+            <ellipse cx="265" cy="320" rx="28" ry="48" fill="white" opacity="0.95" />
+          </svg>
+        )}
+
+        {/* Horse image — multiply blends with background color */}
         <img
           src={BASE_IMAGE}
           alt="Cheval"
-          className="w-full h-full object-contain"
-          style={{ filter }}
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{
+            filter: style.imgFilter,
+            mixBlendMode: 'multiply',
+          }}
         />
 
-        {/* SVG overlays for patterns */}
-        <svg
-          viewBox="0 0 400 400"
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ mixBlendMode: 'multiply' }}
-        >
-          <defs>
-            {hasRoan && (
-              <pattern id="roanDots" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
-                <rect width="6" height="6" fill="transparent" />
-                <circle cx="1.5" cy="1.5" r="1" fill="white" opacity="0.55" />
-                <circle cx="4.5" cy="4.5" r="1" fill="white" opacity="0.55" />
+        {/* Roan: white stipple OVER the image */}
+        {style.hasRoan && (
+          <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full pointer-events-none">
+            <defs>
+              <pattern id="roanPat" x="0" y="0" width="7" height="7" patternUnits="userSpaceOnUse">
+                <circle cx="1.5" cy="1.5" r="1.1" fill="white" opacity="0.5" />
+                <circle cx="5" cy="5" r="0.9" fill="white" opacity="0.4" />
               </pattern>
-            )}
-          </defs>
-
-          {/* Tobiano white patches */}
-          {hasTobiano && (
-            <g opacity="0.88">
-              <ellipse cx="200" cy="170" rx="90" ry="55" fill="white" />
-              <ellipse cx="150" cy="300" rx="30" ry="50" fill="white" />
-              <ellipse cx="260" cy="310" rx="25" ry="45" fill="white" />
-            </g>
-          )}
-
-          {/* Roan stippling over body */}
-          {hasRoan && (
-            <ellipse cx="200" cy="210" rx="140" ry="100" fill="url(#roanDots)" />
-          )}
-
-          {/* Dun dorsal stripe */}
-          {hasDun && (
-            <path
-              d="M 195 80 Q 198 150 200 230 Q 202 150 205 80"
-              fill="rgba(80,40,10,0.45)"
-              strokeWidth="0"
-            />
-          )}
-        </svg>
-
-        {/* Silver mane shimmer (top overlay, screen blend) */}
-        {hasSilver && (
-          <div
-            className="absolute inset-0 pointer-events-none rounded"
-            style={{
-              background: 'linear-gradient(120deg, rgba(220,220,230,0.22) 0%, rgba(180,180,200,0.08) 60%, transparent 100%)',
-              mixBlendMode: 'screen',
-            }}
-          />
+            </defs>
+            <ellipse cx="200" cy="195" rx="145" ry="110" fill="url(#roanPat)" />
+          </svg>
         )}
 
-        {/* Coat color label */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap backdrop-blur-sm">
+        {/* Dun dorsal stripe */}
+        {style.hasDun && (
+          <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full pointer-events-none">
+            <path d="M 192 70 Q 196 160 198 265 Q 202 160 208 70" fill="rgba(60,30,5,0.4)" />
+          </svg>
+        )}
+
+        {/* Silver: sheen over mane area */}
+        {style.hasSilver && (
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(ellipse 60% 40% at 35% 35%, rgba(230,230,245,0.35) 0%, transparent 70%)',
+            mixBlendMode: 'screen',
+          }} />
+        )}
+
+        {/* Coat label */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap backdrop-blur-sm">
           {coatColor || 'Couleur inconnue'}
         </div>
       </div>
 
-      {/* Genetic markers */}
+      {/* Genotype badges */}
       {genotype && (
         <div className="w-full max-w-xs">
           <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Génotype</p>
@@ -182,14 +166,14 @@ export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
             {Object.entries(GENE_LABELS).map(([key, cfg]) => {
               const value = genotype[key];
               if (!value) return null;
-              const isNeutral = isNeutralAllele(key, value);
-              const isExpressed = !isNeutral;
+              const neutral = NEUTRAL[key];
+              const expressed = value !== neutral;
               return (
                 <span
                   key={key}
                   title={cfg.label}
-                  className={`px-2 py-0.5 rounded-full text-xs font-mono font-semibold border transition-all ${
-                    isExpressed
+                  className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold border ${
+                    expressed
                       ? cfg.visible
                         ? 'bg-amber-100 border-amber-300 text-amber-800'
                         : 'bg-violet-100 border-violet-300 text-violet-800'
@@ -197,12 +181,11 @@ export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
                   }`}
                 >
                   {value}
-                  {isExpressed && !cfg.visible && <span className="ml-0.5 opacity-60">👁️‍🗨️</span>}
                 </span>
               );
             })}
           </div>
-          <div className="flex gap-3 mt-2">
+          <div className="flex gap-3 mt-2 flex-wrap">
             <span className="flex items-center gap-1 text-xs text-stone-400">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-200 border border-amber-400 inline-block" />
               Gène visible

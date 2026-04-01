@@ -80,25 +80,21 @@ const getCoatStyle = (genotype) => {
   return { filter, overlays };
 };
 
-const LOCUS_CONFIG = {
-  extension:  { name: "Extension (E)",   desc: "Pigment noir",            visible: true  },
-  agouti:     { name: "Agouti (A)",       desc: "Distribution du noir",    visible: true  },
-  cream:      { name: "Crème (Cr)",       desc: "Dilution crème",          visible: true  },
-  grey:       { name: "Gris (G)",         desc: "Grisonnement",            visible: true  },
-  tobiano:    { name: "Tobiano (TO)",     desc: "Patron pie",              visible: true  },
-  roan:       { name: "Roan (RN)",        desc: "Rouannage",               visible: true  },
-  dun:        { name: "Dun (D)",          desc: "Dilution dun",            visible: true  },
-  champagne:  { name: "Champagne (CH)",   desc: "Dilution champagne",      visible: false },
-  silver:     { name: "Silver (Z)",       desc: "Dilution silver (crin)",  visible: false },
+const GENE_LABELS = {
+  extension: { label: "Extension (E)", visible: true },
+  agouti: { label: "Agouti (A)", visible: true },
+  cream: { label: "Crème (Cr)", visible: true },
+  grey: { label: "Gris (G)", visible: true },
+  tobiano: { label: "Tobiano (TO)", visible: true },
+  roan: { label: "Rouan (RN)", visible: true },
+  dun: { label: "Dun (D)", visible: true },
+  champagne: { label: "Champagne (CH)", visible: false },
+  silver: { label: "Silver (Z)", visible: false },
 };
 
-const HOMO_DOMINANT = { extension: "EE", agouti: "AA", cream: "CrCr", grey: "GG", tobiano: "TOTO", roan: "RNRN", dun: "DD", champagne: "CHCH", silver: "ZZ" };
-const HETEROZYGOUS  = { extension: "Ee", agouti: "Aa", cream: "Crn",  grey: "Gg", tobiano: "TOn",  roan: "RNn",  dun: "Dd", champagne: "CHn",  silver: "Zz" };
-
-const getAlleleClass = (locus, value) => {
-  if (value === HOMO_DOMINANT[locus]) return 'homo';
-  if (value === HETEROZYGOUS[locus])  return 'hetero';
-  return 'recessive';
+const isNeutralAllele = (key, value) => {
+  const neutrals = { extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg', tobiano: 'nn', roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz' };
+  return value === neutrals[key];
 };
 
 export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
@@ -178,61 +174,47 @@ export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
         </div>
       </div>
 
-      {/* Genetic markers — aligned with GeneticPanel */}
+      {/* Genetic markers */}
       {genotype && (
         <div className="w-full max-w-xs">
           <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Génotype</p>
-          <div className="space-y-1">
-            {Object.entries(LOCUS_CONFIG).map(([locus, cfg]) => {
-              const value = genotype[locus];
+          <div className="flex flex-wrap gap-1.5">
+            {Object.entries(GENE_LABELS).map(([key, cfg]) => {
+              const value = genotype[key];
               if (!value) return null;
-              const alleleClass = getAlleleClass(locus, value);
-              const isRecessive = alleleClass === 'recessive';
+              const isNeutral = isNeutralAllele(key, value);
+              const isExpressed = !isNeutral;
               return (
-                <div key={locus} className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs ${
-                  isRecessive ? 'bg-stone-100' : cfg.visible ? 'bg-amber-50' : 'bg-violet-50'
-                }`}>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      alleleClass === 'homo' ? 'bg-emerald-400' :
-                      alleleClass === 'hetero' ? 'bg-amber-400' : 'bg-stone-300'
-                    }`} />
-                    <span className={`font-medium ${
-                      isRecessive ? 'text-stone-400' : cfg.visible ? 'text-amber-800' : 'text-violet-700'
-                    }`}>{cfg.name}</span>
-                    <span className="text-stone-400 hidden sm:inline">{cfg.desc}</span>
-                  </div>
-                  <span className={`font-mono font-bold ${
-                    alleleClass === 'homo' ? 'text-emerald-700' :
-                    alleleClass === 'hetero' ? 'text-amber-700' : 'text-stone-400'
-                  }`}>{value}</span>
-                </div>
+                <span
+                  key={key}
+                  title={cfg.label}
+                  className={`px-2 py-0.5 rounded-full text-xs font-mono font-semibold border transition-all ${
+                    isExpressed
+                      ? cfg.visible
+                        ? 'bg-amber-100 border-amber-300 text-amber-800'
+                        : 'bg-violet-100 border-violet-300 text-violet-800'
+                      : 'bg-stone-100 border-stone-200 text-stone-400'
+                  }`}
+                >
+                  {value}
+                  {isExpressed && !cfg.visible && <span className="ml-0.5 opacity-60">👁️‍🗨️</span>}
+                </span>
               );
             })}
           </div>
-          {/* Legend */}
-          <div className="flex gap-3 mt-2 flex-wrap">
-            {[
-              { color: 'bg-emerald-400', label: 'Hom. dominant' },
-              { color: 'bg-amber-400',   label: 'Hétérozygote' },
-              { color: 'bg-stone-300',   label: 'Récessif' },
-            ].map(({ color, label }) => (
-              <span key={label} className="flex items-center gap-1 text-xs text-stone-400">
-                <span className={`w-2 h-2 rounded-full ${color} inline-block`} />
-                {label}
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-3 mt-1 flex-wrap">
-            {[
-              { color: 'bg-amber-50 border border-amber-200', label: 'Visible' },
-              { color: 'bg-violet-50 border border-violet-200', label: 'Caché/porté' },
-            ].map(({ color, label }) => (
-              <span key={label} className="flex items-center gap-1 text-xs text-stone-400">
-                <span className={`w-3 h-3 rounded ${color} inline-block`} />
-                {label}
-              </span>
-            ))}
+          <div className="flex gap-3 mt-2">
+            <span className="flex items-center gap-1 text-xs text-stone-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-200 border border-amber-400 inline-block" />
+              Gène visible
+            </span>
+            <span className="flex items-center gap-1 text-xs text-stone-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-violet-200 border border-violet-400 inline-block" />
+              Gène caché
+            </span>
+            <span className="flex items-center gap-1 text-xs text-stone-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-stone-100 border border-stone-300 inline-block" />
+              Récessif
+            </span>
           </div>
         </div>
       )}

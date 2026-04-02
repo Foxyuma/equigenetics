@@ -33,7 +33,7 @@ const AuthenticatedApp = () => {
       <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-50">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-stone-500 text-sm">Chargement d'EquiGenes...</p>
+          <p className="text-stone-500 text-sm">Chargement d'EquiGenesis...</p>
         </div>
       </div>
     );

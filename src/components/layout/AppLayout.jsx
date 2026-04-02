@@ -76,7 +76,7 @@ export default function AppLayout() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-200/50">
                 <Dna className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-bold text-stone-800 tracking-tight hidden sm:block">EquiGenes</span>
+              <span className="text-lg font-bold text-stone-800 tracking-tight hidden sm:block">EquiGenesis</span>
             </Link>
 
             {/* Desktop nav */}

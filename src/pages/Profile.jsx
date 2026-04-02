@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Dna, Zap, Star, Calendar, LogOut } from 'lucide-react';
+import { useQuery as useQ2 } from '@tanstack/react-query';
 
 export default function Profile() {
   const { data: user } = useQuery({
@@ -33,6 +34,10 @@ export default function Profile() {
       }, 0) / horses.length)
     : 0;
 
+  const genesis = user?.genesis_balance ?? 0;
+  const credits = user?.credits_balance ?? 0;
+  const fmtG = (n) => n >= 1_000_000 ? (n/1_000_000).toFixed(1)+'M' : n >= 1_000 ? (n/1_000).toFixed(0)+'k' : String(n);
+
   const breedCounts = horses.reduce((acc, h) => { acc[h.breed] = (acc[h.breed] || 0) + 1; return acc; }, {});
   const topBreed = Object.entries(breedCounts).sort((a, b) => b[1] - a[1])[0];
 
@@ -59,6 +64,28 @@ export default function Profile() {
           <LogOut className="w-4 h-4 mr-2" />
           Déconnexion
         </Button>
+      </div>
+
+      {/* Monnaies */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="border-0 shadow-sm bg-amber-50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 text-xl font-bold">₲</div>
+            <div>
+              <p className="text-2xl font-bold text-amber-700">{fmtG(genesis)}</p>
+              <p className="text-xs text-amber-600">Genesis</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-sm bg-violet-50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 text-xl font-bold">✦</div>
+            <div>
+              <p className="text-2xl font-bold text-violet-700">{credits}</p>
+              <p className="text-xs text-violet-600">Crédits premium</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Stats rapides */}

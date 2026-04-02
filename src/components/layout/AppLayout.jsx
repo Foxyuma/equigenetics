@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import CurrencyDisplay from './CurrencyDisplay';
 import { base44 } from '@/api/base44Client';
 
 const menuGroups = [
@@ -134,6 +135,11 @@ export default function AppLayout() {
                 );
               })}
             </nav>
+
+            {/* Currencies */}
+            <div className="hidden sm:flex">
+              <CurrencyDisplay />
+            </div>
 
             {/* Mobile toggle */}
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-stone-100">

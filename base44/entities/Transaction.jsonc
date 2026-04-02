@@ -1,0 +1,40 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email du joueur concern\u00e9"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "genesis",
+        "credits"
+      ],
+      "description": "Type de monnaie"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Montant (positif = gain, n\u00e9gatif = d\u00e9pense)"
+    },
+    "balance_after": {
+      "type": "number",
+      "description": "Solde apr\u00e8s la transaction"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Motif de la transaction (competition, breeding, purchase\u2026)"
+    },
+    "reference_id": {
+      "type": "string",
+      "description": "ID de l'entit\u00e9 li\u00e9e (cheval, comp\u00e9tition\u2026)"
+    }
+  },
+  "required": [
+    "user_email",
+    "currency",
+    "amount",
+    "reason"
+  ]
+}

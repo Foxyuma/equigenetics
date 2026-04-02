@@ -1,0 +1,157 @@
+{
+  "name": "Horse",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Horse name"
+    },
+    "breed": {
+      "type": "string",
+      "description": "Breed of the horse"
+    },
+    "sex": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ]
+    },
+    "age": {
+      "type": "number",
+      "description": "Age in years"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Horse image URL"
+    },
+    "father_id": {
+      "type": "string",
+      "description": "ID of father horse"
+    },
+    "mother_id": {
+      "type": "string",
+      "description": "ID of mother horse"
+    },
+    "coat_color": {
+      "type": "string",
+      "description": "Visible coat color"
+    },
+    "genotype": {
+      "type": "object",
+      "description": "Full genetic profile",
+      "properties": {
+        "extension": {
+          "type": "string",
+          "description": "E locus (EE, Ee, ee)"
+        },
+        "agouti": {
+          "type": "string",
+          "description": "A locus (AA, Aa, aa)"
+        },
+        "cream": {
+          "type": "string",
+          "description": "Cr locus (CrCr, Crn, nn)"
+        },
+        "grey": {
+          "type": "string",
+          "description": "G locus (GG, Gg, gg)"
+        },
+        "tobiano": {
+          "type": "string",
+          "description": "TO locus (TOTO, TOn, nn)"
+        },
+        "roan": {
+          "type": "string",
+          "description": "RN locus (RNn, nn)"
+        },
+        "dun": {
+          "type": "string",
+          "description": "D locus (DD, Dd, dd)"
+        },
+        "champagne": {
+          "type": "string",
+          "description": "CH locus (CHn, nn)"
+        },
+        "silver": {
+          "type": "string",
+          "description": "Z locus (ZZ, Zz, zz)"
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "description": "Ability stats 0-100",
+      "properties": {
+        "speed": {
+          "type": "number"
+        },
+        "endurance": {
+          "type": "number"
+        },
+        "agility": {
+          "type": "number"
+        },
+        "strength": {
+          "type": "number"
+        },
+        "temperament": {
+          "type": "number"
+        },
+        "jumping": {
+          "type": "number"
+        },
+        "dressage": {
+          "type": "number"
+        }
+      }
+    },
+    "health_genes": {
+      "type": "array",
+      "description": "Carried disease genes",
+      "items": {
+        "type": "object",
+        "properties": {
+          "disease": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "carrier",
+              "affected",
+              "clear"
+            ]
+          }
+        }
+      }
+    },
+    "energy": {
+      "type": "number",
+      "description": "Current energy 0-100",
+      "default": 100
+    },
+    "competition_wins": {
+      "type": "number",
+      "default": 0
+    },
+    "is_for_sale": {
+      "type": "boolean",
+      "default": false
+    },
+    "price": {
+      "type": "number",
+      "default": 0
+    },
+    "estimated_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valeur marchande estim\u00e9e en Genesis (visible uniquement par le propri\u00e9taire)"
+    }
+  },
+  "required": [
+    "name",
+    "breed",
+    "sex"
+  ]
+}

@@ -62,11 +62,27 @@ export default function HorseDetail() {
   });
 
   const toggleSaleMutation = useMutation({
-    mutationFn: () => base44.entities.Horse.update(horseId, { 
-      is_for_sale: !horse.is_for_sale, 
-      price: horse.is_for_sale ? 0 : Math.round((Object.values(horse.stats || {}).reduce((a,b) => a+b, 0) / 7) * 50)
-    }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['horse', horseId] }),
+    mutationFn: async () => {
+      await base44.entities.Horse.update(horseId, { 
+        is_for_sale: !horse.is_for_sale, 
+        price: horse.is_for_sale ? 0 : Math.round((Object.values(horse.stats || {}).reduce((a,b) => a+b, 0) / 7) * 50)
+      });
+      // Mise en vente d'un cheval malade = malus réputation
+      if (!horse.is_for_sale && currentUser) {
+        const affectedCount = horse.health_genes?.filter(g => g.status === 'affected').length || 0;
+        const carrierCount = horse.health_genes?.filter(g => g.status === 'carrier').length || 0;
+        const penalty = (affectedCount * 30) + (carrierCount * 5);
+        if (penalty > 0) {
+          const currentRep = currentUser.breeding_reputation ?? 0;
+          await base44.auth.updateMe({ breeding_reputation: Math.max(0, currentRep - penalty) });
+          toast.warning(`⚠️ Cheval malade mis en vente : -${penalty} pts de réputation`);
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['horse', horseId] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
   });
 
   if (isLoading) return (

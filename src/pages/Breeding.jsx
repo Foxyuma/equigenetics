@@ -103,8 +103,16 @@ export default function Breeding() {
       // Calcul de la réputation gagnée
       const avgStat = foalPreview ? Math.round(Object.values(foalPreview.stats || {}).reduce((a,b)=>a+b,0) / 7) : 50;
       const isPure = father.breed === mother.breed;
-      const noDisease = !foalPreview?.health_genes?.some(g => g.status === 'affected');
-      const repGain = 50 + (isPure ? 25 : 0) + (noDisease ? 15 : 0) + Math.round((avgStat - 50) * 0.5);
+      const affectedCount = foalPreview?.health_genes?.filter(g => g.status === 'affected').length || 0;
+      const carrierCount = foalPreview?.health_genes?.filter(g => g.status === 'carrier').length || 0;
+      const noDisease = affectedCount === 0;
+      // Bonus de base + pureté + stats, malus pour maladies
+      const repGain = 50
+        + (isPure ? 25 : 0)
+        + (noDisease ? 15 : 0)
+        + Math.round((avgStat - 50) * 0.5)
+        - (affectedCount * 40)   // -40 par gène atteint
+        - (carrierCount * 10);   // -10 par gène porteur
 
       if (currentUser) {
         const currentRep = currentUser.breeding_reputation ?? 0;
@@ -117,7 +125,10 @@ export default function Breeding() {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['breeding-records'] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
-      toast.success(`Poulain enregistré ! +${repGain} pts de réputation 🌟`);
+      const repLabel = repGain >= 0
+        ? `+${repGain} pts de réputation 🌟`
+        : `${repGain} pts de réputation ⚠️ (poulain malade)`;
+      toast[repGain >= 0 ? 'success' : 'warning'](`Poulain enregistré ! ${repLabel}`);
       setFoalPreview(null);
       setFoalName('');
       setFatherId('');

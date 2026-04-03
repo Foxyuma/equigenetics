@@ -56,10 +56,19 @@ export default function Market() {
   const buyMutation = useMutation({
     mutationFn: async (horse) => {
       await base44.entities.Horse.update(horse.id, { is_for_sale: false, price: 0 });
+      // Bonus de réputation si le vendeur EST le joueur courant (vente aboutie)
+      if (currentUser && horse.created_by === currentUser.email) {
+        const affectedCount = horse.health_genes?.filter(g => g.status === 'affected').length || 0;
+        const avgStat = horse.stats ? Math.round(Object.values(horse.stats).reduce((a,b)=>a+b,0)/7) : 50;
+        const bonus = 40 + Math.round((avgStat - 50) * 0.3) - (affectedCount * 20);
+        const currentRep = currentUser.breeding_reputation ?? 0;
+        await base44.auth.updateMe({ breeding_reputation: Math.max(0, currentRep + bonus) });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['market-horses'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
       toast.success('Cheval acheté !');
     }
   });

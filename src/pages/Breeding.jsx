@@ -24,6 +24,11 @@ export default function Breeding() {
 
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: horses = [] } = useQuery({
     queryKey: ['horses'],
     queryFn: () => base44.entities.Horse.list('-created_date', 200),
@@ -95,11 +100,24 @@ export default function Breeding() {
         foal_name: foalName || `Poulain de ${father.name}`,
         breed: foalPreview.breed,
       });
-      return foal;
+      // Calcul de la réputation gagnée
+      const avgStat = foalPreview ? Math.round(Object.values(foalPreview.stats || {}).reduce((a,b)=>a+b,0) / 7) : 50;
+      const isPure = father.breed === mother.breed;
+      const noDisease = !foalPreview?.health_genes?.some(g => g.status === 'affected');
+      const repGain = 50 + (isPure ? 25 : 0) + (noDisease ? 15 : 0) + Math.round((avgStat - 50) * 0.5);
+
+      if (currentUser) {
+        const currentRep = currentUser.breeding_reputation ?? 0;
+        await base44.auth.updateMe({ breeding_reputation: currentRep + repGain });
+      }
+
+      return { foal, repGain };
     },
-    onSuccess: () => {
+    onSuccess: ({ repGain }) => {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['breeding-records'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.success(`Poulain enregistré ! +${repGain} pts de réputation 🌟`);
       setFoalPreview(null);
       setFoalName('');
       setFatherId('');

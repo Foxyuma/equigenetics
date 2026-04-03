@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Dna, Zap, Star, Calendar, LogOut } from 'lucide-react';
-import { useQuery as useQ2 } from '@tanstack/react-query';
+import BreedingReputation from '../components/profile/BreedingReputation';
 
 export default function Profile() {
   const { data: user } = useQuery({
@@ -65,6 +65,9 @@ export default function Profile() {
           Déconnexion
         </Button>
       </div>
+
+      {/* Réputation d'élevage */}
+      <BreedingReputation reputation={user?.breeding_reputation ?? 0} />
 
       {/* Monnaies */}
       <div className="grid grid-cols-2 gap-4">

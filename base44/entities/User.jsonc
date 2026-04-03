@@ -19,6 +19,12 @@
       "type": "number",
       "default": 10,
       "description": "Monnaie premium achet\u00e9e avec de l'argent r\u00e9el"
+    },
+    "breeding_reputation": {
+      "type": "number",
+      "default": 0,
+      "description": "Points de r\u00e9putation d'\u00e9levage cumul\u00e9s"
     }
-  }
+  },
+  "required": []
 }

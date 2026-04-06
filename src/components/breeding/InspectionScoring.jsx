@@ -374,7 +374,7 @@ export function performFullInspection(horse, parentHorses, healthRecord) {
   inspection.zoneRange = zone?.range || [0, 0];
 
   // ÉTAPE 6: Tirage aléatoire du statut final
-  const approvalResult = getRandomApprovalStatus(inspection.totalScore);
+  const approvalResult = getRandomApprovalStatus(inspection.totalScore, horse);
   inspection.finalStatus = approvalResult.status;
   inspection.finalLabel = approvalResult.label;
   inspection.finalIcon = approvalResult.icon;
@@ -545,12 +545,37 @@ export function detectAutoRestrictions(horse) {
   return restrictions;
 }
 
-export function getRandomApprovalStatus(score) {
+function isYoungAndInexperienced(horse) {
+  const age = horse.age || 0;
+  const wins = horse.competition_wins || 0;
+  // Jeune = moins de 5 ans, inexpérimenté = moins de 5 victoires
+  return age < 5 && wins < 5;
+}
+
+export function getRandomApprovalStatus(score, horse = null) {
   // Trouver la zone correspondant au score
   const zone = APPROVAL_PROBABILITY_ZONES.find(z => score >= z.range[0] && score <= z.range[1]);
   if (!zone) return { ...APPROVAL_THRESHOLDS.rejected, zone: 'unknown' };
 
-  // Tirer aléatoirement un résultat selon les probabilités
+  // Si cheval jeune et inexpérimenté, appliquer règle provisional
+  if (horse && isYoungAndInexperienced(horse)) {
+    if (score >= 65 && score < 80) {
+      // Score bon mais jeune → provisional
+      return { ...APPROVAL_THRESHOLDS.premium, zone: zone.name, reason: 'young_inexperienced' };
+    }
+    if (score >= 80) {
+      // Score excellent mais jeune → provisional ou approved (75/25)
+      const roll = Math.random();
+      const selectedStatus = roll < 0.75 ? 'provisional' : 'approved';
+      const statusMap = {
+        'provisional': APPROVAL_THRESHOLDS.premium,
+        'approved': APPROVAL_THRESHOLDS.approved
+      };
+      return { ...statusMap[selectedStatus], zone: zone.name, reason: 'young_excellent' };
+    }
+  }
+
+  // Tirage aléatoire normal selon les probabilités de la zone
   const roll = Math.random();
   let accumulated = 0;
   let selectedStatus = zone.outcomes[0].status;
@@ -591,7 +616,7 @@ export function getApprovalStatus(score, horse, healthRecord) {
   }
 
   // Utiliser le système de probabilités pour le résultat final
-  const result = getRandomApprovalStatus(score);
+  const result = getRandomApprovalStatus(score, horse);
   result.autoRestrictions = autoRestrictions;
   return result;
 }

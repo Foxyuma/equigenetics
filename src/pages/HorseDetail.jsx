@@ -214,7 +214,7 @@ export default function HorseDetail() {
           <TabsTrigger value="genetics">Génétique</TabsTrigger>
           <TabsTrigger value="health">Santé</TabsTrigger>
           <TabsTrigger value="career">Carrière</TabsTrigger>
-          {horse.sex === 'female' && <TabsTrigger value="reproduction">♥ Reproduction</TabsTrigger>}
+          {horse.sex === 'female' && <TabsTrigger value="reproduction">Reproduction</TabsTrigger>}
         </TabsList>
         <TabsContent value="stats" className="mt-4">
           <Card className="border-0 bg-white/60">

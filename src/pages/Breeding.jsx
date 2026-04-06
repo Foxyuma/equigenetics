@@ -274,7 +274,7 @@ export default function Breeding() {
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-stone-200">
               <div className="flex items-start gap-2 flex-1 p-3 rounded-xl bg-amber-50 border border-amber-200">
                 <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-700">Pour confirmer la saillie et enregistrer le poulain, rendez-vous sur la <strong>fiche de la jument</strong> → onglet <strong>♥ Reproduction</strong>.</p>
+                <p className="text-sm text-amber-700">Pour confirmer la saillie et enregistrer le poulain, rendez-vous sur la <strong>fiche de la jument</strong> → onglet <strong>Reproduction</strong>.</p>
               </div>
               <div className="flex gap-2">
                 {mother && (

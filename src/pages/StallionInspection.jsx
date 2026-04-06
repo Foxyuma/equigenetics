@@ -143,22 +143,21 @@ export default function StallionInspection() {
         throw new Error('Test ADN complet obligatoire avant inspection. Veuillez effectuer le test à la clinique vétérinaire.');
       }
 
-      // Facturer les radios vétérinaires (200 genesis pour première inspection, 150 pour réinspection)
-      const isReInspection = stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated';
-      const vetRadioCost = isReInspection ? 150 : 200;
+      // Facturer les frais d'inscription au testage (150 genesis)
+      const testingEnrollmentCost = 150;
       const balance = currentUser?.genesis_balance || 0;
       if (balance < vetRadioCost) {
-        throw new Error(`Fonds insuffisants. Radios vétérinaires : ${vetRadioCost} ₲`);
+        throw new Error(`Fonds insuffisants. Frais d'inscription au testage : ${testingEnrollmentCost} ₲`);
       }
 
-      // Débiter les radios
-      await base44.auth.updateMe({ genesis_balance: balance - vetRadioCost });
+      // Débiter les frais d'inscription
+      await base44.auth.updateMe({ genesis_balance: balance - testingEnrollmentCost });
       await base44.entities.Transaction.create({
         user_email: currentUser.email,
         currency: 'genesis',
-        amount: -vetRadioCost,
-        balance_after: balance - vetRadioCost,
-        reason: `Radios vétérinaires - Inspection ${stallion.name}`,
+        amount: -testingEnrollmentCost,
+        balance_after: balance - testingEnrollmentCost,
+        reason: `Frais d'inscription testage - ${stallion.name}`,
       });
 
       // Calculate score using comprehensive scoring system
@@ -402,7 +401,7 @@ export default function StallionInspection() {
             <li>✓ Pas d'enregistrement OC</li>
             <li>✓ Santé correcte (pas de maladie active)</li>
             <li>✓ <strong>Test ADN complet obligatoire</strong> (effectué une seule fois)</li>
-            <li>✓ <strong>Radios vétérinaires : 200 ₲</strong></li>
+            <li>✓ <strong>Frais d'inscription au testage : 150 ₲</strong></li>
           </ul>
         </CardContent>
       </Card>

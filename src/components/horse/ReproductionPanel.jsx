@@ -343,7 +343,7 @@ export default function ReproductionPanel({ mare }) {
 
         {selectedStallion && !foalPreview && (
           <div className="space-y-3">
-            {selectedStallion.breeding_approval_status && selectedStallion.breeding_approval_status !== 'approved' && selectedStallion.breeding_approval_status !== 'approved_with_restrictions' && selectedStallion.breeding_approval_status !== 'elite_approved' && (
+            {selectedStallion.breeding_approval_status && selectedStallion.breeding_approval_status !== 'approved_for_breeding' && selectedStallion.breeding_approval_status !== 'approved_for_sport_breeding' && selectedStallion.breeding_approval_status !== 'elite_approved' && (
               <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border-2 border-amber-200">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-amber-800">

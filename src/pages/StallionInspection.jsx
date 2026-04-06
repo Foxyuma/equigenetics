@@ -90,9 +90,9 @@ const INSPECTION_CRITERIA = {
 
 const APPROVAL_THRESHOLDS = {
   elite_approved: 85,
-  approved: 70,
-  approved_with_restrictions: 55,
-  not_approved: 0
+  approved_for_sport_breeding: 70,
+  approved_for_breeding: 55,
+  rejected: 0
 };
 
 export default function StallionInspection() {
@@ -151,13 +151,13 @@ export default function StallionInspection() {
       const finalScore = Math.max(0, Math.min(100, baseScore + (Math.random() - 0.5) * 20));
 
       // Determine approval status
-      let approvalStatus = 'not_approved';
+      let approvalStatus = 'rejected';
       if (finalScore >= APPROVAL_THRESHOLDS.elite_approved) {
         approvalStatus = 'elite_approved';
-      } else if (finalScore >= APPROVAL_THRESHOLDS.approved) {
-        approvalStatus = 'approved';
-      } else if (finalScore >= APPROVAL_THRESHOLDS.approved_with_restrictions) {
-        approvalStatus = 'approved_with_restrictions';
+      } else if (finalScore >= APPROVAL_THRESHOLDS.approved_for_sport_breeding) {
+        approvalStatus = 'approved_for_sport_breeding';
+      } else if (finalScore >= APPROVAL_THRESHOLDS.approved_for_breeding) {
+        approvalStatus = 'approved_for_breeding';
       }
 
       // Update horse with approval status
@@ -197,9 +197,9 @@ export default function StallionInspection() {
     const criteria = INSPECTION_CRITERIA[stallion.breed];
     const statusConfig = {
       elite_approved: { color: 'bg-yellow-50 border-yellow-300', text: 'text-yellow-800', icon: '⭐', label: 'Elite Approved' },
-      approved: { color: 'bg-green-50 border-green-300', text: 'text-green-800', icon: '✅', label: 'Approved' },
-      approved_with_restrictions: { color: 'bg-blue-50 border-blue-300', text: 'text-blue-800', icon: '⚠️', label: 'Approved with Restrictions' },
-      not_approved: { color: 'bg-red-50 border-red-300', text: 'text-red-800', icon: '❌', label: 'Not Approved' }
+      approved_for_sport_breeding: { color: 'bg-green-50 border-green-300', text: 'text-green-800', icon: '✅', label: 'Approved for Sport Breeding' },
+      approved_for_breeding: { color: 'bg-blue-50 border-blue-300', text: 'text-blue-800', icon: '📋', label: 'Approved for Breeding' },
+      rejected: { color: 'bg-red-50 border-red-300', text: 'text-red-800', icon: '❌', label: 'Rejected' }
     };
     const config = statusConfig[status];
 
@@ -357,29 +357,32 @@ export default function StallionInspection() {
       <div className="space-y-3">
         <h2 className="text-xl font-bold text-stone-800">Étalons éligibles ({eligibleStallions.length})</h2>
         {eligibleStallions.length === 0 ? (
-          <Card className="border-0 bg-stone-50">
-            <CardContent className="p-12 text-center">
-              <Zap className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-400">Aucun étalon éligible pour l'inspection</p>
-            </CardContent>
-          </Card>
+        <Card className="border-0 bg-stone-50">
+        <CardContent className="p-12 text-center">
+          <Zap className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+          <p className="text-stone-400">Aucun étalon éligible pour l'inspection</p>
+        </CardContent>
+        </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {eligibleStallions.map(stallion => {
-              const criteria = INSPECTION_CRITERIA[stallion.breed];
-              const avgStat = Math.round(
-                Object.values(stallion.stats || {}).reduce((a, b) => a + b, 0) /
-                Object.keys(stallion.stats || {}).length
-              );
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {eligibleStallions.map(stallion => {
+          const criteria = INSPECTION_CRITERIA[stallion.breed];
+          const avgStat = Math.round(
+            Object.values(stallion.stats || {}).reduce((a, b) => a + b, 0) /
+            Object.keys(stallion.stats || {}).length
+          );
+          const isApproved = stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated' && stallion.breeding_approval_status !== 'rejected';
 
-              return (
-                <Card
-                  key={stallion.id}
-                  className={`border-2 cursor-pointer transition-all ${
-                    stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated'
-                      ? 'border-green-300 bg-green-50/50'
-                      : 'border-stone-200 hover:border-amber-300'
-                  }`}
+          return (
+            <Card
+              key={stallion.id}
+              className={`border-2 cursor-pointer transition-all ${
+                isApproved
+                  ? 'border-green-300 bg-green-50/50'
+                  : stallion.breeding_approval_status === 'rejected'
+                  ? 'border-red-300 bg-red-50/50'
+                  : 'border-stone-200 hover:border-amber-300'
+              }`}
                   onClick={() => setSelectedStallion(stallion)}
                 >
                   <CardContent className="p-4 space-y-3">
@@ -400,11 +403,13 @@ export default function StallionInspection() {
                       <div className={`p-2 rounded text-xs font-semibold ${
                         stallion.breeding_approval_status === 'elite_approved'
                           ? 'bg-yellow-100 text-yellow-700'
-                          : stallion.breeding_approval_status === 'approved'
+                          : stallion.breeding_approval_status === 'approved_for_sport_breeding'
                           ? 'bg-green-100 text-green-700'
-                          : 'bg-blue-100 text-blue-700'
+                          : stallion.breeding_approval_status === 'approved_for_breeding'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-red-100 text-red-700'
                       }`}>
-                        ✓ {stallion.breeding_approval_status === 'elite_approved' ? '⭐ Elite Approved' : stallion.breeding_approval_status === 'approved' ? '✅ Approved' : '⚠️ Approved with Restrictions'}
+                        {stallion.breeding_approval_status === 'elite_approved' ? '⭐ Elite Approved' : stallion.breeding_approval_status === 'approved_for_sport_breeding' ? '✅ Approved for Sport' : stallion.breeding_approval_status === 'approved_for_breeding' ? '📋 Approved for Breeding' : '❌ Rejected'}
                       </div>
                     )}
 

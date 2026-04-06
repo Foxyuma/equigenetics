@@ -503,7 +503,7 @@ const STUDBOOK_RULES = {
 
 export function determineBreedFromParents(sireBreed, damBreed, sireApprovalStatus) {
   // If stallion not approved, foal is automatically OC
-  if (sireApprovalStatus && sireApprovalStatus !== 'approved' && sireApprovalStatus !== 'approved_with_restrictions' && sireApprovalStatus !== 'elite_approved') {
+  if (sireApprovalStatus && sireApprovalStatus !== 'approved_for_breeding' && sireApprovalStatus !== 'approved_for_sport_breeding' && sireApprovalStatus !== 'elite_approved') {
     return {
       breed: 'OC',
       isOC: true,

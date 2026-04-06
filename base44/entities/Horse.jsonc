@@ -152,9 +152,9 @@
       "type": "string",
       "enum": [
         "not_evaluated",
-        "not_approved",
-        "approved",
-        "approved_with_restrictions",
+        "rejected",
+        "approved_for_breeding",
+        "approved_for_sport_breeding",
         "elite_approved"
       ],
       "default": "not_evaluated",

@@ -24,6 +24,7 @@ import Messages from './pages/Messages';
 import Trades from './pages/Trades';
 import Staff from './pages/Staff';
 import Profile from './pages/Profile';
+import Transactions from './pages/Transactions';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -69,6 +70,7 @@ const AuthenticatedApp = () => {
         <Route path="/Trades" element={<Trades />} />
         <Route path="/Staff" element={<Staff />} />
         <Route path="/Profile" element={<Profile />} />
+        <Route path="/Transactions" element={<Transactions />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle } from 'lucide-react';
+import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
 import { base44 } from '@/api/base44Client';
@@ -19,6 +19,7 @@ const menuGroups = [
       { path: "/Paddocks", label: "Paddocks", icon: LayoutGrid },
       { path: "/Staff", label: "Personnel", icon: Users },
       { path: "/Profile", label: "Mon Profil", icon: UserCircle },
+      { path: "/Transactions", label: "Transactions", icon: History },
     ]
   },
   {

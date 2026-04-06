@@ -4,8 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle2, Award, Zap, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Award, Zap, TrendingUp, Gift, Frown } from 'lucide-react';
 import { toast } from 'sonner';
+import { calculateInspectionScore, getApprovalStatus, getScoreColor, SCORING_CRITERIA, GENETIC_BONUSES } from '../components/breeding/InspectionScoring';
 
 const INSPECTION_CRITERIA = {
   'Arabian': {
@@ -88,12 +89,7 @@ const INSPECTION_CRITERIA = {
   }
 };
 
-const APPROVAL_THRESHOLDS = {
-  elite_approved: 85,
-  approved_for_sport_breeding: 70,
-  approved_for_breeding: 55,
-  rejected: 0
-};
+// Thresholds moved to InspectionScoring component
 
 export default function StallionInspection() {
   const [selectedStallion, setSelectedStallion] = useState(null);
@@ -132,33 +128,13 @@ export default function StallionInspection() {
       const criteria = INSPECTION_CRITERIA[stallion.breed];
       if (!criteria) throw new Error('Race non inspectable');
 
-      // Calculate score based on stats and race-specific weights
-      let statScore = 0;
-      if (stallion.stats) {
-        Object.entries(criteria.statWeights).forEach(([stat, weight]) => {
-          statScore += (stallion.stats[stat] || 50) * weight;
-        });
-        statScore = statScore / Object.values(criteria.statWeights).reduce((a, b) => a + b, 0);
-      } else {
-        statScore = 50;
-      }
-
-      // Add genetic health bonus
-      const hasHealthGenes = stallion.health_genes?.some(h => h.status !== 'clear') ? -5 : 5;
-      const baseScore = statScore + hasHealthGenes;
-
-      // Random variation
-      const finalScore = Math.max(0, Math.min(100, baseScore + (Math.random() - 0.5) * 20));
+      // Calculate score using comprehensive scoring system
+      const scoreData = calculateInspectionScore(stallion);
+      const finalScore = scoreData.total;
 
       // Determine approval status
-      let approvalStatus = 'rejected';
-      if (finalScore >= APPROVAL_THRESHOLDS.elite_approved) {
-        approvalStatus = 'elite_approved';
-      } else if (finalScore >= APPROVAL_THRESHOLDS.approved_for_sport_breeding) {
-        approvalStatus = 'approved_for_sport_breeding';
-      } else if (finalScore >= APPROVAL_THRESHOLDS.approved_for_breeding) {
-        approvalStatus = 'approved_for_breeding';
-      }
+      const approvalData = getApprovalStatus(finalScore);
+      const approvalStatus = approvalData.status;
 
       // Update horse with approval status
       await base44.entities.Horse.update(stallion.id, {
@@ -176,72 +152,114 @@ export default function StallionInspection() {
         reason: `Stallion Inspection - ${stallion.name} (${approvalStatus})`,
       });
 
-      return { stallion, score: finalScore, status: approvalStatus };
+      return { stallion, score: finalScore, status: approvalStatus, scoreData };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       setInspectionResults(data);
-      const statusLabel = {
-        elite_approved: '⭐ Elite Approved',
-        approved: '✅ Approved',
-        approved_with_restrictions: '⚠️ Approved with Restrictions',
-        not_approved: '❌ Not Approved'
-      };
-      toast.success(`${data.stallion.name}: ${statusLabel[data.status]} (${Math.round(data.score)}/100)`);
+      const approvalData = getApprovalStatus(data.score);
+      toast.success(`${data.stallion.name}: ${approvalData.icon} ${approvalData.label} (${Math.round(data.score)}/100)`);
     },
     onError: (err) => toast.error(err.message),
   });
 
   if (inspectionResults) {
-    const { stallion, score, status } = inspectionResults;
+    const { stallion, score, status, scoreData } = inspectionResults;
     const criteria = INSPECTION_CRITERIA[stallion.breed];
+    const approvalData = getApprovalStatus(score);
+    const colorGradient = getScoreColor(score);
     const statusConfig = {
-      elite_approved: { color: 'bg-yellow-50 border-yellow-300', text: 'text-yellow-800', icon: '⭐', label: 'Elite Approved' },
-      approved_for_sport_breeding: { color: 'bg-green-50 border-green-300', text: 'text-green-800', icon: '✅', label: 'Approved for Sport Breeding' },
-      approved_for_breeding: { color: 'bg-blue-50 border-blue-300', text: 'text-blue-800', icon: '📋', label: 'Approved for Breeding' },
-      rejected: { color: 'bg-red-50 border-red-300', text: 'text-red-800', icon: '❌', label: 'Rejected' }
+      elite: { color: 'bg-yellow-50 border-yellow-300', text: 'text-yellow-800' },
+      provisional: { color: 'bg-emerald-50 border-emerald-300', text: 'text-emerald-800' },
+      approved: { color: 'bg-blue-50 border-blue-300', text: 'text-blue-800' },
+      approved_restricted: { color: 'bg-orange-50 border-orange-300', text: 'text-orange-800' },
+      not_approved: { color: 'bg-red-50 border-red-300', text: 'text-red-800' }
     };
     const config = statusConfig[status];
 
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         <Card className={`border-2 ${config.color}`}>
           <CardHeader>
             <CardTitle className={`text-2xl flex items-center gap-2 ${config.text}`}>
-              <span>{config.icon}</span>
-              {stallion.name} - {config.label}
+              <span>{approvalData.icon}</span>
+              {stallion.name} - {approvalData.label}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            {/* Score visuel */}
+            <div className={`bg-gradient-to-r ${colorGradient} rounded-xl p-6 text-white`}>
               <div className="text-center">
-                <p className="text-3xl font-bold text-stone-800">{Math.round(score)}</p>
-                <p className="text-xs text-stone-500">Score Final</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-bold text-stone-700">{stallion.breed}</p>
-                <p className="text-xs text-stone-500">Race</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-bold text-stone-700">{stallion.age}y</p>
-                <p className="text-xs text-stone-500">Âge</p>
+                <p className="text-5xl font-bold mb-2">{Math.round(score)}</p>
+                <p className="text-lg opacity-90">Score d'approbation</p>
               </div>
             </div>
 
-            <div className="p-4 rounded-lg bg-white/50 border border-stone-200">
-              <h4 className="font-semibold text-stone-700 mb-2">Critères d'évaluation</h4>
+            {/* Infos chevaux */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-3 rounded-lg bg-stone-50 text-center">
+                <p className="text-lg font-bold text-stone-800">{stallion.breed}</p>
+                <p className="text-xs text-stone-500">Race</p>
+              </div>
+              <div className="p-3 rounded-lg bg-stone-50 text-center">
+                <p className="text-lg font-bold text-stone-800">{stallion.age}y</p>
+                <p className="text-xs text-stone-500">Âge</p>
+              </div>
+              <div className="p-3 rounded-lg bg-stone-50 text-center">
+                <p className="text-lg font-bold text-stone-800">
+                  {Math.round(Object.values(stallion.stats || {}).reduce((a, b) => a + b, 0) / Object.keys(stallion.stats || {}).length)}
+                </p>
+                <p className="text-xs text-stone-500">Moy. Stats</p>
+              </div>
+            </div>
+
+            {/* Breakdown du score */}
+            <div className="p-4 rounded-lg bg-stone-50 border border-stone-200">
+              <h4 className="font-semibold text-stone-700 mb-3">Détail du scoring (/100)</h4>
               <div className="space-y-2">
-                {criteria.criteria.map(c => (
-                  <div key={c.name} className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-stone-700">{c.name}</p>
-                      <p className="text-xs text-stone-500">{c.description}</p>
+                {scoreData && Object.entries(scoreData.breakdown).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-stone-700 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-white rounded-full h-2 border border-stone-300 overflow-hidden">
+                        <div className="bg-gradient-to-r from-emerald-400 to-green-500 h-full" style={{width: `${(value / 20) * 100}%`}}></div>
+                      </div>
+                      <span className="font-bold text-stone-800 w-6 text-right">{value}/20</span>
                     </div>
-                    <Badge variant="outline" className="text-xs">{Math.round(c.weight * 100)}%</Badge>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Bonus et pénalités */}
+            {scoreData && (scoreData.bonuses.length > 0 || scoreData.penalties.length > 0) && (
+              <div className="space-y-2">
+                {scoreData.bonuses.length > 0 && (
+                  <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <h5 className="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
+                      <Gift className="w-4 h-4" /> Bonus génétiques
+                    </h5>
+                    <ul className="space-y-1 text-sm text-emerald-700">
+                      {scoreData.bonuses.map((b, i) => (
+                        <li key={i} className="flex items-center gap-2">✓ {b.description}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {scoreData.penalties.length > 0 && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                    <h5 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                      <Frown className="w-4 h-4" /> Pénalités génétiques
+                    </h5>
+                    <ul className="space-y-1 text-sm text-red-700">
+                      {scoreData.penalties.map((p, i) => (
+                        <li key={i} className="flex items-center gap-2">✗ {p.description}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="flex gap-3">
               <Button

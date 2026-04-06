@@ -1,11 +1,25 @@
 // Horse Genetics Engine - handles inheritance, coat color determination, disease transmission
 
+// Races européennes principales pour l'élevage sport
 const BREEDS = [
-  "Pur-Sang Anglais", "Arabe", "Quarter Horse", "Frison", "Andalou",
-  "Lusitanien", "Hanovrien", "Selle Français", "Trakehner", "Holsteiner",
-  "KWPN", "Connemara", "Fjord", "Haflinger", "Welsh Pony",
-  "Shetland", "Appaloosa", "Paint Horse", "Mustang", "Percheron",
-  "Boulonnais", "Comtois", "Camargue", "Mérens", "Lipizzan"
+  // Studbooks fermés (sangs purs uniquement)
+  "Arabian",
+  "Thoroughbred",
+  "Friesian",
+  "Lipizzaner",
+  
+  // Studbooks semi-ouverts (acceptent certains apports)
+  "Anglo-Arabian",
+  "Haflinger",
+  "Connemara",
+  
+  // Warmblood européens (studbooks ouverts, sportifs)
+  "Selle Français",
+  "KWPN",
+  "Hanoverian",
+  "Holsteiner",
+  "Oldenburg",
+  "Belgian Warmblood"
 ];
 
 const DISEASES = [
@@ -429,101 +443,155 @@ export function estimateHorseValue(horse) {
   return Math.round(base / 100) * 100;
 }
 
-// Studbook rules for breed determination
+// Studbook rules pour les races européennes
 const STUDBOOK_RULES = {
+  // === STUDBOOKS FERMÉS (sangs purs uniquement) ===
   'Arabian': {
     type: 'closed',
     acceptedCrosses: [{ sire: 'Arabian', dam: 'Arabian', result: 'Arabian' }]
   },
-  'Pur-Sang Anglais': {
+  'Thoroughbred': {
     type: 'closed',
-    acceptedCrosses: [{ sire: 'Pur-Sang Anglais', dam: 'Pur-Sang Anglais', result: 'Pur-Sang Anglais' }]
+    acceptedCrosses: [{ sire: 'Thoroughbred', dam: 'Thoroughbred', result: 'Thoroughbred' }]
   },
+  'Friesian': {
+    type: 'closed',
+    acceptedCrosses: [{ sire: 'Friesian', dam: 'Friesian', result: 'Friesian' }]
+  },
+  'Lipizzaner': {
+    type: 'closed',
+    acceptedCrosses: [{ sire: 'Lipizzaner', dam: 'Lipizzaner', result: 'Lipizzaner' }]
+  },
+  
+  // === STUDBOOKS SEMI-OUVERTS ===
   'Anglo-Arabian': {
     type: 'semi-open',
+    minArabianBlood: 0.25,
     acceptedCrosses: [
-      { sire: 'Arabian', dam: 'Pur-Sang Anglais', result: 'Anglo-Arabian' },
-      { sire: 'Pur-Sang Anglais', dam: 'Arabian', result: 'Anglo-Arabian' },
+      { sire: 'Arabian', dam: 'Thoroughbred', result: 'Anglo-Arabian' },
+      { sire: 'Thoroughbred', dam: 'Arabian', result: 'Anglo-Arabian' },
       { sire: 'Anglo-Arabian', dam: 'Arabian', result: 'Anglo-Arabian' },
       { sire: 'Arabian', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' },
-      { sire: 'Anglo-Arabian', dam: 'Pur-Sang Anglais', result: 'Anglo-Arabian' },
-      { sire: 'Pur-Sang Anglais', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' },
+      { sire: 'Anglo-Arabian', dam: 'Thoroughbred', result: 'Anglo-Arabian' },
+      { sire: 'Thoroughbred', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' },
       { sire: 'Anglo-Arabian', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' }
     ]
   },
+  'Haflinger': {
+    type: 'semi-open',
+    acceptedCrosses: [
+      { sire: 'Haflinger', dam: 'Haflinger', result: 'Haflinger' },
+      { sire: 'Haflinger', dam: 'Thoroughbred', result: 'Haflinger' },
+      { sire: 'Thoroughbred', dam: 'Haflinger', result: 'Haflinger' }
+    ]
+  },
+  'Connemara': {
+    type: 'semi-open',
+    acceptedCrosses: [
+      { sire: 'Connemara', dam: 'Connemara', result: 'Connemara' },
+      { sire: 'Connemara', dam: 'Thoroughbred', result: 'Connemara' },
+      { sire: 'Thoroughbred', dam: 'Connemara', result: 'Connemara' }
+    ]
+  },
+  
+  // === WARMBLOOD OUVERTS (sportifs) ===
   'Selle Français': {
     type: 'open',
     acceptedCrosses: [
       { sire: 'Selle Français', dam: 'Selle Français', result: 'Selle Français' },
-      { sire: 'Selle Français', dam: 'Pur-Sang Anglais', result: 'Selle Français' },
-      { sire: 'Pur-Sang Anglais', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Thoroughbred', result: 'Selle Français' },
+      { sire: 'Thoroughbred', dam: 'Selle Français', result: 'Selle Français' },
       { sire: 'Selle Français', dam: 'Anglo-Arabian', result: 'Selle Français' },
       { sire: 'Anglo-Arabian', dam: 'Selle Français', result: 'Selle Français' },
-      { sire: 'Selle Français', dam: 'Hanovrien', result: 'Selle Français' },
-      { sire: 'Hanovrien', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Hanoverian', result: 'Selle Français' },
+      { sire: 'Hanoverian', dam: 'Selle Français', result: 'Selle Français' },
       { sire: 'Selle Français', dam: 'KWPN', result: 'Selle Français' },
       { sire: 'KWPN', dam: 'Selle Français', result: 'Selle Français' },
       { sire: 'Selle Français', dam: 'Holsteiner', result: 'Selle Français' },
-      { sire: 'Holsteiner', dam: 'Selle Français', result: 'Selle Français' }
+      { sire: 'Holsteiner', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Oldenburg', result: 'Selle Français' },
+      { sire: 'Oldenburg', dam: 'Selle Français', result: 'Selle Français' }
     ]
   },
   'KWPN': {
     type: 'open',
     acceptedCrosses: [
       { sire: 'KWPN', dam: 'KWPN', result: 'KWPN' },
-      { sire: 'KWPN', dam: 'Pur-Sang Anglais', result: 'KWPN' },
-      { sire: 'Pur-Sang Anglais', dam: 'KWPN', result: 'KWPN' },
-      { sire: 'KWPN', dam: 'Hanovrien', result: 'KWPN' },
-      { sire: 'Hanovrien', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Thoroughbred', result: 'KWPN' },
+      { sire: 'Thoroughbred', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Anglo-Arabian', result: 'KWPN' },
+      { sire: 'Anglo-Arabian', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Hanoverian', result: 'KWPN' },
+      { sire: 'Hanoverian', dam: 'KWPN', result: 'KWPN' },
       { sire: 'KWPN', dam: 'Holsteiner', result: 'KWPN' },
       { sire: 'Holsteiner', dam: 'KWPN', result: 'KWPN' },
-      { sire: 'KWPN', dam: 'Selle Français', result: 'KWPN' },
-      { sire: 'Selle Français', dam: 'KWPN', result: 'KWPN' }
+      { sire: 'KWPN', dam: 'Oldenburg', result: 'KWPN' },
+      { sire: 'Oldenburg', dam: 'KWPN', result: 'KWPN' }
+    ]
+  },
+  'Hanoverian': {
+    type: 'open',
+    acceptedCrosses: [
+      { sire: 'Hanoverian', dam: 'Hanoverian', result: 'Hanoverian' },
+      { sire: 'Hanoverian', dam: 'Thoroughbred', result: 'Hanoverian' },
+      { sire: 'Thoroughbred', dam: 'Hanoverian', result: 'Hanoverian' },
+      { sire: 'Hanoverian', dam: 'Anglo-Arabian', result: 'Hanoverian' },
+      { sire: 'Anglo-Arabian', dam: 'Hanoverian', result: 'Hanoverian' },
+      { sire: 'Hanoverian', dam: 'KWPN', result: 'Hanoverian' },
+      { sire: 'KWPN', dam: 'Hanoverian', result: 'Hanoverian' },
+      { sire: 'Hanoverian', dam: 'Holsteiner', result: 'Hanoverian' },
+      { sire: 'Holsteiner', dam: 'Hanoverian', result: 'Hanoverian' }
     ]
   },
   'Holsteiner': {
     type: 'open',
     acceptedCrosses: [
       { sire: 'Holsteiner', dam: 'Holsteiner', result: 'Holsteiner' },
-      { sire: 'Holsteiner', dam: 'Pur-Sang Anglais', result: 'Holsteiner' },
-      { sire: 'Pur-Sang Anglais', dam: 'Holsteiner', result: 'Holsteiner' },
-      { sire: 'Holsteiner', dam: 'Hanovrien', result: 'Holsteiner' },
-      { sire: 'Hanovrien', dam: 'Holsteiner', result: 'Holsteiner' },
-      { sire: 'Holsteiner', dam: 'Selle Français', result: 'Holsteiner' },
-      { sire: 'Selle Français', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'Thoroughbred', result: 'Holsteiner' },
+      { sire: 'Thoroughbred', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'Anglo-Arabian', result: 'Holsteiner' },
+      { sire: 'Anglo-Arabian', dam: 'Holsteiner', result: 'Holsteiner' },
       { sire: 'Holsteiner', dam: 'KWPN', result: 'Holsteiner' },
-      { sire: 'KWPN', dam: 'Holsteiner', result: 'Holsteiner' }
+      { sire: 'KWPN', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'Hanoverian', result: 'Holsteiner' },
+      { sire: 'Hanoverian', dam: 'Holsteiner', result: 'Holsteiner' }
     ]
   },
-  'Hanovrien': {
+  'Oldenburg': {
     type: 'open',
     acceptedCrosses: [
-      { sire: 'Hanovrien', dam: 'Hanovrien', result: 'Hanovrien' },
-      { sire: 'Hanovrien', dam: 'Pur-Sang Anglais', result: 'Hanovrien' },
-      { sire: 'Pur-Sang Anglais', dam: 'Hanovrien', result: 'Hanovrien' }
+      { sire: 'Oldenburg', dam: 'Oldenburg', result: 'Oldenburg' },
+      { sire: 'Oldenburg', dam: 'Thoroughbred', result: 'Oldenburg' },
+      { sire: 'Thoroughbred', dam: 'Oldenburg', result: 'Oldenburg' },
+      { sire: 'Oldenburg', dam: 'Anglo-Arabian', result: 'Oldenburg' },
+      { sire: 'Anglo-Arabian', dam: 'Oldenburg', result: 'Oldenburg' },
+      { sire: 'Oldenburg', dam: 'KWPN', result: 'Oldenburg' },
+      { sire: 'KWPN', dam: 'Oldenburg', result: 'Oldenburg' }
     ]
   },
-  'Welsh Pony': {
-    type: 'pony',
-    acceptedCrosses: [{ sire: 'Welsh Pony', dam: 'Welsh Pony', result: 'Welsh Pony' }]
-  },
-  'Connemara': {
-    type: 'pony',
-    acceptedCrosses: [{ sire: 'Connemara', dam: 'Connemara', result: 'Connemara' }]
+  'Belgian Warmblood': {
+    type: 'open',
+    acceptedCrosses: [
+      { sire: 'Belgian Warmblood', dam: 'Belgian Warmblood', result: 'Belgian Warmblood' },
+      { sire: 'Belgian Warmblood', dam: 'Thoroughbred', result: 'Belgian Warmblood' },
+      { sire: 'Thoroughbred', dam: 'Belgian Warmblood', result: 'Belgian Warmblood' },
+      { sire: 'Belgian Warmblood', dam: 'KWPN', result: 'Belgian Warmblood' },
+      { sire: 'KWPN', dam: 'Belgian Warmblood', result: 'Belgian Warmblood' }
+    ]
   }
 };
 
 export function determineBreedFromParents(sireBreed, damBreed, sireApprovalStatus) {
-  // If stallion not approved, foal is automatically OC
+  // Si l'étalon n'est pas approuvé, le poulain est automatiquement OC
   if (sireApprovalStatus && sireApprovalStatus !== 'approved' && sireApprovalStatus !== 'approved_restricted' && sireApprovalStatus !== 'provisional' && sireApprovalStatus !== 'elite') {
     return {
       breed: 'OC',
       isOC: true,
-      message: `⚠️ Warning: The stallion is not approved for breeding. The foal will be registered as OC (Unknown Origins). Depending on the dam's studbook rules, the foal may still be eligible for the dam's registry.`
+      message: `⚠️ L'étalon n'est pas approuvé à la monte. Le poulain sera enregistré comme OC (Origines Constatées).`
     };
   }
 
-  // Check if cross is recognized in studbook rules
+  // Vérifier si le croisement est reconnu
   for (const breed in STUDBOOK_RULES) {
     const rules = STUDBOOK_RULES[breed];
     const match = rules.acceptedCrosses.find(c => c.sire === sireBreed && c.dam === damBreed);
@@ -533,7 +601,7 @@ export function determineBreedFromParents(sireBreed, damBreed, sireApprovalStatu
   return {
     breed: 'OC',
     isOC: true,
-    message: `⚠️ Le poulain sera enregistré comme OC (Origines Constatées) car ${sireBreed} × ${damBreed} n'est pas un croisement reconnu.`
+    message: `⚠️ Le poulain sera enregistré comme OC (Origines Constatées) car ${sireBreed} × ${damBreed} n'est pas un croisement reconnu par les studbooks.`
   };
 }
 

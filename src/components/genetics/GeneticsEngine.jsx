@@ -417,4 +417,102 @@ export function estimateHorseValue(horse) {
   return Math.round(base / 100) * 100;
 }
 
+// Studbook rules for breed determination
+const STUDBOOK_RULES = {
+  'Arabian': {
+    type: 'closed',
+    acceptedCrosses: [{ sire: 'Arabian', dam: 'Arabian', result: 'Arabian' }]
+  },
+  'Pur-Sang Anglais': {
+    type: 'closed',
+    acceptedCrosses: [{ sire: 'Pur-Sang Anglais', dam: 'Pur-Sang Anglais', result: 'Pur-Sang Anglais' }]
+  },
+  'Anglo-Arabian': {
+    type: 'semi-open',
+    acceptedCrosses: [
+      { sire: 'Arabian', dam: 'Pur-Sang Anglais', result: 'Anglo-Arabian' },
+      { sire: 'Pur-Sang Anglais', dam: 'Arabian', result: 'Anglo-Arabian' },
+      { sire: 'Anglo-Arabian', dam: 'Arabian', result: 'Anglo-Arabian' },
+      { sire: 'Arabian', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' },
+      { sire: 'Anglo-Arabian', dam: 'Pur-Sang Anglais', result: 'Anglo-Arabian' },
+      { sire: 'Pur-Sang Anglais', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' },
+      { sire: 'Anglo-Arabian', dam: 'Anglo-Arabian', result: 'Anglo-Arabian' }
+    ]
+  },
+  'Selle Français': {
+    type: 'open',
+    acceptedCrosses: [
+      { sire: 'Selle Français', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Pur-Sang Anglais', result: 'Selle Français' },
+      { sire: 'Pur-Sang Anglais', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Anglo-Arabian', result: 'Selle Français' },
+      { sire: 'Anglo-Arabian', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Hanovrien', result: 'Selle Français' },
+      { sire: 'Hanovrien', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'KWPN', result: 'Selle Français' },
+      { sire: 'KWPN', dam: 'Selle Français', result: 'Selle Français' },
+      { sire: 'Selle Français', dam: 'Holsteiner', result: 'Selle Français' },
+      { sire: 'Holsteiner', dam: 'Selle Français', result: 'Selle Français' }
+    ]
+  },
+  'KWPN': {
+    type: 'open',
+    acceptedCrosses: [
+      { sire: 'KWPN', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Pur-Sang Anglais', result: 'KWPN' },
+      { sire: 'Pur-Sang Anglais', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Hanovrien', result: 'KWPN' },
+      { sire: 'Hanovrien', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Holsteiner', result: 'KWPN' },
+      { sire: 'Holsteiner', dam: 'KWPN', result: 'KWPN' },
+      { sire: 'KWPN', dam: 'Selle Français', result: 'KWPN' },
+      { sire: 'Selle Français', dam: 'KWPN', result: 'KWPN' }
+    ]
+  },
+  'Holsteiner': {
+    type: 'open',
+    acceptedCrosses: [
+      { sire: 'Holsteiner', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'Pur-Sang Anglais', result: 'Holsteiner' },
+      { sire: 'Pur-Sang Anglais', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'Hanovrien', result: 'Holsteiner' },
+      { sire: 'Hanovrien', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'Selle Français', result: 'Holsteiner' },
+      { sire: 'Selle Français', dam: 'Holsteiner', result: 'Holsteiner' },
+      { sire: 'Holsteiner', dam: 'KWPN', result: 'Holsteiner' },
+      { sire: 'KWPN', dam: 'Holsteiner', result: 'Holsteiner' }
+    ]
+  },
+  'Hanovrien': {
+    type: 'open',
+    acceptedCrosses: [
+      { sire: 'Hanovrien', dam: 'Hanovrien', result: 'Hanovrien' },
+      { sire: 'Hanovrien', dam: 'Pur-Sang Anglais', result: 'Hanovrien' },
+      { sire: 'Pur-Sang Anglais', dam: 'Hanovrien', result: 'Hanovrien' }
+    ]
+  },
+  'Welsh Pony': {
+    type: 'pony',
+    acceptedCrosses: [{ sire: 'Welsh Pony', dam: 'Welsh Pony', result: 'Welsh Pony' }]
+  },
+  'Connemara': {
+    type: 'pony',
+    acceptedCrosses: [{ sire: 'Connemara', dam: 'Connemara', result: 'Connemara' }]
+  }
+};
+
+export function determineBreedFromParents(sireBreed, damBreed) {
+  for (const breed in STUDBOOK_RULES) {
+    const rules = STUDBOOK_RULES[breed];
+    const match = rules.acceptedCrosses.find(c => c.sire === sireBreed && c.dam === damBreed);
+    if (match) return { breed: match.result, isOC: false };
+  }
+
+  return {
+    breed: 'OC',
+    isOC: true,
+    message: `⚠️ Le poulain sera enregistré comme OC (Origines Constatées) car ${sireBreed} × ${damBreed} n'est pas un croisement reconnu.`
+  };
+}
+
 export { BREEDS, DISEASES };

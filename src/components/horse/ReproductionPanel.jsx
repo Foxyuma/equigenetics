@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
-import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge } from '../genetics/GeneticsEngine';
+import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge, determineBreedFromParents } from '../genetics/GeneticsEngine';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
@@ -55,6 +55,7 @@ export default function ReproductionPanel({ mare }) {
     
     const viability = checkFoalViability(selectedStallion.health_genes, mare.health_genes, mare.breed);
     const deathAge = !viability.viable ? null : determineFoalDeathAge(childHealth);
+    const breedResult = determineBreedFromParents(selectedStallion.breed, mare.breed);
     
     setFoalPreview({
       genotype: childGenotype,
@@ -62,7 +63,9 @@ export default function ReproductionPanel({ mare }) {
       health_genes: childHealth,
       coat_color: coatColor,
       sex: Math.random() > 0.5 ? 'male' : 'female',
-      breed: selectedStallion.breed === mare.breed ? selectedStallion.breed : `${selectedStallion.breed} x ${mare.breed}`,
+      breed: breedResult.breed,
+      isOC: breedResult.isOC,
+      ocMessage: breedResult.message,
       viable: viability.viable,
       viability_cause: viability.cause,
       death_age: deathAge,
@@ -357,6 +360,15 @@ export default function ReproductionPanel({ mare }) {
                   <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe peuvent varier lors de la naissance réelle.
                 </p>
               </div>
+              
+              {foalPreview.isOC && (
+                <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
+                  <p className="text-xs font-semibold text-orange-700 mb-1 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Enregistrement comme OC
+                  </p>
+                  <p className="text-xs text-orange-600">{foalPreview.ocMessage}</p>
+                </div>
+              )}
               
               {!foalPreview.viable && (
                 <div className="p-3 rounded-xl bg-red-50 border border-red-200">

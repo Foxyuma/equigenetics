@@ -27,30 +27,6 @@ export default function HorseDetail() {
   const [customPrice, setCustomPrice] = useState('');
   const [generatingImage, setGeneratingImage] = useState(false);
 
-  useEffect(() => {
-    if (horse && !horse.image_url && !generatingImage) {
-      generateHorseImage();
-    }
-  }, [horse?.id]);
-
-  const generateHorseImage = async () => {
-    if (!horse) return;
-    setGeneratingImage(true);
-    const visibleGenes = horse.genotype
-      ? Object.entries(horse.genotype)
-          .filter(([, v]) => !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v))
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(', ')
-      : '';
-    const prompt = `Photographie professionnelle d'un cheval de race ${horse.breed}, robe ${horse.coat_color}, ${
-      horse.sex === 'male' ? 'étalon' : 'jument'
-    }, âgé de ${horse.age || 1} ans. ${visibleGenes ? `Marquages génétiques visibles : ${visibleGenes}.` : ''} Photo réaliste de haute qualité, cheval entier en plein air, fond naturel, lumière douce, style photo équestre professionnelle. Le cheval doit ressembler parfaitement à la race ${horse.breed} avec ses caractéristiques morphologiques typiques.`;
-    const { url } = await base44.integrations.Core.GenerateImage({ prompt });
-    await base44.entities.Horse.update(horse.id, { image_url: url });
-    queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
-    setGeneratingImage(false);
-  };
-
   const { data: horse, isLoading } = useQuery({
     queryKey: ['horse', horseId],
     queryFn: () => base44.entities.Horse.filter({ id: horseId }).then(r => r[0]),
@@ -78,6 +54,30 @@ export default function HorseDetail() {
     queryKey: ['me'],
     queryFn: () => base44.auth.me(),
   });
+
+  const generateHorseImage = async () => {
+    if (!horse) return;
+    setGeneratingImage(true);
+    const visibleGenes = horse.genotype
+      ? Object.entries(horse.genotype)
+          .filter(([, v]) => !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v))
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(', ')
+      : '';
+    const prompt = `Photographie professionnelle d'un cheval de race ${horse.breed}, robe ${horse.coat_color}, ${
+      horse.sex === 'male' ? 'étalon' : 'jument'
+    }, âgé de ${horse.age || 1} ans. ${visibleGenes ? `Marquages génétiques visibles : ${visibleGenes}.` : ''} Photo réaliste de haute qualité, cheval entier en plein air, fond naturel, lumière douce, style photo équestre professionnelle. Le cheval doit ressembler parfaitement à la race ${horse.breed} avec ses caractéristiques morphologiques typiques.`;
+    const { url } = await base44.integrations.Core.GenerateImage({ prompt });
+    await base44.entities.Horse.update(horse.id, { image_url: url });
+    queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
+    setGeneratingImage(false);
+  };
+
+  useEffect(() => {
+    if (horse && !horse.image_url && !generatingImage) {
+      generateHorseImage();
+    }
+  }, [horse?.id]);
 
   const { data: competitions = [] } = useQuery({
     queryKey: ['horse-competitions', horseId],

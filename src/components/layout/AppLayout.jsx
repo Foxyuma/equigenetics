@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
+import GameClockDisplay from './GameClockDisplay';
 import { base44 } from '@/api/base44Client';
 
 const menuGroups = [
@@ -149,6 +150,7 @@ export default function AppLayout() {
 
             {/* Currencies */}
             <div className="hidden sm:flex items-center gap-3">
+              <GameClockDisplay />
               <CurrencyDisplay />
               <button
                 onClick={() => base44.auth.logout()}

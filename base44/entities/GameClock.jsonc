@@ -1,0 +1,42 @@
+{
+  "name": "GameClock",
+  "type": "object",
+  "properties": {
+    "day": {
+      "type": "number",
+      "default": 1,
+      "description": "Jour du mois (1-14)"
+    },
+    "month": {
+      "type": "number",
+      "default": 1,
+      "description": "Mois de l'ann\u00e9e"
+    },
+    "year": {
+      "type": "number",
+      "default": 1,
+      "description": "Ann\u00e9e de jeu"
+    },
+    "total_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre total de jours \u00e9coul\u00e9s depuis le d\u00e9but"
+    },
+    "last_tick_real": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Dernier tick r\u00e9el (timestamp)"
+    },
+    "season": {
+      "type": "string",
+      "enum": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "default": "spring"
+    }
+  },
+  "required": []
+}

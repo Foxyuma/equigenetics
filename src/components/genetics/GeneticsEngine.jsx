@@ -258,4 +258,52 @@ export function getCompetitionScore(horse, discipline) {
   return Math.max(0, Math.min(100, Math.round(score * 10) / 10));
 }
 
+/**
+ * Estime la valeur marchande d'un cheval en Genesis (€ x 1)
+ * Basé sur les tranches réelles du marché équin :
+ * Loisir €1k-8k | Amateur €8k-25k | Pro €25k-150k | Elite €150k+
+ * Poulains €3k-15k | Jeunes (2-3 ans) €10k-40k
+ */
+export function estimateHorseValue(horse) {
+  const avgStat = horse.stats
+    ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7)
+    : 50;
+  const age = horse.age ?? 0;
+  const wins = horse.competition_wins || 0;
+  const hasDisease = horse.health_genes?.some(g => g.status === 'affected');
+
+  let base;
+
+  if (age <= 1) {
+    // Poulains : €3 000 – €15 000
+    base = 3000 + Math.max(0, (avgStat - 30)) * 240;
+    base = Math.max(3000, Math.min(15000, base));
+  } else if (age <= 3) {
+    // Jeunes 2-3 ans : €10 000 – €40 000
+    base = 10000 + Math.max(0, (avgStat - 30)) * 857;
+    base = Math.max(10000, Math.min(40000, base));
+  } else if (avgStat < 45) {
+    // Loisir : €1 000 – €8 000
+    base = 1000 + (avgStat / 45) * 7000;
+  } else if (avgStat < 65) {
+    // Amateur sport : €8 000 – €25 000
+    base = 8000 + ((avgStat - 45) / 20) * 17000;
+  } else if (avgStat < 82) {
+    // Pro sport : €25 000 – €150 000
+    base = 25000 + ((avgStat - 65) / 17) * 125000;
+  } else {
+    // Elite / Champion : €150 000 – €1 000 000+
+    base = 150000 + ((avgStat - 82) / 18) * 850000;
+  }
+
+  // Bonus victoires : +10% par victoire, max ×3
+  const winsMultiplier = Math.min(3, 1 + wins * 0.1);
+  base *= winsMultiplier;
+
+  // Malus maladie génétique : -60%
+  if (hasDisease) base *= 0.4;
+
+  return Math.round(base / 100) * 100;
+}
+
 export { BREEDS, DISEASES };

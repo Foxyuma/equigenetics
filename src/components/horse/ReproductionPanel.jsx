@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp } from 'lucide-react';
-import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases } from '../genetics/GeneticsEngine';
+import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue } from '../genetics/GeneticsEngine';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
@@ -61,16 +61,9 @@ export default function ReproductionPanel({ mare }) {
           reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
         });
       }
-      const foal = await base44.entities.Horse.create({
-        name: foalName,
-        ...foalPreview,
-        father_id: selectedStallion.is_own ? selectedStallion.id : null,
-        mother_id: mare.id,
-        age: 0,
-        energy: 100,
-        competition_wins: 0,
-        is_for_sale: false,
-      });
+      const foalData = { name: foalName, ...foalPreview, father_id: selectedStallion.is_own ? selectedStallion.id : null, mother_id: mare.id, age: 0, energy: 100, competition_wins: 0, is_for_sale: false };
+      foalData.estimated_value = estimateHorseValue(foalData);
+      const foal = await base44.entities.Horse.create(foalData);
       await base44.entities.BreedingRecord.create({
         father_id: selectedStallion.id,
         mother_id: mare.id,

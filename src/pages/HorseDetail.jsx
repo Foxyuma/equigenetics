@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
+import { estimateHorseValue } from '../components/genetics/GeneticsEngine';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
 import HorseVisualizer from '../components/horse/HorseVisualizer';
@@ -56,9 +57,11 @@ export default function HorseDetail() {
 
   const toggleSaleMutation = useMutation({
     mutationFn: async () => {
+      const value = estimateHorseValue(horse);
       await base44.entities.Horse.update(horseId, {
         is_for_sale: !horse.is_for_sale,
-        price: horse.is_for_sale ? 0 : Math.round((Object.values(horse.stats || {}).reduce((a, b) => a + b, 0) / 7) * 50)
+        price: horse.is_for_sale ? 0 : value,
+        estimated_value: value,
       });
       if (!horse.is_for_sale && currentUser) {
         const affectedCount = horse.health_genes?.filter(g => g.status === 'affected').length || 0;

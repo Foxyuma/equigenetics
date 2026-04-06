@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { AlertTriangle, Baby, Dna, FlaskConical, Info, TrendingUp } from 'lucide-react';
-import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, BREEDS, generateStarterHorse } from '../components/genetics/GeneticsEngine';
+import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, BREEDS, generateStarterHorse } from '../components/genetics/GeneticsEngine';
 import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import { toast } from 'sonner';
@@ -118,14 +118,9 @@ export default function StallionMarket() {
       if (!currentUser) throw new Error('Non connecté');
       const balance = currentUser.genesis_balance ?? 0;
       if (balance < selectedStallion.price) throw new Error('Fonds insuffisants');
-      const foal = await base44.entities.Horse.create({
-        name: foalName,
-        ...foalPreview,
-        age: 0,
-        energy: 100,
-        competition_wins: 0,
-        is_for_sale: false,
-      });
+      const foalData = { name: foalName, ...foalPreview, age: 0, energy: 100, competition_wins: 0, is_for_sale: false };
+      foalData.estimated_value = estimateHorseValue(foalData);
+      const foal = await base44.entities.Horse.create(foalData);
       await base44.auth.updateMe({ genesis_balance: balance - selectedStallion.price });
       await base44.entities.Transaction.create({
         user_email: currentUser.email,

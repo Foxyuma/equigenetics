@@ -13,6 +13,7 @@ const menuGroups = [
     items: [
       { path: "/Stable", label: "Mes Chevaux", icon: Home },
       { path: "/Breeding", label: "Élevage", icon: Heart },
+      { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
       { path: "/Training", label: "Entraînement", icon: TrendingUp },
       { path: "/Pedigree", label: "Lignées", icon: GitBranch },
       { path: "/Inventory", label: "Inventaire", icon: Package },

@@ -297,9 +297,17 @@ export default function Breeding() {
               <Badge className="bg-stone-100 text-stone-600 border-0">{foalPreview.coat_color}</Badge>
             </div>
 
+            {/* Forecast disclaimer */}
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
+              <span className="text-blue-500 text-sm flex-shrink-0 mt-0.5">ℹ️</span>
+              <p className="text-xs text-blue-700">
+                <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe du poulain peuvent varier lors de la naissance réelle. Cette simulation est une estimation probabiliste.
+              </p>
+            </div>
+
             {/* Stats */}
             <div>
-              <h4 className="font-semibold text-stone-700 mb-3">Compétences</h4>
+              <h4 className="font-semibold text-stone-700 mb-2 flex items-center gap-2">Compétences <span className="text-xs font-normal text-stone-400">(estimées, peuvent varier)</span></h4>
               <div className="space-y-2">
                 {Object.entries(foalPreview.stats).map(([s, v]) => (
                   <StatBar key={s} stat={s} value={v} />
@@ -309,7 +317,7 @@ export default function Breeding() {
 
             {/* Genotype */}
             <div>
-              <h4 className="font-semibold text-stone-700 mb-3">Génotype</h4>
+              <h4 className="font-semibold text-stone-700 mb-2 flex items-center gap-2">Génotype <span className="text-xs font-normal text-stone-400">(estimé, peut varier)</span></h4>
               <GeneticPanel genotype={foalPreview.genotype} />
             </div>
 

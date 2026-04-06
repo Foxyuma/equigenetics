@@ -1,0 +1,53 @@
+{
+  "name": "StallionOffer",
+  "type": "object",
+  "properties": {
+    "stallion_name": {
+      "type": "string"
+    },
+    "breed": {
+      "type": "string"
+    },
+    "coat_color": {
+      "type": "string"
+    },
+    "age": {
+      "type": "number"
+    },
+    "genotype": {
+      "type": "object"
+    },
+    "stats": {
+      "type": "object"
+    },
+    "health_genes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "price": {
+      "type": "number",
+      "default": 5000
+    },
+    "owner_name": {
+      "type": "string",
+      "default": "Haras Nationaux"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "is_npc": {
+      "type": "boolean",
+      "default": true
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "stallion_name",
+    "breed",
+    "price"
+  ]
+}

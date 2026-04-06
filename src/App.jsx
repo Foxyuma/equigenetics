@@ -26,6 +26,7 @@ import Staff from './pages/Staff';
 import Profile from './pages/Profile';
 import Transactions from './pages/Transactions';
 import StallionMarket from './pages/StallionMarket';
+import BuyCredits from './pages/BuyCredits';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
         <Route path="/Profile" element={<Profile />} />
         <Route path="/Transactions" element={<Transactions />} />
         <Route path="/StallionMarket" element={<StallionMarket />} />
+        <Route path="/BuyCredits" element={<BuyCredits />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

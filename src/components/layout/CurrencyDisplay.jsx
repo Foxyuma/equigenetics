@@ -15,17 +15,17 @@ export default function CurrencyDisplay() {
   const fmt = (n) => n.toLocaleString('fr-FR');
 
   return (
-    <Link to="/Profile" className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
       {/* Genesis */}
-      <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
+      <Link to="/Profile" className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 hover:bg-amber-100 transition-colors">
         <span className="text-amber-600 font-bold text-sm leading-none">₲</span>
         <span className="text-amber-800 font-semibold text-sm tabular-nums">{fmt(genesis)}</span>
-      </div>
-      {/* Credits */}
-      <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-3 py-1">
+      </Link>
+      {/* Credits - link to buy */}
+      <Link to="/BuyCredits" className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-3 py-1 hover:bg-violet-100 transition-colors">
         <span className="text-violet-600 font-bold text-sm leading-none">✦</span>
         <span className="text-violet-800 font-semibold text-sm tabular-nums">{credits}</span>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }

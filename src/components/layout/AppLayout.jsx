@@ -13,7 +13,6 @@ const menuGroups = [
     items: [
       { path: "/Stable", label: "Mes Chevaux", icon: Home },
       { path: "/Breeding", label: "Élevage", icon: Heart },
-      { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
       { path: "/Training", label: "Entraînement", icon: TrendingUp },
       { path: "/Pedigree", label: "Lignées", icon: GitBranch },
       { path: "/Inventory", label: "Inventaire", icon: Package },
@@ -45,6 +44,7 @@ const menuGroups = [
     icon: MapPin,
     items: [
       { path: "/Market", label: "Marché & Enchères", icon: ShoppingCart },
+      { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
       { path: "/Shop", label: "Boutique", icon: Store },
       { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },
     ]

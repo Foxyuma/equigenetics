@@ -33,6 +33,98 @@ const SCORING_CATEGORIES = {
   }
 };
 
+export function applyModifiers(score, horse, parentHorses, healthRecord, inbreedingCoef) {
+  let modifiedScore = score;
+  const modifiers = { bonuses: [], penalties: [] };
+
+  // === BONUS POSITIFS ===
+
+  // 1. Parents approuvés / élite
+  if (parentHorses && parentHorses.length > 0) {
+    const approvedParents = parentHorses.filter(p => {
+      const status = p.breeding_approval_status;
+      return status === 'elite' || status === 'provisional' || status === 'approved';
+    }).length;
+    if (approvedParents > 0) {
+      const bonus = approvedParents === 2 ? 5 : 2; // +5 si les deux parents approuvés, +2 sinon
+      modifiedScore += bonus;
+      modifiers.bonuses.push({ type: 'approved_parents', value: bonus, description: `Parents approuvés (+${bonus})` });
+    }
+  }
+
+  // 2. Performances supérieures à la moyenne
+  if (horse.stats) {
+    const avgStat = Object.values(horse.stats).reduce((a, b) => a + b, 0) / Object.keys(horse.stats).length;
+    if (avgStat >= 70) {
+      const bonus = Math.min(5, Math.round((avgStat - 70) / 6));
+      modifiedScore += bonus;
+      modifiers.bonuses.push({ type: 'high_performance', value: bonus, description: `Performances supérieures (+${bonus})` });
+    }
+  }
+
+  // 3. Tempérament excellent
+  if (horse.stats?.temperament && horse.stats.temperament >= 75) {
+    const bonus = Math.min(3, Math.round((horse.stats.temperament - 75) / 8));
+    modifiedScore += bonus;
+    modifiers.bonuses.push({ type: 'excellent_temperament', value: bonus, description: `Tempérament excellent (+${bonus})` });
+  }
+
+  // === MALUS ===
+
+  // 1. Porteur maladie génétique
+  const carrierDiseases = horse.health_genes?.filter(h => h.status === 'carrier') || [];
+  if (carrierDiseases.length > 0) {
+    const penalty = -4 * carrierDiseases.length;
+    modifiedScore += penalty;
+    modifiers.penalties.push({ type: 'carrier_diseases', value: penalty, description: `Porteur de maladie (${penalty})` });
+  }
+
+  // 2. Faible locomotion
+  if (horse.stats) {
+    const locomotionScore = Math.round(
+      (horse.stats.agility || 50) * 0.4 + (horse.stats.speed || 50) * 0.35 + (horse.stats.endurance || 50) * 0.25
+    );
+    if (locomotionScore < 40) {
+      const penalty = Math.round(-3 - (40 - locomotionScore) / 2);
+      modifiedScore += penalty;
+      modifiers.penalties.push({ type: 'low_locomotion', value: penalty, description: `Faible locomotion (${penalty})` });
+    }
+  }
+
+  // 3. Faible type racial (peu de gènes rares)
+  const rareGeneCount = horse.genotype
+    ? Object.entries(horse.genotype).filter(([k, v]) => {
+        return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v) && v;
+      }).length
+    : 0;
+  if (rareGeneCount === 0) {
+    const penalty = -3;
+    modifiedScore += penalty;
+    modifiers.penalties.push({ type: 'weak_breed_type', value: penalty, description: `Type racial faible (${penalty})` });
+  }
+
+  // 4. Consanguinité élevée
+  if (inbreedingCoef !== undefined && inbreedingCoef > 0.10) {
+    const penalty = Math.round(-2 - (inbreedingCoef - 0.10) * 50);
+    modifiedScore += penalty;
+    modifiers.penalties.push({ type: 'high_inbreeding', value: penalty, description: `Consanguinité élevée (${penalty})` });
+  }
+
+  // 5. Blessure récente / visite véto problématique
+  if (healthRecord?.current_illness && healthRecord.illness_severity) {
+    const severityPenalty = {
+      'mild': -3,
+      'moderate': -6,
+      'severe': -10
+    };
+    const penalty = severityPenalty[healthRecord.illness_severity] || -3;
+    modifiedScore += penalty;
+    modifiers.penalties.push({ type: 'recent_health_issue', value: penalty, description: `Problème de santé récent (${penalty})` });
+  }
+
+  return { modifiedScore: Math.max(0, Math.min(100, modifiedScore)), modifiers };
+}
+
 export function calculateInspectionScore(horse) {
   if (!horse || !horse.stats) return { total: 0, breakdown: {}, bonuses: [], penalties: [] };
 
@@ -118,6 +210,15 @@ export function calculateInspectionScore(horse) {
     bonuses: bonuses.filter((b, i, arr) => arr.findIndex(x => x.key === b.key) === i),
     penalties: penalties.filter((b, i, arr) => arr.findIndex(x => x.key === b.key) === i)
   };
+}
+
+// Fonction utilitaire pour calculer le coefficient de consanguinité (simple)
+export function calculateInbreedingCoefficient(parentHorses) {
+  if (!parentHorses || parentHorses.length < 2) return 0;
+  // Implémentation simple : si parents proches dans la même race, faible inbreeding
+  // Peut être amélioré avec vrai calcul d'ascendants
+  const avgCoefficient = parentHorses.reduce((sum, p) => sum + (p.estimated_inbreeding_coef || 0), 0) / parentHorses.length;
+  return Math.min(0.25, avgCoefficient + 0.05); // Cap à 25%
 }
 
 const APPROVAL_THRESHOLDS = {

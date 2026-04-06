@@ -258,6 +258,35 @@ export function getCompetitionScore(horse, discipline) {
   return Math.max(0, Math.min(100, Math.round(score * 10) / 10));
 }
 
+const COAT_MULTIPLIERS = [
+  // Common
+  { keywords: ['bai', 'alezan'], multiplier: 1.00 },
+  // Uncommon
+  { keywords: ['noir', 'gris'], multiplier: 1.15 },
+  // Rare
+  { keywords: ['palomino', 'isabelle', 'dun', 'cremello', 'perlino', 'smoky'], multiplier: 1.35 },
+  // Rare+ (roan)
+  { keywords: ['roan'], multiplier: 1.40 },
+  // Very rare
+  { keywords: ['silver', 'tobiano'], multiplier: 1.70 },
+  // Very rare+ (champagne)
+  { keywords: ['champagne'], multiplier: 1.85 },
+  // Exceptional
+  { keywords: ['perle', 'pearl', 'blanc', 'white'], multiplier: 2.50 },
+];
+
+function getCoatMultiplier(coatColor) {
+  if (!coatColor) return 1.00;
+  const lower = coatColor.toLowerCase();
+  // Match from most specific (highest multiplier) to least
+  for (let i = COAT_MULTIPLIERS.length - 1; i >= 0; i--) {
+    if (COAT_MULTIPLIERS[i].keywords.some(k => lower.includes(k))) {
+      return COAT_MULTIPLIERS[i].multiplier;
+    }
+  }
+  return 1.00;
+}
+
 /**
  * Estime la valeur marchande d'un cheval en Genesis (€ x 1)
  * Basé sur les tranches réelles du marché équin :
@@ -295,6 +324,9 @@ export function estimateHorseValue(horse) {
     // Elite / Champion : €150 000 – €1 000 000+
     base = 150000 + ((avgStat - 82) / 18) * 850000;
   }
+
+  // Multiplicateur robe
+  base *= getCoatMultiplier(horse.coat_color);
 
   // Bonus victoires : +10% par victoire, max ×3
   const winsMultiplier = Math.min(3, 1 + wins * 0.1);

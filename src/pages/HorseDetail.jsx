@@ -12,6 +12,7 @@ import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
 import HorseVisualizer from '../components/horse/HorseVisualizer';
 import CareerPanel from '../components/horse/CareerPanel';
+import ReproductionPanel from '../components/horse/ReproductionPanel';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -213,6 +214,7 @@ export default function HorseDetail() {
           <TabsTrigger value="genetics">Génétique</TabsTrigger>
           <TabsTrigger value="health">Santé</TabsTrigger>
           <TabsTrigger value="career">Carrière</TabsTrigger>
+          {horse.sex === 'female' && <TabsTrigger value="reproduction">♥ Reproduction</TabsTrigger>}
         </TabsList>
         <TabsContent value="stats" className="mt-4">
           <Card className="border-0 bg-white/60">
@@ -242,6 +244,11 @@ export default function HorseDetail() {
         <TabsContent value="career" className="mt-4">
           <CareerPanel competitions={competitions} />
         </TabsContent>
+        {horse.sex === 'female' && (
+          <TabsContent value="reproduction" className="mt-4">
+            <ReproductionPanel mare={horse} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

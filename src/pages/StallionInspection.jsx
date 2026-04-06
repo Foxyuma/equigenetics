@@ -111,6 +111,11 @@ export default function StallionInspection() {
     queryFn: () => base44.entities.HealthRecord.list('-created_date', 200),
   });
 
+  const { data: geneticTests = [] } = useQuery({
+    queryKey: ['genetic-tests'],
+    queryFn: () => base44.entities.GeneticTest.list('-created_date', 500),
+  });
+
   // Filter eligible stallions
   const eligibleStallions = horses.filter(h => {
     if (h.sex !== 'male') return false;
@@ -123,10 +128,37 @@ export default function StallionInspection() {
     return true;
   });
 
+  // Check if stallion has full genetic test
+  const hasFullGeneticTest = (stallionId) => {
+    return geneticTests.some(test => test.horse_id === stallionId && test.test_type === 'full_test');
+  };
+
   const performInspectionMutation = useMutation({
     mutationFn: async (stallion) => {
       const criteria = INSPECTION_CRITERIA[stallion.breed];
       if (!criteria) throw new Error('Race non inspectable');
+
+      // Vérifier test ADN complet obligatoire
+      if (!hasFullGeneticTest(stallion.id)) {
+        throw new Error('Test ADN complet obligatoire avant inspection. Veuillez effectuer le test à la clinique vétérinaire.');
+      }
+
+      // Facturer les radios vétérinaires (200 genesis)
+      const vetRadioCost = 200;
+      const balance = currentUser?.genesis_balance || 0;
+      if (balance < vetRadioCost) {
+        throw new Error(`Fonds insuffisants. Radios vétérinaires : ${vetRadioCost} ₲`);
+      }
+
+      // Débiter les radios
+      await base44.auth.updateMe({ genesis_balance: balance - vetRadioCost });
+      await base44.entities.Transaction.create({
+        user_email: currentUser.email,
+        currency: 'genesis',
+        amount: -vetRadioCost,
+        balance_after: balance - vetRadioCost,
+        reason: `Radios vétérinaires - Inspection ${stallion.name}`,
+      });
 
       // Calculate score using comprehensive scoring system
       const scoreData = calculateInspectionScore(stallion);
@@ -143,13 +175,13 @@ export default function StallionInspection() {
         breeding_approval_date: new Date().toISOString().split('T')[0],
       });
 
-      // Record in transaction/notification
+      // Record inspection transaction
       await base44.entities.Transaction.create({
         user_email: currentUser.email,
         currency: 'genesis',
         amount: 0,
-        balance_after: currentUser.genesis_balance || 0,
-        reason: `Stallion Inspection - ${stallion.name} (${approvalStatus})`,
+        balance_after: balance - vetRadioCost,
+        reason: `Inspection - ${stallion.name} (${approvalStatus})`,
       });
 
       return { stallion, score: finalScore, status: approvalStatus, scoreData };
@@ -368,6 +400,8 @@ export default function StallionInspection() {
             <li>✓ Race inspectable (Arabian, Thoroughbred, Selle Français, KWPN, Holsteiner, Frison)</li>
             <li>✓ Pas d'enregistrement OC</li>
             <li>✓ Santé correcte (pas de maladie active)</li>
+            <li>✓ <strong>Test ADN complet obligatoire</strong> (effectué une seule fois)</li>
+            <li>✓ <strong>Radios vétérinaires : 200 ₲</strong></li>
           </ul>
         </CardContent>
       </Card>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Activity, Heart, AlertTriangle, Pill, Syringe, CheckCircle, XCircle, TrendingDown } from 'lucide-react';
+import { Activity, Heart, AlertTriangle, Pill, Syringe, CheckCircle, XCircle, TrendingDown, Dna, Beaker } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
@@ -38,6 +38,33 @@ const VACCINATIONS = [
   { name: "Rhinopneumonie", key: "rhinopneumonie", price: 90, icon: "💉", validityMonths: 6 },
 ];
 
+const TEST_TYPES = {
+  health_panel: {
+    label: "Health Panel",
+    description: "Détecte les maladies génétiques courantes",
+    price: 150,
+    icon: "🔬",
+    reveals: ["HYPP", "PSSM1", "HERDA", "GBED", "SCID", "LFS"],
+    time: "2-3 jours"
+  },
+  coat_test: {
+    label: "Coat & Pattern Test",
+    description: "Analyse la génétique de la robe et des motifs",
+    price: 120,
+    icon: "🎨",
+    reveals: ["Génotype complet de couleur", "Motifs cachés"],
+    time: "1-2 jours"
+  },
+  full_test: {
+    label: "Full Genetic Profile",
+    description: "Test génétique complet : santé + robe + tous les loci",
+    price: 300,
+    icon: "🧬",
+    reveals: ["Tous les gènes détectés", "Génotype complet", "Prédictions de descendance"],
+    time: "5-7 jours"
+  }
+};
+
 const conditionConfig = {
   excellent: { label: "Excellent", color: "bg-green-100 text-green-700", icon: CheckCircle },
   good: { label: "Bon", color: "bg-blue-100 text-blue-700", icon: Heart },
@@ -49,6 +76,9 @@ const conditionConfig = {
 export default function VetClinic() {
   const [selectedHorse, setSelectedHorse] = useState(null);
   const [treatmentDialog, setTreatmentDialog] = useState(false);
+  const [selectedTestHorse, setSelectedTestHorse] = useState(null);
+  const [selectedTest, setSelectedTest] = useState(null);
+  const [showTestResults, setShowTestResults] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -71,6 +101,12 @@ export default function VetClinic() {
   const { data: seasons = [] } = useQuery({
     queryKey: ['seasons-vet'],
     queryFn: () => base44.entities.Season.list('-created_date', 1),
+  });
+
+  const { data: testHistory = [] } = useQuery({
+    queryKey: ['genetic-tests-vet', selectedTestHorse?.id],
+    queryFn: () => selectedTestHorse ? base44.entities.GeneticTest.filter({ horse_id: selectedTestHorse.id }, '-created_date', 50) : Promise.resolve([]),
+    enabled: !!selectedTestHorse,
   });
 
   const currentSeason = seasons[0];
@@ -134,6 +170,63 @@ export default function VetClinic() {
       setTreatmentDialog(false);
       toast.success('Traitement appliqué avec succès !');
     },
+  });
+
+  const performTestMutation = useMutation({
+    mutationFn: async (testType) => {
+      if (!currentUser || !selectedTestHorse) throw new Error('Données manquantes');
+      
+      const testConfig = TEST_TYPES[testType];
+      const balance = currentUser.genesis_balance || 0;
+      
+      if (balance < testConfig.price) {
+        throw new Error(`Fonds insuffisants. Coût : ${testConfig.price} ₲`);
+      }
+
+      let results = {};
+      
+      if (testType === 'health_panel') {
+        results.health_genes = selectedTestHorse.health_genes || [];
+      } else if (testType === 'coat_test') {
+        results.genotype = selectedTestHorse.genotype || {};
+        results.coat_color = selectedTestHorse.coat_color;
+      } else if (testType === 'full_test') {
+        results.genotype = selectedTestHorse.genotype || {};
+        results.coat_color = selectedTestHorse.coat_color;
+        results.health_genes = selectedTestHorse.health_genes || [];
+      }
+
+      const test = await base44.entities.GeneticTest.create({
+        horse_id: selectedTestHorse.id,
+        horse_name: selectedTestHorse.name,
+        test_type: testType,
+        cost: testConfig.price,
+        results,
+        tested_at: new Date().toISOString(),
+      });
+
+      await base44.auth.updateMe({
+        genesis_balance: balance - testConfig.price,
+      });
+
+      await base44.entities.Transaction.create({
+        user_email: currentUser.email,
+        currency: 'genesis',
+        amount: -testConfig.price,
+        balance_after: balance - testConfig.price,
+        reason: `Test ADN ${testConfig.label} - ${selectedTestHorse.name}`,
+      });
+
+      return test;
+    },
+    onSuccess: (test) => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['genetic-tests-vet', selectedTestHorse.id] });
+      setShowTestResults(test);
+      setSelectedTest(null);
+      toast.success(`Test ${TEST_TYPES[selectedTest].label} en cours !`);
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const vaccinateMutation = useMutation({
@@ -298,6 +391,10 @@ export default function VetClinic() {
             <Activity className="w-4 h-4 mr-2" />
             État de Santé
           </TabsTrigger>
+          <TabsTrigger value="genetic-tests">
+            <Dna className="w-4 h-4 mr-2" />
+            Tests ADN
+          </TabsTrigger>
           <TabsTrigger value="medications">
             <Pill className="w-4 h-4 mr-2" />
             Médicaments
@@ -307,6 +404,119 @@ export default function VetClinic() {
             Vaccinations
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="genetic-tests" className="mt-6">
+          {!selectedTestHorse ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {horses.length === 0 ? (
+                <Card className="border-0 bg-stone-50 col-span-3">
+                  <CardContent className="p-12 text-center">
+                    <Dna className="w-16 h-16 mx-auto text-stone-300 mb-4" />
+                    <p className="text-stone-400">Aucun cheval à tester</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                horses.map(horse => (
+                  <button
+                    key={horse.id}
+                    onClick={() => setSelectedTestHorse(horse)}
+                    className="text-left p-4 rounded-xl border-2 border-transparent hover:border-blue-300 bg-white shadow hover:shadow-md transition-all"
+                  >
+                    {horse.image_url && (
+                      <div className="w-full h-32 rounded-lg overflow-hidden mb-3 bg-stone-100">
+                        <img src={horse.image_url} alt={horse.name} className="w-full h-full object-cover" onError={(e) => (e.target.style.display = 'none')} />
+                      </div>
+                    )}
+                    <p className="font-bold text-stone-800">{horse.name}</p>
+                    <p className="text-sm text-stone-500">{horse.breed}</p>
+                  </button>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
+                    <Dna className="w-6 h-6 text-blue-600" />
+                    Tests ADN pour {selectedTestHorse.name}
+                  </h2>
+                </div>
+                <Button variant="outline" onClick={() => setSelectedTestHorse(null)}>← Changer de cheval</Button>
+              </div>
+
+              {showTestResults ? (
+                <Card className="border-0 bg-gradient-to-br from-emerald-50/60 to-blue-50/60">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      {TEST_TYPES[showTestResults.test_type]?.icon} {TEST_TYPES[showTestResults.test_type]?.label}
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {showTestResults.test_type === 'health_panel' && (
+                      <div>
+                        <h3 className="font-semibold text-stone-800 mb-3">Maladies génétiques détectées</h3>
+                        {showTestResults.results.health_genes && showTestResults.results.health_genes.length > 0 ? (
+                          <div className="space-y-2">
+                            {showTestResults.results.health_genes.map(gene => (
+                              <Badge key={gene.disease} className={`block text-left py-2 px-3 border-0 ${gene.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                {gene.disease}: {gene.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                            <p className="text-emerald-700">✨ Aucune maladie détectée !</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <Button onClick={() => { setShowTestResults(null); setSelectedTestHorse(null); }} className="w-full bg-stone-800 hover:bg-stone-900">Tester un autre cheval</Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Object.entries(TEST_TYPES).map(([testKey, testConfig]) => {
+                    const alreadyTested = testHistory.some(t => t.test_type === testKey);
+                    const canAfford = (currentUser?.genesis_balance || 0) >= testConfig.price;
+
+                    return (
+                      <Card key={testKey} className={`border-2 transition-all cursor-pointer ${selectedTest === testKey ? 'border-blue-400 bg-blue-50/50' : 'border-stone-200 hover:border-blue-300'}`} onClick={() => setSelectedTest(selectedTest === testKey ? null : testKey)}>
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-3xl mb-2">{testConfig.icon}</p>
+                              <CardTitle className="text-base">{testConfig.label}</CardTitle>
+                            </div>
+                            {alreadyTested && <CheckCircle className="w-5 h-5 text-emerald-500" />}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <p className="text-xs text-stone-600">{testConfig.description}</p>
+                          <p className="text-sm font-bold text-blue-600">{testConfig.price} ₲</p>
+                          {selectedTest === testKey && (
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                performTestMutation.mutate(testKey);
+                              }}
+                              disabled={!canAfford || performTestMutation.isPending}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                              size="sm"
+                            >
+                              {!canAfford ? '❌ Fonds insuffisants' : performTestMutation.isPending ? 'En cours...' : 'Commander ce test'}
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
 
         <TabsContent value="health" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

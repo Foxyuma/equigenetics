@@ -128,6 +128,53 @@ const APPROVAL_THRESHOLDS = {
   rejected: { min: 0, status: 'not_approved', label: 'Refusé', icon: '❌' }
 };
 
+// Zones de probabilités finales
+const APPROVAL_PROBABILITY_ZONES = [
+  {
+    name: 'Zone 1: Très faible',
+    range: [0, 49],
+    outcomes: [
+      { status: 'not_approved', probability: 0.95 },
+      { status: 'approved_restricted', probability: 0.05 }
+    ]
+  },
+  {
+    name: 'Zone 2: Passable',
+    range: [50, 64],
+    outcomes: [
+      { status: 'not_approved', probability: 0.45 },
+      { status: 'approved_restricted', probability: 0.45 },
+      { status: 'approved', probability: 0.10 }
+    ]
+  },
+  {
+    name: 'Zone 3: Bon',
+    range: [65, 79],
+    outcomes: [
+      { status: 'approved_restricted', probability: 0.20 },
+      { status: 'approved', probability: 0.65 },
+      { status: 'provisional', probability: 0.15 }
+    ]
+  },
+  {
+    name: 'Zone 4: Très bon',
+    range: [80, 89],
+    outcomes: [
+      { status: 'approved', probability: 0.20 },
+      { status: 'provisional', probability: 0.60 },
+      { status: 'elite', probability: 0.20 }
+    ]
+  },
+  {
+    name: 'Zone 5: Excellent',
+    range: [90, 100],
+    outcomes: [
+      { status: 'provisional', probability: 0.25 },
+      { status: 'elite', probability: 0.75 }
+    ]
+  }
+];
+
 export function detectAutoRejects(horse, healthRecord) {
   const rejects = [];
 
@@ -232,6 +279,36 @@ export function detectAutoRestrictions(horse) {
   return restrictions;
 }
 
+export function getRandomApprovalStatus(score) {
+  // Trouver la zone correspondant au score
+  const zone = APPROVAL_PROBABILITY_ZONES.find(z => score >= z.range[0] && score <= z.range[1]);
+  if (!zone) return { ...APPROVAL_THRESHOLDS.rejected, zone: 'unknown' };
+
+  // Tirer aléatoirement un résultat selon les probabilités
+  const roll = Math.random();
+  let accumulated = 0;
+  let selectedStatus = zone.outcomes[0].status;
+
+  for (const outcome of zone.outcomes) {
+    accumulated += outcome.probability;
+    if (roll <= accumulated) {
+      selectedStatus = outcome.status;
+      break;
+    }
+  }
+
+  // Chercher le label correspondant
+  const statusMap = {
+    'elite': APPROVAL_THRESHOLDS.elite,
+    'provisional': APPROVAL_THRESHOLDS.premium,
+    'approved': APPROVAL_THRESHOLDS.approved,
+    'approved_restricted': APPROVAL_THRESHOLDS.restricted,
+    'not_approved': APPROVAL_THRESHOLDS.rejected
+  };
+
+  return { ...statusMap[selectedStatus], zone: zone.name };
+}
+
 export function getApprovalStatus(score, horse, healthRecord) {
   // Vérifier refus automatique d'abord
   const autoRejects = horse ? detectAutoRejects(horse, healthRecord) : [];
@@ -247,13 +324,10 @@ export function getApprovalStatus(score, horse, healthRecord) {
     return { ...APPROVAL_THRESHOLDS.restricted, autoRestrictions };
   }
 
-  let status = APPROVAL_THRESHOLDS.rejected;
-  if (score >= APPROVAL_THRESHOLDS.elite.min) status = APPROVAL_THRESHOLDS.elite;
-  else if (score >= APPROVAL_THRESHOLDS.premium.min) status = APPROVAL_THRESHOLDS.premium;
-  else if (score >= APPROVAL_THRESHOLDS.approved.min) status = APPROVAL_THRESHOLDS.approved;
-  else if (score >= APPROVAL_THRESHOLDS.restricted.min) status = APPROVAL_THRESHOLDS.restricted;
-
-  return { ...status, autoRestrictions };
+  // Utiliser le système de probabilités pour le résultat final
+  const result = getRandomApprovalStatus(score);
+  result.autoRestrictions = autoRestrictions;
+  return result;
 }
 
 export function getScoreColor(score) {

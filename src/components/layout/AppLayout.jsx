@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -58,6 +58,16 @@ export default function AppLayout() {
     queryKey: ['current-user-nav'],
     queryFn: () => base44.auth.me(),
   });
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const updates = {};
+    if (currentUser.genesis_balance == null) updates.genesis_balance = 200000;
+    if (currentUser.credits_balance == null) updates.credits_balance = 200;
+    if (Object.keys(updates).length > 0) {
+      base44.auth.updateMe(updates);
+    }
+  }, [currentUser?.email]);
 
   const { data: messages = [] } = useQuery({
     queryKey: ['messages-nav'],

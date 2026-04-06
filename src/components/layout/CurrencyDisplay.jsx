@@ -12,11 +12,7 @@ export default function CurrencyDisplay() {
   const genesis = user?.genesis_balance ?? 0;
   const credits = user?.credits_balance ?? 0;
 
-  const fmt = (n) => n >= 1_000_000
-    ? (n / 1_000_000).toFixed(1) + 'M'
-    : n >= 1_000
-    ? (n / 1_000).toFixed(0) + 'k'
-    : String(n);
+  const fmt = (n) => n.toLocaleString('fr-FR');
 
   return (
     <Link to="/Profile" className="flex items-center gap-2">

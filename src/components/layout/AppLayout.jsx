@@ -62,7 +62,7 @@ export default function AppLayout() {
   useEffect(() => {
     if (!currentUser) return;
     const updates = {};
-    if (currentUser.genesis_balance == null) updates.genesis_balance = 200000;
+    if (currentUser.genesis_balance == null) updates.genesis_balance = 300000;
     if (currentUser.credits_balance == null) updates.credits_balance = 200;
     if (Object.keys(updates).length > 0) {
       base44.auth.updateMe(updates);

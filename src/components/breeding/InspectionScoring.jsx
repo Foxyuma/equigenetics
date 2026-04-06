@@ -4,33 +4,132 @@ const SCORING_CATEGORIES = {
   conformation: {
     name: 'Modèle / Conformation',
     description: 'Équilibre général, membres, dos, encolure, type de corps, solidité',
-    maxScore: 30,
-    weight: 0.30
+    maxScore: 25
   },
   locomotion: {
     name: 'Locomotion',
     description: 'Qualité des allures, amplitude, souplesse, régularité, propulsion',
-    maxScore: 20,
-    weight: 0.20
+    maxScore: 25
   },
   breedType: {
     name: 'Type racial',
     description: 'Ressemblance au standard, tête, proportions, expression, cohérence',
-    maxScore: 15,
-    weight: 0.15
+    maxScore: 20
   },
   genetics: {
     name: 'Génétique / Santé',
     description: 'Maladies génétiques, qualité des lignées, tests ADN, défauts majeurs',
-    maxScore: 20,
-    weight: 0.20
+    maxScore: 20
   },
   performance: {
     name: 'Performances / Potentiel',
     description: 'Résultats compétition, potentiel sportif, aptitude, mental',
-    maxScore: 15,
-    weight: 0.15
+    maxScore: 10
   }
+};
+
+// Poids de scoring par race (totalisant 100)
+const RACE_SCORING_WEIGHTS = {
+  'Arabian': {
+    conformation: 25,
+    locomotion: 15,
+    breedType: 30,
+    genetics: 15,
+    performance: 15
+  },
+  'Thoroughbred': {
+    conformation: 20,
+    locomotion: 25,
+    breedType: 15,
+    genetics: 20,
+    performance: 20
+  },
+  'Selle Français': {
+    conformation: 25,
+    locomotion: 25,
+    breedType: 10,
+    genetics: 20,
+    performance: 20
+  },
+  'KWPN': {
+    conformation: 25,
+    locomotion: 25,
+    breedType: 10,
+    genetics: 20,
+    performance: 20
+  },
+  'Hanoverian': {
+    conformation: 25,
+    locomotion: 25,
+    breedType: 10,
+    genetics: 20,
+    performance: 20
+  },
+  'Holsteiner': {
+    conformation: 25,
+    locomotion: 25,
+    breedType: 10,
+    genetics: 20,
+    performance: 20
+  },
+  'Friesian': {
+    conformation: 25,
+    locomotion: 20,
+    breedType: 25,
+    genetics: 20,
+    performance: 10
+  },
+  'Lipizzaner': {
+    conformation: 25,
+    locomotion: 20,
+    breedType: 25,
+    genetics: 15,
+    performance: 15
+  },
+  'Anglo-Arabian': {
+    conformation: 25,
+    locomotion: 20,
+    breedType: 20,
+    genetics: 20,
+    performance: 15
+  },
+  'Haflinger': {
+    conformation: 25,
+    locomotion: 20,
+    breedType: 25,
+    genetics: 15,
+    performance: 15
+  },
+  'Connemara': {
+    conformation: 25,
+    locomotion: 20,
+    breedType: 20,
+    genetics: 20,
+    performance: 15
+  },
+  'Belgian Warmblood': {
+    conformation: 25,
+    locomotion: 25,
+    breedType: 10,
+    genetics: 20,
+    performance: 20
+  },
+  'Oldenburg': {
+    conformation: 25,
+    locomotion: 25,
+    breedType: 10,
+    genetics: 20,
+    performance: 20
+  }
+};
+
+// Poids par défaut pour les races non listées
+const DEFAULT_SCORING_WEIGHTS = {
+  conformation: 25,
+  locomotion: 25,
+  breedType: 10,
+  genetics: 20,
+  performance: 20
 };
 
 export function applyModifiers(score, horse, parentHorses, healthRecord, inbreedingCoef) {
@@ -132,38 +231,41 @@ export function calculateInspectionScore(horse) {
   const bonuses = [];
   const penalties = [];
 
-  // A. Conformation (30 points) - basé sur strength, agility, temperament
+  // Récupérer les poids pour la race du cheval
+  const weights = RACE_SCORING_WEIGHTS[horse.breed] || DEFAULT_SCORING_WEIGHTS;
+
+  // A. Conformation - basé sur strength, agility, temperament
   const conformationScore = Math.round(
     (horse.stats.strength || 50) * 0.4 +
     (horse.stats.agility || 50) * 0.3 +
     (horse.stats.temperament || 50) * 0.3
   );
-  breakdown.conformation = Math.min(30, Math.round((conformationScore / 100) * 30));
+  breakdown.conformation = Math.round((conformationScore / 100) * weights.conformation);
 
-  // B. Locomotion (20 points) - basé sur agility, speed, endurance
+  // B. Locomotion - basé sur agility, speed, endurance
   const locomotionScore = Math.round(
     (horse.stats.agility || 50) * 0.4 +
     (horse.stats.speed || 50) * 0.35 +
     (horse.stats.endurance || 50) * 0.25
   );
-  breakdown.locomotion = Math.min(20, Math.round((locomotionScore / 100) * 20));
+  breakdown.locomotion = Math.round((locomotionScore / 100) * weights.locomotion);
 
-  // C. Type racial (15 points) - basé sur gènes rares et cohérence
+  // C. Type racial - basé sur gènes rares et cohérence
   const rareGeneCount = horse.genotype
     ? Object.entries(horse.genotype).filter(([k, v]) => {
         return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v) && v;
       }).length
     : 0;
-  breakdown.breedType = Math.min(15, 8 + (rareGeneCount * 1.5));
+  const maxBreedTypeScore = Math.min(weights.breedType, 8 + (rareGeneCount * 1.5));
+  breakdown.breedType = Math.round(maxBreedTypeScore);
 
-  // D. Génétique / Santé (20 points)
-  let geneticScore = 12; // Base
+  // D. Génétique / Santé
+  let geneticScore = Math.round(weights.genetics * 0.6); // Base
   const affectedCount = horse.health_genes?.filter(h => h.status === 'affected').length || 0;
   const carrierCount = horse.health_genes?.filter(h => h.status === 'carrier').length || 0;
-  const clearCount = horse.health_genes?.filter(h => h.status === 'clear').length || 0;
 
   if (affectedCount === 0 && carrierCount === 0) {
-    geneticScore += 5;
+    geneticScore += Math.round(weights.genetics * 0.25);
     bonuses.push({ key: 'cleanGenetics', description: 'ADN sain sans porteur' });
   }
 
@@ -173,29 +275,29 @@ export function calculateInspectionScore(horse) {
   }
 
   if (affectedCount > 0) {
-    geneticScore -= 10 * affectedCount;
+    geneticScore -= Math.round((weights.genetics * 0.5) * affectedCount);
     for (let i = 0; i < affectedCount; i++) {
       penalties.push({ key: 'affectedGenes', description: 'Affecté par maladie génétique' });
     }
   }
 
   if (carrierCount > 0) {
-    geneticScore -= 4 * carrierCount;
+    geneticScore -= Math.round((weights.genetics * 0.2) * carrierCount);
     for (let i = 0; i < carrierCount; i++) {
       penalties.push({ key: 'carrierDisease', description: 'Porteur de maladie génétique' });
     }
   }
 
-  breakdown.genetics = Math.max(0, Math.min(20, geneticScore));
+  breakdown.genetics = Math.max(0, Math.min(weights.genetics, geneticScore));
 
-  // E. Performances / Potentiel (15 points) - basé sur jumping, dressage, endurance, speed
+  // E. Performances / Potentiel - basé sur jumping, dressage, endurance, speed
   const performanceScore = Math.round(
     (horse.stats.jumping || 50) * 0.25 +
     (horse.stats.dressage || 50) * 0.25 +
     (horse.stats.endurance || 50) * 0.25 +
     (horse.stats.speed || 50) * 0.25
   );
-  breakdown.performance = Math.min(15, Math.round((performanceScore / 100) * 15));
+  breakdown.performance = Math.round((performanceScore / 100) * weights.performance);
 
   // Calcul du total /100
   const totalScore = Object.values(breakdown).reduce((a, b) => a + b, 0);

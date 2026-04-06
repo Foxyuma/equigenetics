@@ -198,47 +198,135 @@ export function breedGenotype(fatherGenotype, motherGenotype) {
   return childGenotype;
 }
 
-export function determineCoatColor(genotype) {
-  if (!genotype) return "Inconnu";
+// Étape A : Déterminer la base de robe
+function determineBaseColor(genotype) {
+  if (!genotype) return 'chestnut';
   
-  if (genotype.grey === "GG" || genotype.grey === "Gg") return "Gris";
+  // e/e = chestnut
+  if (genotype.extension === 'ee') return 'chestnut';
   
-  const isBlack = genotype.extension !== "ee";
-  const hasAgouti = genotype.agouti !== "aa";
-  const hasCream = genotype.cream === "Crn";
-  const doubleCream = genotype.cream === "CrCr";
-  const hasDun = genotype.dun !== "dd";
-  const hasChampagne = genotype.champagne === "CHn" || genotype.champagne === "CHCH";
-  const hasSilver = genotype.silver !== "zz";
-  const hasTobiano = genotype.tobiano !== "nn";
-  const hasRoan = genotype.roan === "RNn" || genotype.roan === "RNRN";
+  // E/_ + A/_ = bay
+  if (genotype.agouti !== 'aa') return 'bay';
   
-  let base = "";
+  // E/_ + a/a = black
+  return 'black';
+}
+
+// Étape B : Appliquer les dilutions (cream, dun, champagne, silver)
+function applyDilutions(baseColor, genotype) {
+  if (!genotype) return baseColor;
   
-  if (!isBlack) {
-    base = "Alezan";
-    if (hasCream) base = "Palomino";
-    if (doubleCream) base = "Cremello";
-    if (hasChampagne) base = "Alezan Champagne";
-  } else if (hasAgouti) {
-    base = "Bai";
-    if (hasCream) base = "Isabelle";
-    if (doubleCream) base = "Perlino";
-    if (hasChampagne) base = "Ambre Champagne";
-    if (hasSilver) base = "Bai Silver";
-  } else {
-    base = "Noir";
-    if (hasCream) base = "Smoky Black";
-    if (doubleCream) base = "Smoky Cream";
-    if (hasChampagne) base = "Noir Champagne";
-    if (hasSilver) base = "Noir Silver";
+  let color = baseColor;
+  const hasCream = genotype.cream === 'Crn';
+  const doubleCream = genotype.cream === 'CrCr';
+  const hasDun = genotype.dun !== 'dd';
+  const hasChampagne = genotype.champagne !== 'nn';
+  const hasSilver = genotype.silver !== 'zz';
+  
+  // Cream (dominante incomplète)
+  if (doubleCream) {
+    if (baseColor === 'chestnut') color = 'Cremello';
+    else if (baseColor === 'bay') color = 'Perlino';
+    else if (baseColor === 'black') color = 'Smoky Cream';
+  } else if (hasCream) {
+    if (baseColor === 'chestnut') color = 'Palomino';
+    else if (baseColor === 'bay') color = 'Buckskin';
+    else if (baseColor === 'black') color = 'Smoky Black';
   }
   
-  if (hasDun) base += " Dun";
-  if (hasTobiano) base += " Tobiano";
-  if (hasRoan) base += " Roan";
+  // Dun (affecte la base)
+  if (hasDun && !doubleCream && !hasCream) {
+    if (baseColor === 'chestnut') color = 'Red Dun';
+    else if (baseColor === 'bay') color = 'Bay Dun';
+    else if (baseColor === 'black') color = 'Grullo';
+  } else if (hasDun && (doubleCream || hasCream)) {
+    color += ' Dun';
+  }
   
-  return base;
+  // Champagne (gold, amber, classic)
+  if (hasChampagne) {
+    if (baseColor === 'chestnut') color = 'Gold Champagne';
+    else if (baseColor === 'bay') color = 'Amber Champagne';
+    else if (baseColor === 'black') color = 'Classic Champagne';
+  }
+  
+  // Silver (sur noir seulement)
+  if (hasSilver && (baseColor === 'black' || baseColor === 'bay')) {
+    if (baseColor === 'black') color = 'Silver Black';
+    else if (baseColor === 'bay') color = 'Silver Bay';
+  }
+  
+  return color;
+}
+
+// Étape C : Appliquer le gène Grey
+function applyGrey(displayColor, baseColor, genotype) {
+  if (!genotype) return { displayColor, baseColorAtBirth: baseColor };
+  
+  const isGrey = genotype.grey === 'GG' || genotype.grey === 'Gg';
+  
+  return {
+    displayColor: isGrey ? 'Grey' : displayColor,
+    baseColorAtBirth: baseColor,
+    isGrey
+  };
+}
+
+// Étape D : Appliquer les patterns blancs (tobiano, sabino, splash, roan, overo)
+function applyPatterns(color, genotype) {
+  if (!genotype) return color;
+  
+  const hasTobiano = genotype.tobiano !== 'nn';
+  const hasSabino = genotype.sabino !== 'nn';
+  const hasSplash = genotype.splash !== 'nn';
+  const hasRoan = genotype.roan !== 'nn';
+  const hasOvero = genotype.overo !== 'nn';
+  
+  let patterns = [];
+  
+  if (hasTobiano) patterns.push('Tobiano');
+  if (hasSabino) patterns.push('Sabino');
+  if (hasSplash) patterns.push('Splash');
+  if (hasRoan) patterns.push('Roan');
+  if (hasOvero) patterns.push('Overo');
+  
+  return patterns.length > 0 ? color + ' ' + patterns.join(' ') : color;
+}
+
+// Fonction principale : déterminer la robe complète
+export function determineCoatColor(genotype) {
+  if (!genotype) return 'Unknown';
+  
+  // Étape A : base
+  const baseColor = determineBaseColor(genotype);
+  
+  // Étape B : dilutions
+  let displayColor = applyDilutions(baseColor, genotype);
+  
+  // Étape C : grey
+  const { displayColor: finalDisplay, baseColorAtBirth, isGrey } = applyGrey(displayColor, baseColor, genotype);
+  displayColor = finalDisplay;
+  
+  // Étape D : patterns
+  const finalColor = applyPatterns(displayColor, genotype);
+  
+  return finalColor;
+}
+
+// Retourner aussi la couleur de naissance pour les gris
+export function getCoatColorInfo(genotype) {
+  if (!genotype) return { displayColor: 'Unknown', baseColorAtBirth: 'Unknown', isGrey: false };
+  
+  const baseColor = determineBaseColor(genotype);
+  const dilutedColor = applyDilutions(baseColor, genotype);
+  const { displayColor, baseColorAtBirth, isGrey } = applyGrey(dilutedColor, baseColor, genotype);
+  const finalColor = applyPatterns(displayColor, genotype);
+  
+  return {
+    displayColor: finalColor,
+    baseColorAtBirth: isGrey ? applyPatterns(dilutedColor, genotype) : finalColor,
+    isGrey
+  };
 }
 
 export function generateRandomStats(fatherStats, motherStats) {

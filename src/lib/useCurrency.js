@@ -10,8 +10,8 @@ export function useCurrency() {
     queryFn: () => base44.auth.me(),
   });
 
-  const genesis = user?.genesis_balance ?? 300000;
-  const credits = user?.credits_balance ?? 10;
+  const genesis = user?.genesis_balance ?? 200000;
+  const credits = user?.credits_balance ?? 200;
 
   const _record = async (currency, amount, reason, referenceId) => {
     const currentBalance = currency === 'genesis' ? genesis : credits;

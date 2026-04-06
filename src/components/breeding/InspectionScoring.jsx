@@ -1,142 +1,132 @@
-// Système de scoring pour les inspections de studbook
-// Critères conformes aux règles européennes réelles
+// Système de scoring pour les inspections de studbook - Nouvelle formule 5 catégories
 
-const SCORING_CRITERIA = {
+const SCORING_CATEGORIES = {
   conformation: {
-    name: 'Conformation',
-    description: 'Morphologie générale et structure osseuse',
-    maxScore: 20,
-    statWeights: { strength: 0.5, agility: 0.3, temperament: 0.2 }
+    name: 'Modèle / Conformation',
+    description: 'Équilibre général, membres, dos, encolure, type de corps, solidité',
+    maxScore: 30,
+    weight: 0.30
   },
   locomotion: {
     name: 'Locomotion',
-    description: 'Qualité des allures et efficacité des mouvements',
+    description: 'Qualité des allures, amplitude, souplesse, régularité, propulsion',
     maxScore: 20,
-    statWeights: { agility: 0.4, speed: 0.3, endurance: 0.3 }
+    weight: 0.20
   },
-  typeRacial: {
+  breedType: {
     name: 'Type racial',
-    description: 'Respect du standard génétique de la race',
-    maxScore: 20,
-    statWeights: { temperament: 0.4, agility: 0.3, strength: 0.3 }
+    description: 'Ressemblance au standard, tête, proportions, expression, cohérence',
+    maxScore: 15,
+    weight: 0.15
   },
-  potentielSportif: {
-    name: 'Potentiel sportif',
-    description: 'Capacités compétitives selon la discipline',
+  genetics: {
+    name: 'Génétique / Santé',
+    description: 'Maladies génétiques, qualité des lignées, tests ADN, défauts majeurs',
     maxScore: 20,
-    statWeights: { jumping: 0.3, dressage: 0.3, endurance: 0.2, speed: 0.2 }
+    weight: 0.20
   },
-  genetique: {
-    name: 'Génétique',
-    description: 'Santé génétique et qualité des lignées',
-    maxScore: 20,
-    healthBonus: true
+  performance: {
+    name: 'Performances / Potentiel',
+    description: 'Résultats compétition, potentiel sportif, aptitude, mental',
+    maxScore: 15,
+    weight: 0.15
   }
 };
 
-const GENETIC_BONUSES = {
-  cleanGenetics: { bonus: 3, description: 'ADN sain sans porteur' },
-  parentChampions: { bonus: 2, description: 'Parents avec record compétitif' },
-  rareGenes: { bonus: 1, description: 'Gènes rares/recherchés' },
-  carrierDisease: { penalty: -5, description: 'Porteur de maladie génétique' },
-  affectedGenes: { penalty: -10, description: 'Affecté par maladie génétique' }
-};
-
-const APPROVAL_THRESHOLDS = {
-  elite: { min: 90, status: 'elite', label: 'Elite', icon: '⭐' },
-  premium: { min: 80, status: 'provisional', label: 'Premium', icon: '🌟' },
-  approved: { min: 65, status: 'approved', label: 'Approuvé', icon: '✅' },
-  restricted: { min: 50, status: 'approved_restricted', label: 'Approuvé avec Restrictions', icon: '⚠️' },
-  rejected: { min: 0, status: 'not_approved', label: 'Non Approuvé', icon: '❌' }
-};
-
-export function calculateInspectionScore(horse, parentScores = {}) {
+export function calculateInspectionScore(horse) {
   if (!horse || !horse.stats) return { total: 0, breakdown: {}, bonuses: [], penalties: [] };
 
   const breakdown = {};
   const bonuses = [];
   const penalties = [];
-  let totalScore = 0;
 
-  // 1. Conformation (25% des stats requises)
+  // A. Conformation (30 points) - basé sur strength, agility, temperament
   const conformationScore = Math.round(
-    (horse.stats.strength || 50) * 0.5 +
+    (horse.stats.strength || 50) * 0.4 +
     (horse.stats.agility || 50) * 0.3 +
-    (horse.stats.temperament || 50) * 0.2
+    (horse.stats.temperament || 50) * 0.3
   );
-  breakdown.conformation = Math.min(20, Math.round((conformationScore / 100) * 20));
+  breakdown.conformation = Math.min(30, Math.round((conformationScore / 100) * 30));
 
-  // 2. Locomotion (25% des stats requises)
+  // B. Locomotion (20 points) - basé sur agility, speed, endurance
   const locomotionScore = Math.round(
     (horse.stats.agility || 50) * 0.4 +
-    (horse.stats.speed || 50) * 0.3 +
-    (horse.stats.endurance || 50) * 0.3
+    (horse.stats.speed || 50) * 0.35 +
+    (horse.stats.endurance || 50) * 0.25
   );
   breakdown.locomotion = Math.min(20, Math.round((locomotionScore / 100) * 20));
 
-  // 3. Type racial (dépend des gènes rares)
+  // C. Type racial (15 points) - basé sur gènes rares et cohérence
   const rareGeneCount = horse.genotype
     ? Object.entries(horse.genotype).filter(([k, v]) => {
         return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v) && v;
       }).length
     : 0;
-  breakdown.typeRacial = Math.min(20, 10 + (rareGeneCount * 2));
+  breakdown.breedType = Math.min(15, 8 + (rareGeneCount * 1.5));
 
-  // 4. Potentiel sportif (moyenne des stats liées au sport)
-  const sportScore = Math.round(
-    (horse.stats.jumping || 50) * 0.3 +
-    (horse.stats.dressage || 50) * 0.3 +
-    (horse.stats.endurance || 50) * 0.2 +
-    (horse.stats.speed || 50) * 0.2
-  );
-  breakdown.potentielSportif = Math.min(20, Math.round((sportScore / 100) * 20));
-
-  // 5. Génétique (santé et lignées)
-  let geneticScore = 10; // Base
+  // D. Génétique / Santé (20 points)
+  let geneticScore = 12; // Base
   const affectedCount = horse.health_genes?.filter(h => h.status === 'affected').length || 0;
   const carrierCount = horse.health_genes?.filter(h => h.status === 'carrier').length || 0;
   const clearCount = horse.health_genes?.filter(h => h.status === 'clear').length || 0;
 
   if (affectedCount === 0 && carrierCount === 0) {
-    geneticScore += 7;
-    bonuses.push({ key: 'cleanGenetics', ...GENETIC_BONUSES.cleanGenetics });
+    geneticScore += 5;
+    bonuses.push({ key: 'cleanGenetics', description: 'ADN sain sans porteur' });
   }
 
   if (rareGeneCount >= 2) {
     geneticScore += 1;
-    bonuses.push({ key: 'rareGenes', ...GENETIC_BONUSES.rareGenes });
+    bonuses.push({ key: 'rareGenes', description: 'Gènes rares/recherchés' });
   }
 
   if (affectedCount > 0) {
     geneticScore -= 10 * affectedCount;
     for (let i = 0; i < affectedCount; i++) {
-      penalties.push({ key: 'affectedGenes', ...GENETIC_BONUSES.affectedGenes });
+      penalties.push({ key: 'affectedGenes', description: 'Affecté par maladie génétique' });
     }
   }
 
   if (carrierCount > 0) {
-    geneticScore -= 5 * carrierCount;
+    geneticScore -= 4 * carrierCount;
     for (let i = 0; i < carrierCount; i++) {
-      penalties.push({ key: 'carrierDisease', ...GENETIC_BONUSES.carrierDisease });
+      penalties.push({ key: 'carrierDisease', description: 'Porteur de maladie génétique' });
     }
   }
 
-  breakdown.genetique = Math.max(0, Math.min(20, geneticScore));
+  breakdown.genetics = Math.max(0, Math.min(20, geneticScore));
 
-  // Calcul du total
-  totalScore = Object.values(breakdown).reduce((a, b) => a + b, 0);
+  // E. Performances / Potentiel (15 points) - basé sur jumping, dressage, endurance, speed
+  const performanceScore = Math.round(
+    (horse.stats.jumping || 50) * 0.25 +
+    (horse.stats.dressage || 50) * 0.25 +
+    (horse.stats.endurance || 50) * 0.25 +
+    (horse.stats.speed || 50) * 0.25
+  );
+  breakdown.performance = Math.min(15, Math.round((performanceScore / 100) * 15));
 
-  // Ajouter variation aléatoire mineure (±5)
-  const variation = (Math.random() - 0.5) * 10;
-  totalScore = Math.max(0, Math.min(100, totalScore + variation));
+  // Calcul du total /100
+  const totalScore = Object.values(breakdown).reduce((a, b) => a + b, 0);
+
+  // Variation aléatoire mineure (±3)
+  const variation = (Math.random() - 0.5) * 6;
+  const finalScore = Math.max(0, Math.min(100, totalScore + variation));
 
   return {
-    total: Math.round(totalScore),
+    total: Math.round(finalScore),
     breakdown,
     bonuses: bonuses.filter((b, i, arr) => arr.findIndex(x => x.key === b.key) === i),
     penalties: penalties.filter((b, i, arr) => arr.findIndex(x => x.key === b.key) === i)
   };
 }
+
+const APPROVAL_THRESHOLDS = {
+  elite: { min: 90, status: 'elite', label: 'Elite', icon: '⭐' },
+  premium: { min: 80, status: 'provisional', label: 'Premium', icon: '🌟' },
+  approved: { min: 65, status: 'approved', label: 'Approuvé', icon: '✅' },
+  restricted: { min: 50, status: 'approved_restricted', label: 'Candidat restreint', icon: '⚠️' },
+  rejected: { min: 0, status: 'not_approved', label: 'Refusé', icon: '❌' }
+};
 
 export function getApprovalStatus(score) {
   if (score >= APPROVAL_THRESHOLDS.elite.min) return APPROVAL_THRESHOLDS.elite;
@@ -208,4 +198,4 @@ export function getBreedingImpact(approvalStatus) {
   return impacts[approvalStatus] || impacts.not_evaluated;
 }
 
-export { SCORING_CRITERIA, GENETIC_BONUSES, APPROVAL_THRESHOLDS };
+export { SCORING_CATEGORIES, APPROVAL_THRESHOLDS, SCORING_CATEGORIES as SCORING_CRITERIA };

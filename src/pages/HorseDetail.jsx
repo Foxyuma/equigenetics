@@ -134,14 +134,14 @@ export default function HorseDetail() {
             </div>
           </div>
 
-          {currentUser && horse.created_by === currentUser.email && horse.estimated_value > 0 && (
+          {currentUser && horse.created_by === currentUser.email && (
             <Card className="border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-0.5">Valeur estimée</p>
                     <p className="text-2xl font-bold text-amber-800">
-                      {horse.estimated_value.toLocaleString('fr-FR')} <span className="text-base font-semibold">₲ Genesis</span>
+                      {estimateHorseValue(horse).toLocaleString('fr-FR')} <span className="text-base font-semibold">₲ Genesis</span>
                     </p>
                     <p className="text-xs text-amber-600/70 mt-1">Estimation basée sur la génétique, les performances, l'âge, la rareté et le potentiel en compétition.</p>
                   </div>

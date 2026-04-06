@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Dna, Zap, Star, Calendar, LogOut } from 'lucide-react';
+import { Trophy, Dna, Zap, Star, Calendar } from 'lucide-react';
 import BreedingReputation from '../components/profile/BreedingReputation';
 
 export default function Profile() {
@@ -55,15 +55,7 @@ export default function Profile() {
             <Badge variant="outline" className="mt-1 text-xs capitalize">{user?.role || 'user'}</Badge>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => base44.auth.logout()}
-          className="text-red-500 border-red-200 hover:bg-red-50"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Déconnexion
-        </Button>
+
       </div>
 
       {/* Réputation d'élevage */}

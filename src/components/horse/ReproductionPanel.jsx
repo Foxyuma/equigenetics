@@ -6,28 +6,45 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
 import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue } from '../genetics/GeneticsEngine';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
+import { addMonths, format, isPast, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export default function ReproductionPanel({ mare }) {
   const [selectedStallion, setSelectedStallion] = useState(null);
-  const [stallionSource, setStallionSource] = useState('own'); // 'own' | 'market'
+  const [stallionSource, setStallionSource] = useState('own');
   const [foalPreview, setFoalPreview] = useState(null);
+  const [breedingDateChoice, setBreedingDateChoice] = useState('immediate'); // 'immediate' | 'scheduled'
+  const [birthingFoal, setBirthingFoal] = useState(null); // BreedingRecord to birth
   const [foalName, setFoalName] = useState('');
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
   const { data: ownHorses = [] } = useQuery({ queryKey: ['horses'], queryFn: () => base44.entities.Horse.list('-created_date', 200) });
   const { data: stallionOffers = [] } = useQuery({ queryKey: ['stallion-offers'], queryFn: () => base44.entities.StallionOffer.list('-created_date', 200) });
+  const { data: pendingBreedings = [] } = useQuery({
+    queryKey: ['breeding-pending', mare.id],
+    queryFn: () => base44.entities.BreedingRecord.filter({ mother_id: mare.id, status: 'pending' }, '-created_date', 20),
+  });
 
   const ownMales = ownHorses.filter(h => h.sex === 'male');
-
   const stallionsToShow = stallionSource === 'own'
     ? ownMales.map(h => ({ ...h, stallion_name: h.name, price: 0, owner_name: 'Mon écurie', is_own: true }))
     : stallionOffers;
+
+  const getBreedingDate = () => {
+    const now = new Date();
+    if (breedingDateChoice === 'scheduled') {
+      const d = new Date(now);
+      d.setDate(d.getDate() + 30);
+      return d;
+    }
+    return now;
+  };
 
   const simulateBreeding = () => {
     if (!selectedStallion) return;
@@ -45,7 +62,7 @@ export default function ReproductionPanel({ mare }) {
     });
   };
 
-  const birthMutation = useMutation({
+  const confirmBreedingMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser) throw new Error('Non connecté');
       const price = selectedStallion.price ?? 0;
@@ -61,191 +78,336 @@ export default function ReproductionPanel({ mare }) {
           reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
         });
       }
-      const foalData = { name: foalName, ...foalPreview, father_id: selectedStallion.is_own ? selectedStallion.id : null, mother_id: mare.id, age: 0, energy: 100, competition_wins: 0, is_for_sale: false };
-      foalData.estimated_value = estimateHorseValue(foalData);
-      const foal = await base44.entities.Horse.create(foalData);
+      const breedingDate = getBreedingDate();
+      const dueDate = addMonths(breedingDate, 11);
       await base44.entities.BreedingRecord.create({
-        father_id: selectedStallion.id,
+        father_id: selectedStallion.is_own ? selectedStallion.id : null,
         mother_id: mare.id,
         father_name: selectedStallion.stallion_name,
         mother_name: mare.name,
-        foal_id: foal.id,
-        foal_name: foalName,
         breed: foalPreview.breed,
+        status: 'pending',
+        breeding_date: format(breedingDate, 'yyyy-MM-dd'),
+        foal_due_date: format(dueDate, 'yyyy-MM-dd'),
+        foal_genotype: foalPreview.genotype,
+        foal_stats: foalPreview.stats,
+        foal_health_genes: foalPreview.health_genes,
+        foal_coat_color: foalPreview.coat_color,
+        foal_sex: foalPreview.sex,
+        foal_breed: foalPreview.breed,
       });
-      // Réputation
-      const avgStat = Math.round(Object.values(foalPreview.stats || {}).reduce((a, b) => a + b, 0) / 7);
-      const isPure = selectedStallion.breed === mare.breed;
-      const affectedCount = foalPreview?.health_genes?.filter(g => g.status === 'affected').length || 0;
-      const carrierCount = foalPreview?.health_genes?.filter(g => g.status === 'carrier').length || 0;
-      // Détection gènes rares (champagne, silver, dun, roan simultanés)
-      const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
-      const rareCount = rareGenes.filter(g => foalPreview.genotype?.[g] && foalPreview.genotype[g] !== 'nn').length;
-      const rareBonus = rareCount >= 2 ? 5 : 0; // +5 pour gène rare
-      const studbookBonus = isPure ? 8 : 0; // +8 poulain approuvé studbook (race pure)
-      const repGain = 50 + studbookBonus + rareBonus + (affectedCount === 0 ? 15 : 0)
-        + Math.round((avgStat - 50) * 0.5) - (affectedCount * 40) - (carrierCount * 10);
-      await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
-      return { repGain, rareBonus, studbookBonus };
     },
-    onSuccess: ({ repGain, rareBonus, studbookBonus }) => {
-      queryClient.invalidateQueries({ queryKey: ['horses'] });
-      queryClient.invalidateQueries({ queryKey: ['breeding-records'] });
-      let bonusMsg = '';
-      if (studbookBonus) bonusMsg += ' +studbook';
-      if (rareBonus) bonusMsg += ' +gène rare';
-      toast.success(`Poulain né ! ${repGain >= 0 ? '+' : ''}${repGain} pts réputation${bonusMsg} 🐴`);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['breeding-pending', mare.id] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      const breedingDate = getBreedingDate();
+      const dueDate = addMonths(breedingDate, 11);
+      const label = breedingDateChoice === 'immediate' ? 'immédiatement' : 'dans 30 jours';
+      toast.success(`Saillie confirmée ${label} ! Naissance prévue le ${format(dueDate, 'd MMMM yyyy', { locale: fr })} 🐴`);
       setFoalPreview(null);
-      setFoalName('');
       setSelectedStallion(null);
     },
     onError: (err) => toast.error(err.message),
   });
 
+  const birthFoalMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser || !birthingFoal || !foalName) throw new Error('Données manquantes');
+      const foalData = {
+        name: foalName,
+        genotype: birthingFoal.foal_genotype,
+        stats: birthingFoal.foal_stats,
+        health_genes: birthingFoal.foal_health_genes,
+        coat_color: birthingFoal.foal_coat_color,
+        sex: birthingFoal.foal_sex,
+        breed: birthingFoal.foal_breed,
+        father_id: birthingFoal.father_id,
+        mother_id: mare.id,
+        age: 0,
+        energy: 100,
+        competition_wins: 0,
+        is_for_sale: false,
+      };
+      foalData.estimated_value = estimateHorseValue(foalData);
+      const foal = await base44.entities.Horse.create(foalData);
+      await base44.entities.BreedingRecord.update(birthingFoal.id, {
+        status: 'born',
+        foal_id: foal.id,
+        foal_name: foalName,
+      });
+      // Réputation
+      const avgStat = Math.round(Object.values(foalData.stats || {}).reduce((a, b) => a + b, 0) / 7);
+      const isPure = birthingFoal.foal_breed && !birthingFoal.foal_breed.includes(' x ');
+      const affectedCount = foalData.health_genes?.filter(g => g.status === 'affected').length || 0;
+      const carrierCount = foalData.health_genes?.filter(g => g.status === 'carrier').length || 0;
+      const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
+      const rareCount = rareGenes.filter(g => foalData.genotype?.[g] && foalData.genotype[g] !== 'nn').length;
+      const rareBonus = rareCount >= 2 ? 5 : 0;
+      const studbookBonus = isPure ? 8 : 0;
+      const repGain = 50 + studbookBonus + rareBonus + (affectedCount === 0 ? 15 : 0)
+        + Math.round((avgStat - 50) * 0.5) - (affectedCount * 40) - (carrierCount * 10);
+      await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['horses'] });
+      queryClient.invalidateQueries({ queryKey: ['breeding-pending', mare.id] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.success(`${foalName} est né(e) ! 🐴`);
+      setBirthingFoal(null);
+      setFoalName('');
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const readyToBeborn = pendingBreedings.filter(b => isPast(parseISO(b.foal_due_date)));
+  const waitingBreedings = pendingBreedings.filter(b => !isPast(parseISO(b.foal_due_date)));
+
   return (
-    <div className="space-y-5">
-      {/* Source selector */}
-      <Tabs value={stallionSource} onValueChange={(v) => { setStallionSource(v); setSelectedStallion(null); setFoalPreview(null); }}>
-        <TabsList className="bg-stone-100/80">
-          <TabsTrigger value="own">Mes étalons ({ownMales.length})</TabsTrigger>
-          <TabsTrigger value="market">Marché des saillies ({stallionOffers.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={stallionSource} className="mt-4">
-          {stallionsToShow.length === 0 ? (
-            <p className="text-stone-400 text-sm py-6 text-center">Aucun étalon disponible</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {stallionsToShow.map(s => {
-                const isSelected = selectedStallion?.id === s.id && selectedStallion?.is_own === s.is_own;
-                const hasDiseases = s.health_genes?.some(g => g.status !== 'clear');
-                return (
-                  <Card
-                    key={s.id}
-                    onClick={() => { setSelectedStallion(s); setFoalPreview(null); }}
-                    className={`cursor-pointer transition-all border-2 ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-transparent bg-white/70 hover:border-stone-300'}`}
+    <div className="space-y-6">
+      {/* Naissances prêtes */}
+      {readyToBeborn.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+            <Gift className="w-4 h-4 text-pink-500" /> Naissances prêtes !
+          </h3>
+          {readyToBeborn.map(b => (
+            <Card key={b.id} className="border-2 border-pink-200 bg-pink-50/50">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-stone-800">{b.father_name} × {b.mother_name}</p>
+                    <div className="flex gap-1.5 mt-1">
+                      <Badge variant="outline" className="text-xs">{b.foal_breed}</Badge>
+                      <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{b.foal_coat_color}</Badge>
+                      <Badge className={`border-0 text-xs ${b.foal_sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
+                        {b.foal_sex === 'male' ? '♂' : '♀'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <Baby className="w-6 h-6 text-pink-400" />
+                </div>
+                {birthingFoal?.id === b.id ? (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Nom du poulain..."
+                      value={foalName}
+                      onChange={e => setFoalName(e.target.value)}
+                      className="flex-1"
+                      autoFocus
+                    />
+                    <Button
+                      onClick={() => birthFoalMutation.mutate()}
+                      disabled={!foalName || birthFoalMutation.isPending}
+                      className="bg-stone-800 hover:bg-stone-900"
+                    >
+                      Nommer & faire naître
+                    </Button>
+                    <Button variant="outline" onClick={() => { setBirthingFoal(null); setFoalName(''); }}>Annuler</Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => { setBirthingFoal(b); setFoalName(''); }}
+                    className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white"
                   >
-                    <CardContent className="p-4 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-bold text-stone-800 text-sm">{s.stallion_name}</p>
-                          <p className="text-xs text-stone-400">{s.owner_name}</p>
-                        </div>
-                        {s.price > 0
-                          ? <span className="text-amber-700 font-bold text-sm">{s.price.toLocaleString('fr-FR')} ₲</span>
-                          : <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
-                        }
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        <Badge variant="outline" className="text-xs">{s.breed}</Badge>
-                        <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
-                      </div>
-                      {s.stats && (
-                        <div className="flex items-center gap-1">
-                          <TrendingUp className="w-3 h-3 text-emerald-500" />
-                          <span className="text-xs text-stone-500">
-                            Moy. <strong>{Math.round(Object.values(s.stats).reduce((a, b) => a + b, 0) / Object.keys(s.stats).length)}</strong>
-                          </span>
-                        </div>
-                      )}
-                      {s.genotype && (
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(s.genotype).slice(0, 4).map(([k, v]) => (
-                            <span key={k} className="px-1.5 py-0.5 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-mono">{v}</span>
-                          ))}
-                        </div>
-                      )}
-                      {hasDiseases && (
-                        <div className="flex flex-wrap gap-1">
-                          {s.health_genes.filter(g => g.status !== 'clear').map(g => (
-                            <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                              ⚠️ {g.disease}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Simulate button */}
-      {selectedStallion && !foalPreview && (
-        <Button
-          onClick={simulateBreeding}
-          className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
-        >
-          <FlaskConical className="w-4 h-4 mr-2" />
-          Simuler le croisement avec {selectedStallion.stallion_name}
-        </Button>
+                    <Baby className="w-4 h-4 mr-2" /> Faire naître ce poulain
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
-      {/* Foal preview */}
-      {foalPreview && (
-        <Card className="border-0 bg-gradient-to-br from-amber-50/60 to-pink-50/60">
-          <CardContent className="p-5 space-y-4">
-            {/* Disclaimer */}
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
-              <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-blue-700">
-                <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe peuvent varier lors de la naissance réelle.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Badge className={`border-0 ${foalPreview.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
-                {foalPreview.sex === 'male' ? '♂ Mâle (estimé)' : '♀ Femelle (estimé)'}
-              </Badge>
-              <Badge variant="outline">{foalPreview.breed}</Badge>
-              <Badge className="bg-stone-100 text-stone-600 border-0">{foalPreview.coat_color} (estimé)</Badge>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Compétences estimées</p>
-              <div className="space-y-1.5">
-                {Object.entries(foalPreview.stats).map(([s, v]) => <StatBar key={s} stat={s} value={v} />)}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Génotype estimé</p>
-              <GeneticPanel genotype={foalPreview.genotype} />
-            </div>
-
-            {foalPreview.health_genes?.some(g => g.status !== 'clear') && (
-              <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
-                <p className="text-xs font-semibold text-orange-700 mb-2 flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5" /> Risques génétiques détectés
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {foalPreview.health_genes.filter(g => g.status !== 'clear').map(g => (
-                    <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                      {g.disease}: {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
-                    </Badge>
-                  ))}
+      {/* Gestations en cours */}
+      {waitingBreedings.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-amber-500" /> Gestations en cours
+          </h3>
+          {waitingBreedings.map(b => (
+            <Card key={b.id} className="border border-amber-200 bg-amber-50/40">
+              <CardContent className="p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-stone-700">{b.father_name} × {b.mother_name}</p>
+                  <p className="text-xs text-stone-400">{b.foal_breed} · {b.foal_coat_color}</p>
                 </div>
+                <div className="text-right">
+                  <p className="text-xs text-amber-700 font-semibold">Naissance prévue</p>
+                  <p className="text-xs text-stone-500">{format(parseISO(b.foal_due_date), 'd MMM yyyy', { locale: fr })}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Nouvelle saillie */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-stone-700">Nouvelle saillie</h3>
+        <Tabs value={stallionSource} onValueChange={(v) => { setStallionSource(v); setSelectedStallion(null); setFoalPreview(null); }}>
+          <TabsList className="bg-stone-100/80">
+            <TabsTrigger value="own">Mes étalons ({ownMales.length})</TabsTrigger>
+            <TabsTrigger value="market">Marché des saillies ({stallionOffers.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={stallionSource} className="mt-4">
+            {stallionsToShow.length === 0 ? (
+              <p className="text-stone-400 text-sm py-6 text-center">Aucun étalon disponible</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {stallionsToShow.map(s => {
+                  const isSelected = selectedStallion?.id === s.id && selectedStallion?.is_own === s.is_own;
+                  const hasDiseases = s.health_genes?.some(g => g.status !== 'clear');
+                  return (
+                    <Card
+                      key={s.id}
+                      onClick={() => { setSelectedStallion(s); setFoalPreview(null); }}
+                      className={`cursor-pointer transition-all border-2 ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-transparent bg-white/70 hover:border-stone-300'}`}
+                    >
+                      <CardContent className="p-4 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-bold text-stone-800 text-sm">{s.stallion_name}</p>
+                            <p className="text-xs text-stone-400">{s.owner_name}</p>
+                          </div>
+                          {s.price > 0
+                            ? <span className="text-amber-700 font-bold text-sm">{s.price.toLocaleString('fr-FR')} ₲</span>
+                            : <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
+                          }
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="outline" className="text-xs">{s.breed}</Badge>
+                          <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
+                        </div>
+                        {s.stats && (
+                          <div className="flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3 text-emerald-500" />
+                            <span className="text-xs text-stone-500">
+                              Moy. <strong>{Math.round(Object.values(s.stats).reduce((a, b) => a + b, 0) / Object.keys(s.stats).length)}</strong>
+                            </span>
+                          </div>
+                        )}
+                        {hasDiseases && (
+                          <div className="flex flex-wrap gap-1">
+                            {s.health_genes.filter(g => g.status !== 'clear').map(g => (
+                              <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                ⚠️ {g.disease}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
+          </TabsContent>
+        </Tabs>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-stone-200">
-              <Input placeholder="Nom du poulain..." value={foalName} onChange={e => setFoalName(e.target.value)} className="flex-1" />
-              <Button
-                onClick={() => birthMutation.mutate()}
-                disabled={!foalName || birthMutation.isPending}
-                className="bg-stone-800 hover:bg-stone-900"
+        {/* Choix de la date */}
+        {selectedStallion && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-stone-600">Date de la saillie</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setBreedingDateChoice('immediate')}
+                className={`flex-1 flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-sm ${breedingDateChoice === 'immediate' ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:border-stone-300'}`}
               >
-                <Baby className="w-4 h-4 mr-2" />
-                Faire naître{selectedStallion.price > 0 ? ` — ${selectedStallion.price.toLocaleString('fr-FR')} ₲` : ''}
-              </Button>
-              <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
+                <Clock className="w-4 h-4 text-amber-500" />
+                <div className="text-left">
+                  <p className="font-semibold text-stone-800">Immédiatement</p>
+                  <p className="text-xs text-stone-400">Naissance dans 11 mois</p>
+                </div>
+              </button>
+              <button
+                onClick={() => setBreedingDateChoice('scheduled')}
+                className={`flex-1 flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-sm ${breedingDateChoice === 'scheduled' ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:border-stone-300'}`}
+              >
+                <Calendar className="w-4 h-4 text-blue-500" />
+                <div className="text-left">
+                  <p className="font-semibold text-stone-800">Dans 30 jours</p>
+                  <p className="text-xs text-stone-400">
+                    Naissance le {format(addMonths(new Date(new Date().setDate(new Date().getDate() + 30)), 11), 'd MMM yyyy', { locale: fr })}
+                  </p>
+                </div>
+              </button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+
+        {/* Simulate button */}
+        {selectedStallion && !foalPreview && (
+          <Button
+            onClick={simulateBreeding}
+            className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
+          >
+            <FlaskConical className="w-4 h-4 mr-2" />
+            Simuler le croisement avec {selectedStallion.stallion_name}
+          </Button>
+        )}
+
+        {/* Foal preview */}
+        {foalPreview && (
+          <Card className="border-0 bg-gradient-to-br from-amber-50/60 to-pink-50/60">
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
+                <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-blue-700">
+                  <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe peuvent varier lors de la naissance réelle.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Badge className={`border-0 ${foalPreview.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
+                  {foalPreview.sex === 'male' ? '♂ Mâle (estimé)' : '♀ Femelle (estimé)'}
+                </Badge>
+                <Badge variant="outline">{foalPreview.breed}</Badge>
+                <Badge className="bg-stone-100 text-stone-600 border-0">{foalPreview.coat_color} (estimé)</Badge>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Compétences estimées</p>
+                <div className="space-y-1.5">
+                  {Object.entries(foalPreview.stats).map(([s, v]) => <StatBar key={s} stat={s} value={v} />)}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Génotype estimé</p>
+                <GeneticPanel genotype={foalPreview.genotype} />
+              </div>
+
+              {foalPreview.health_genes?.some(g => g.status !== 'clear') && (
+                <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
+                  <p className="text-xs font-semibold text-orange-700 mb-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Risques génétiques détectés
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {foalPreview.health_genes.filter(g => g.status !== 'clear').map(g => (
+                      <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                        {g.disease}: {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-stone-200 flex gap-3">
+                <Button
+                  onClick={() => confirmBreedingMutation.mutate()}
+                  disabled={confirmBreedingMutation.isPending}
+                  className="flex-1 bg-stone-800 hover:bg-stone-900"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Confirmer la saillie{selectedStallion.price > 0 ? ` — ${selectedStallion.price.toLocaleString('fr-FR')} ₲` : ''}
+                </Button>
+                <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

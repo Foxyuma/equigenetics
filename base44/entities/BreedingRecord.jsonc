@@ -1,0 +1,73 @@
+{
+  "name": "BreedingRecord",
+  "type": "object",
+  "properties": {
+    "father_id": {
+      "type": "string"
+    },
+    "mother_id": {
+      "type": "string"
+    },
+    "father_name": {
+      "type": "string"
+    },
+    "mother_name": {
+      "type": "string"
+    },
+    "foal_id": {
+      "type": "string"
+    },
+    "foal_name": {
+      "type": "string"
+    },
+    "breed": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "born"
+      ],
+      "default": "born"
+    },
+    "breeding_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de la saillie"
+    },
+    "foal_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de naissance pr\u00e9vue (saillie + 11 mois)"
+    },
+    "foal_genotype": {
+      "type": "object"
+    },
+    "foal_stats": {
+      "type": "object"
+    },
+    "foal_health_genes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "foal_coat_color": {
+      "type": "string"
+    },
+    "foal_sex": {
+      "type": "string"
+    },
+    "foal_breed": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "father_id",
+    "mother_id"
+  ]
+}

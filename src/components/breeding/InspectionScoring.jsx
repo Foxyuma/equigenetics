@@ -154,4 +154,58 @@ export function getScoreColor(score) {
   return 'from-red-500 to-rose-500';
 }
 
+export function getBreedingImpact(approvalStatus) {
+  const impacts = {
+    elite: {
+      breeddingAllowed: true,
+      foalRegistration: 'full_studbook',
+      restrictions: [],
+      priceMultiplier: 1.5,
+      prestigeBonus: 15,
+      description: 'Saillie premium avec tous les avantages'
+    },
+    provisional: {
+      breeddingAllowed: true,
+      foalRegistration: 'full_studbook',
+      restrictions: [],
+      priceMultiplier: 1.2,
+      prestigeBonus: 8,
+      description: 'Saillie approuvée, jeune étalon sous surveillance'
+    },
+    approved: {
+      breeddingAllowed: true,
+      foalRegistration: 'full_studbook',
+      restrictions: [],
+      priceMultiplier: 1.0,
+      prestigeBonus: 5,
+      description: 'Saillie standard reconnu studbook'
+    },
+    approved_restricted: {
+      breeddingAllowed: true,
+      foalRegistration: 'full_studbook',
+      restrictions: ['Juments sélectionnées uniquement', 'Nombre de saillies limité par saison', 'Suivi vétérinaire obligatoire'],
+      priceMultiplier: 0.8,
+      prestigeBonus: 2,
+      description: 'Saillie possible mais avec limitations'
+    },
+    not_approved: {
+      breeddingAllowed: true,
+      foalRegistration: 'oc',
+      restrictions: ['Poulains enregistrés comme OC', 'Marché secondaire uniquement', 'Pas d\'accès aux épreuves approuvées'],
+      priceMultiplier: 0.5,
+      prestigeBonus: -5,
+      description: 'Reproduction en OC uniquement'
+    },
+    not_evaluated: {
+      breeddingAllowed: true,
+      foalRegistration: 'oc',
+      restrictions: ['Poulains potentiellement OC', 'Inspection requise'],
+      priceMultiplier: 0.6,
+      prestigeBonus: 0,
+      description: 'En attente d\'inspection studbook'
+    }
+  };
+  return impacts[approvalStatus] || impacts.not_evaluated;
+}
+
 export { SCORING_CRITERIA, GENETIC_BONUSES, APPROVAL_THRESHOLDS };

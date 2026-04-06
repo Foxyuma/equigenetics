@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
 import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge, determineBreedFromParents } from '../genetics/GeneticsEngine';
+import { getBreedingImpact } from '../breeding/InspectionScoring';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
@@ -264,8 +265,10 @@ export default function ReproductionPanel({ mare }) {
                 {stallionsToShow.map(s => {
                   const isSelected = selectedStallion?.id === s.id && selectedStallion?.is_own === s.is_own;
                   const hasDiseases = s.health_genes?.some(g => g.status !== 'clear');
+                  const approvalStatus = s.breeding_approval_status || 'not_evaluated';
+                  const breedingImpact = getBreedingImpact(approvalStatus);
                   return (
-                    <Card
+                   <Card
                       key={s.id}
                       onClick={() => { setSelectedStallion(s); setFoalPreview(null); }}
                       className={`cursor-pointer transition-all border-2 ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-transparent bg-white/70 hover:border-stone-300'}`}
@@ -277,9 +280,12 @@ export default function ReproductionPanel({ mare }) {
                             <p className="text-xs text-stone-400">{s.owner_name}</p>
                           </div>
                           {s.price > 0
-                            ? <span className="text-amber-700 font-bold text-sm">{s.price.toLocaleString('fr-FR')} ₲</span>
-                            : <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
-                          }
+                             ? <div>
+                                 <p className="text-amber-700 font-bold text-sm">{s.price.toLocaleString('fr-FR')} ₲</p>
+                                 {breedingImpact.priceMultiplier !== 1 && <p className="text-xs text-stone-400">×{breedingImpact.priceMultiplier}</p>}
+                               </div>
+                             : <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
+                           }
                         </div>
                         <div className="flex flex-wrap gap-1">
                           <Badge variant="outline" className="text-xs">{s.breed}</Badge>
@@ -294,18 +300,31 @@ export default function ReproductionPanel({ mare }) {
                           </div>
                         )}
                         {hasDiseases && (
-                          <div className="flex flex-wrap gap-1">
-                            {s.health_genes.filter(g => g.status !== 'clear').map(g => (
-                              <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                ⚠️ {g.disease}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                           <div className="flex flex-wrap gap-1">
+                             {s.health_genes.filter(g => g.status !== 'clear').map(g => (
+                               <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                 ⚠️ {g.disease}
+                               </Badge>
+                             ))}
+                           </div>
+                         )}
+                         {/* Statut d'approbation */}
+                         <div className="text-xs text-stone-600 mt-1.5 p-2 rounded bg-stone-50">
+                           <p className="font-semibold mb-1 text-stone-700">{breedingImpact.description}</p>
+                           {breedingImpact.restrictions.length > 0 && (
+                             <ul className="space-y-0.5">
+                               {breedingImpact.restrictions.map((r, i) => (
+                                 <li key={i} className="text-stone-500 flex items-start gap-1">
+                                   <span>•</span> {r}
+                                 </li>
+                               ))}
+                             </ul>
+                           )}
+                         </div>
+                        </CardContent>
+                        </Card>
+                        );
+                        })}
               </div>
             )}
           </TabsContent>
@@ -365,6 +384,37 @@ export default function ReproductionPanel({ mare }) {
         {foalPreview && (
           <Card className="border-0 bg-gradient-to-br from-amber-50/60 to-pink-50/60">
             <CardContent className="p-5 space-y-4">
+              {/* Impact de l'approbation du père */}
+              {selectedStallion && (() => {
+                const impact = getBreedingImpact(selectedStallion.breeding_approval_status || 'not_evaluated');
+                const statusColors = {
+                  elite: 'from-yellow-400 to-amber-400',
+                  provisional: 'from-emerald-400 to-green-400',
+                  approved: 'from-blue-400 to-cyan-400',
+                  approved_restricted: 'from-orange-400 to-amber-400',
+                  not_approved: 'from-red-400 to-rose-400'
+                };
+                const color = statusColors[selectedStallion.breeding_approval_status || 'not_approved'] || statusColors.not_approved;
+                return (
+                  <div className={`p-3 rounded-xl bg-gradient-to-r ${color} text-white`}>
+                    <p className="font-semibold mb-2">📋 Impact de l'approbation du père</p>
+                    <div className="space-y-1 text-xs">
+                      <p><strong>Statut du poulain:</strong> {impact.foalRegistration === 'oc' ? '❌ OC (Origines Constatées)' : '✅ Studbook complet'}</p>
+                      <p><strong>Valeur multipliée par:</strong> {impact.priceMultiplier}×</p>
+                      <p><strong>Bonus prestige:</strong> {impact.prestigeBonus > 0 ? '+' : ''}{impact.prestigeBonus}</p>
+                      {impact.restrictions.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-white/30">
+                          <p className="font-semibold mb-1">⚠️ Limitations:</p>
+                          <ul className="space-y-0.5">
+                            {impact.restrictions.map((r, i) => <li key={i}>• {r}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+              
               <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
                 <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-blue-700">

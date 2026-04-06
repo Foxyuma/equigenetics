@@ -1,0 +1,58 @@
+{
+  "name": "GeneticTest",
+  "type": "object",
+  "properties": {
+    "horse_id": {
+      "type": "string",
+      "description": "ID du cheval test\u00e9"
+    },
+    "horse_name": {
+      "type": "string",
+      "description": "Nom du cheval"
+    },
+    "test_type": {
+      "type": "string",
+      "enum": [
+        "health_panel",
+        "coat_test",
+        "full_test"
+      ],
+      "description": "Type de test effectu\u00e9"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Co\u00fbt du test en Genesis"
+    },
+    "results": {
+      "type": "object",
+      "description": "R\u00e9sultats du test",
+      "properties": {
+        "genotype": {
+          "type": "object",
+          "description": "G\u00e9notype complet (full_test uniquement)"
+        },
+        "coat_color": {
+          "type": "string",
+          "description": "Couleur estim\u00e9e"
+        },
+        "health_genes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "G\u00e8nes de sant\u00e9 d\u00e9tect\u00e9s"
+        }
+      }
+    },
+    "tested_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date du test"
+    }
+  },
+  "required": [
+    "horse_id",
+    "test_type",
+    "cost"
+  ]
+}

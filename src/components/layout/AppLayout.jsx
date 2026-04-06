@@ -43,6 +43,7 @@ const menuGroups = [
     items: [
       { path: "/Market", label: "Marché & Enchères", icon: ShoppingCart },
       { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
+      { path: "/GeneticTest", label: "Labo Génétique", icon: Dna },
       { path: "/Inventory", label: "Inventaire", icon: Package },
       { path: "/Shop", label: "Boutique", icon: Store },
       { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },

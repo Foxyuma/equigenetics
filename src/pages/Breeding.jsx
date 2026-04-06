@@ -1,33 +1,22 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Dna, AlertTriangle, Baby, ArrowRight } from 'lucide-react';
+import { Heart, Dna, AlertTriangle, ArrowRight, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases } from '../components/genetics/GeneticsEngine';
 import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
 import SeasonManager from '../components/season/SeasonManager';
-import { toast } from 'sonner';
 
 export default function Breeding() {
   const [fatherId, setFatherId] = useState('');
   const [motherId, setMotherId] = useState('');
-  const [foalName, setFoalName] = useState('');
   const [foalPreview, setFoalPreview] = useState(null);
-  const [breeding, setBreeding] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const { data: currentUser } = useQuery({
-    queryKey: ['me'],
-    queryFn: () => base44.auth.me(),
-  });
 
   const { data: horses = [] } = useQuery({
     queryKey: ['horses'],
@@ -58,7 +47,6 @@ export default function Breeding() {
     // Check fertility based on season
     const successChance = fertilityModifier / 100;
     if (Math.random() > successChance) {
-      toast.error(`Échec de la reproduction ! (Fertilité: ${fertilityModifier}%)`);
       setFoalPreview(null);
       return;
     }
@@ -76,66 +64,7 @@ export default function Breeding() {
       sex: Math.random() > 0.5 ? 'male' : 'female',
       breed: father.breed === mother.breed ? father.breed : `${father.breed} x ${mother.breed}`,
     });
-    toast.success('Croisement réussi !');
   };
-
-  const createFoalMutation = useMutation({
-    mutationFn: async () => {
-      const foal = await base44.entities.Horse.create({
-        name: foalName || `Poulain de ${father.name}`,
-        ...foalPreview,
-        father_id: father.id,
-        mother_id: mother.id,
-        age: 0,
-        energy: 100,
-        competition_wins: 0,
-        is_for_sale: false,
-      });
-      await base44.entities.BreedingRecord.create({
-        father_id: father.id,
-        mother_id: mother.id,
-        father_name: father.name,
-        mother_name: mother.name,
-        foal_id: foal.id,
-        foal_name: foalName || `Poulain de ${father.name}`,
-        breed: foalPreview.breed,
-      });
-      // Calcul de la réputation gagnée
-      const avgStat = foalPreview ? Math.round(Object.values(foalPreview.stats || {}).reduce((a,b)=>a+b,0) / 7) : 50;
-      const isPure = father.breed === mother.breed;
-      const affectedCount = foalPreview?.health_genes?.filter(g => g.status === 'affected').length || 0;
-      const carrierCount = foalPreview?.health_genes?.filter(g => g.status === 'carrier').length || 0;
-      const noDisease = affectedCount === 0;
-      // Bonus de base + pureté + stats, malus pour maladies
-      const repGain = 50
-        + (isPure ? 25 : 0)
-        + (noDisease ? 15 : 0)
-        + Math.round((avgStat - 50) * 0.5)
-        - (affectedCount * 40)   // -40 par gène atteint
-        - (carrierCount * 10);   // -10 par gène porteur
-
-      if (currentUser) {
-        const currentRep = currentUser.breeding_reputation ?? 0;
-        await base44.auth.updateMe({ breeding_reputation: currentRep + repGain });
-      }
-
-      return { foal, repGain };
-    },
-    onSuccess: ({ repGain }) => {
-      queryClient.invalidateQueries({ queryKey: ['horses'] });
-      queryClient.invalidateQueries({ queryKey: ['breeding-records'] });
-      queryClient.invalidateQueries({ queryKey: ['me'] });
-      const repLabel = repGain >= 0
-        ? `+${repGain} pts de réputation 🌟`
-        : `${repGain} pts de réputation ⚠️ (poulain malade)`;
-      toast[repGain >= 0 ? 'success' : 'warning'](`Poulain enregistré ! ${repLabel}`);
-      setFoalPreview(null);
-      setFoalName('');
-      setFatherId('');
-      setMotherId('');
-      setBreeding(false);
-    }
-  });
 
   const warningDiseases = () => {
     if (!father || !mother) return [];
@@ -284,8 +213,8 @@ export default function Breeding() {
         <Card className="border-0 bg-gradient-to-br from-amber-50/50 to-pink-50/50">
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
-              <Baby className="w-5 h-5 text-pink-500" />
-              Résultat du croisement
+              <Dna className="w-5 h-5 text-pink-500" />
+              Simulation génétique
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -341,25 +270,20 @@ export default function Breeding() {
               </div>
             )}
 
-            {/* Save foal */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-stone-200">
-              <Input 
-                placeholder="Nom du poulain..." 
-                value={foalName}
-                onChange={(e) => setFoalName(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                onClick={() => createFoalMutation.mutate()}
-                disabled={!foalName}
-                className="bg-stone-800 hover:bg-stone-900"
-              >
-                <Baby className="w-4 h-4 mr-2" />
-                Enregistrer le poulain
-              </Button>
-              <Button variant="outline" onClick={simulateBreeding}>
-                🎲 Relancer
-              </Button>
+            {/* Redirect to mare profile */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-stone-200">
+              <div className="flex items-start gap-2 flex-1 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-700">Pour confirmer la saillie et enregistrer le poulain, rendez-vous sur la <strong>fiche de la jument</strong> → onglet <strong>♥ Reproduction</strong>.</p>
+              </div>
+              <div className="flex gap-2">
+                {mother && (
+                  <Link to={`/HorseDetail?id=${mother.id}`}>
+                    <Button className="bg-pink-500 hover:bg-pink-600 text-white whitespace-nowrap">Fiche de {mother.name}</Button>
+                  </Link>
+                )}
+                <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -143,8 +143,9 @@ export default function StallionInspection() {
         throw new Error('Test ADN complet obligatoire avant inspection. Veuillez effectuer le test à la clinique vétérinaire.');
       }
 
-      // Facturer les radios vétérinaires (200 genesis)
-      const vetRadioCost = 200;
+      // Facturer les radios vétérinaires (200 genesis pour première inspection, 150 pour réinspection)
+      const isReInspection = stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated';
+      const vetRadioCost = isReInspection ? 150 : 200;
       const balance = currentUser?.genesis_balance || 0;
       if (balance < vetRadioCost) {
         throw new Error(`Fonds insuffisants. Radios vétérinaires : ${vetRadioCost} ₲`);

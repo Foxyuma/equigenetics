@@ -128,6 +128,58 @@ const APPROVAL_THRESHOLDS = {
   rejected: { min: 0, status: 'not_approved', label: 'Refusé', icon: '❌' }
 };
 
+export function detectAutoRejects(horse, healthRecord) {
+  const rejects = [];
+
+  // Refus 1: Maladie génétique létale exprimée
+  const affectedLethals = horse.health_genes?.filter(h => h.status === 'affected') || [];
+  if (affectedLethals.length > 0) {
+    rejects.push({
+      type: 'lethal_disease',
+      reason: `Maladie génétique affectée : ${affectedLethals.map(d => d.disease).join(', ')}`,
+      severity: 'critical',
+      forceRejected: true
+    });
+  }
+
+  // Refus 2: Défaut grave de conformation
+  if (horse.stats) {
+    const conformationScore = Math.min(30, Math.round(
+      (horse.stats.strength || 50) * 0.4 + (horse.stats.agility || 50) * 0.3 + (horse.stats.temperament || 50) * 0.3
+    ));
+    if (conformationScore < 8) {
+      rejects.push({
+        type: 'severe_conformation',
+        reason: 'Défaut grave de conformation (score < 8/30)',
+        severity: 'critical',
+        forceRejected: true
+      });
+    }
+  }
+
+  // Refus 3: Boiterie active
+  if (healthRecord?.current_illness && healthRecord.current_illness.toLowerCase().includes('laméness')) {
+    rejects.push({
+      type: 'active_lameness',
+      reason: 'Boiterie active détectée',
+      severity: 'critical',
+      forceRejected: true
+    });
+  }
+
+  // Refus 4: Âge insuffisant
+  if ((horse.age || 0) < 3) {
+    rejects.push({
+      type: 'insufficient_age',
+      reason: `Âge insuffisant (${horse.age}y < 3y minimum)`,
+      severity: 'critical',
+      forceRejected: true
+    });
+  }
+
+  return rejects;
+}
+
 export function detectAutoRestrictions(horse) {
   const restrictions = [];
 
@@ -180,7 +232,13 @@ export function detectAutoRestrictions(horse) {
   return restrictions;
 }
 
-export function getApprovalStatus(score, horse) {
+export function getApprovalStatus(score, horse, healthRecord) {
+  // Vérifier refus automatique d'abord
+  const autoRejects = horse ? detectAutoRejects(horse, healthRecord) : [];
+  if (autoRejects.length > 0) {
+    return { ...APPROVAL_THRESHOLDS.rejected, autoRejects };
+  }
+
   const autoRestrictions = horse ? detectAutoRestrictions(horse) : [];
   const hasForceRestriction = autoRestrictions.some(r => r.forceRestricted);
 

@@ -12,6 +12,17 @@ import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import { toast } from 'sonner';
 
+function calculateStallionPrice(basePrice, approvalStatus) {
+  const multipliers = {
+    elite_approved: 1.5,
+    approved_for_sport_breeding: 1.2,
+    approved_for_breeding: 1.0,
+    rejected: 0.7,
+    not_evaluated: 1.0
+  };
+  return Math.round(basePrice * (multipliers[approvalStatus] || 1.0));
+}
+
 const NPC_STALLION_NAMES = {
   "Thoroughbred": ["Northern Dancer II", "Galileo's Legacy", "Frankel Star", "Sea The Stars Jr"],
   "Arabian": ["Desert Prince", "Al Farid", "Regal Mirage", "Sahara Wind"],
@@ -73,6 +84,7 @@ export default function StallionMarket() {
   const [foalPreview, setFoalPreview] = useState(null);
   const [foalName, setFoalName] = useState('');
   const [filterBreed, setFilterBreed] = useState('all');
+  const [filterApprovedOnly, setFilterApprovedOnly] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
@@ -94,7 +106,20 @@ export default function StallionMarket() {
   const mares = horses.filter(h => h.sex === 'female');
   const selectedMare = mares.find(h => h.id === selectedMareId);
 
-  const filteredStallions = filterBreed === 'all' ? stallions : stallions.filter(s => s.breed === filterBreed);
+  let filteredStallions = filterBreed === 'all' ? stallions : stallions.filter(s => s.breed === filterBreed);
+  if (filterApprovedOnly) {
+    filteredStallions = filteredStallions.filter(s => 
+      s.breeding_approval_status && 
+      s.breeding_approval_status !== 'not_evaluated' && 
+      s.breeding_approval_status !== 'rejected'
+    );
+  }
+
+  // Calculate dynamic prices based on approval status
+  const stallionsWithDynamicPrices = filteredStallions.map(s => ({
+    ...s,
+    dynamicPrice: calculateStallionPrice(s.price || 5000, s.breeding_approval_status)
+  }));
 
   const simulateBreeding = () => {
     if (!selectedStallion || !selectedMare) return;
@@ -116,19 +141,20 @@ export default function StallionMarket() {
   const createFoalMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser) throw new Error('Non connecté');
-      const balance = currentUser.genesis_balance ?? 0;
-      if (balance < selectedStallion.price) throw new Error('Fonds insuffisants');
-      const foalData = { name: foalName, ...foalPreview, age: 0, energy: 100, competition_wins: 0, is_for_sale: false };
-      foalData.estimated_value = estimateHorseValue(foalData);
-      const foal = await base44.entities.Horse.create(foalData);
-      await base44.auth.updateMe({ genesis_balance: balance - selectedStallion.price });
-      await base44.entities.Transaction.create({
-        user_email: currentUser.email,
-        currency: 'genesis',
-        amount: -selectedStallion.price,
-        balance_after: balance - selectedStallion.price,
-        reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
-      });
+       const balance = currentUser.genesis_balance ?? 0;
+       const actualPrice = selectedStallion.dynamicPrice || selectedStallion.price;
+       if (balance < actualPrice) throw new Error('Fonds insuffisants');
+       const foalData = { name: foalName, ...foalPreview, age: 0, energy: 100, competition_wins: 0, is_for_sale: false };
+       foalData.estimated_value = estimateHorseValue(foalData);
+       const foal = await base44.entities.Horse.create(foalData);
+       await base44.auth.updateMe({ genesis_balance: balance - actualPrice });
+       await base44.entities.Transaction.create({
+         user_email: currentUser.email,
+         currency: 'genesis',
+         amount: -actualPrice,
+         balance_after: balance - actualPrice,
+         reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
+       });
       await base44.entities.BreedingRecord.create({
         father_id: selectedStallion.id,
         mother_id: selectedMare.id,
@@ -167,7 +193,7 @@ export default function StallionMarket() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-3 flex-wrap">
+      <div className="flex gap-3 flex-wrap items-center">
         <Select value={filterBreed} onValueChange={setFilterBreed}>
           <SelectTrigger className="w-52 bg-white/80"><SelectValue placeholder="Toutes les races" /></SelectTrigger>
           <SelectContent>
@@ -175,17 +201,27 @@ export default function StallionMarket() {
             {BREEDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Badge className="bg-stone-100 text-stone-600 border-0 self-center">{filteredStallions.length} étalons disponibles</Badge>
+        <button
+          onClick={() => setFilterApprovedOnly(!filterApprovedOnly)}
+          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+            filterApprovedOnly
+              ? 'bg-green-600 text-white'
+              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+          }`}
+        >
+          ✓ Approuvés uniquement
+        </button>
+        <Badge className="bg-stone-100 text-stone-600 border-0 self-center">{stallionsWithDynamicPrices.length} étalons disponibles</Badge>
       </div>
 
       {/* Stallions grid */}
-      {isLoading || filteredStallions.length === 0 ? (
+      {isLoading || stallionsWithDynamicPrices.length === 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1,2,3,4,5,6].map(i => <div key={i} className="h-56 rounded-2xl bg-stone-100 animate-pulse" />)}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredStallions.map(s => {
+          {stallionsWithDynamicPrices.map(s => {
             const hasDiseases = s.health_genes?.some(g => g.status !== 'clear');
             const isSelected = selectedStallion?.id === s.id;
             return (
@@ -200,12 +236,20 @@ export default function StallionMarket() {
                       <p className="font-bold text-stone-800">{s.stallion_name}</p>
                       <p className="text-xs text-stone-500">{s.owner_name}</p>
                     </div>
-                    <span className="text-amber-700 font-bold text-sm">{s.price.toLocaleString('fr-FR')} ₲</span>
+                    <div className="text-right">
+                      {s.dynamicPrice !== s.price && (
+                        <span className="text-xs text-stone-400 line-through block">{s.price.toLocaleString('fr-FR')} ₲</span>
+                      )}
+                      <span className="text-amber-700 font-bold text-sm">{s.dynamicPrice.toLocaleString('fr-FR')} ₲</span>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
                     <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
+                    {s.breeding_approval_status === 'elite_approved' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Elite</Badge>}
+                    {s.breeding_approval_status === 'approved_for_sport_breeding' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">✅ Sport</Badge>}
+                    {s.breeding_approval_status === 'approved_for_breeding' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">📋 Breeding</Badge>}
                   </div>
                   {/* Avg stat */}
                   {s.stats && (
@@ -321,12 +365,12 @@ export default function StallionMarket() {
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-stone-200">
                   <Input placeholder="Nom du poulain..." value={foalName} onChange={e => setFoalName(e.target.value)} className="flex-1" />
                   <Button
-                    onClick={() => createFoalMutation.mutate()}
-                    disabled={!foalName || createFoalMutation.isPending}
-                    className="bg-stone-800 hover:bg-stone-900"
+                   onClick={() => createFoalMutation.mutate()}
+                   disabled={!foalName || createFoalMutation.isPending}
+                   className="bg-stone-800 hover:bg-stone-900"
                   >
-                    <Baby className="w-4 h-4 mr-2" />
-                    Confirmer — {selectedStallion.price.toLocaleString('fr-FR')} ₲
+                   <Baby className="w-4 h-4 mr-2" />
+                   Confirmer — {selectedStallion.dynamicPrice?.toLocaleString('fr-FR') || selectedStallion.price?.toLocaleString('fr-FR')} ₲
                   </Button>
                   <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
                 </div>

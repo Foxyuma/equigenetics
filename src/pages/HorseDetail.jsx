@@ -17,6 +17,7 @@ import HealthPanel from '../components/horse/HealthPanel';
 import HorseVisualizer from '../components/horse/HorseVisualizer';
 import CareerPanel from '../components/horse/CareerPanel';
 import ReproductionPanel from '../components/horse/ReproductionPanel';
+import ApprovalBenefits from '../components/breeding/ApprovalBenefits';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -316,6 +317,7 @@ export default function HorseDetail() {
           <TabsTrigger value="health">Santé</TabsTrigger>
           <TabsTrigger value="career">Carrière</TabsTrigger>
           {horse.sex === 'female' && <TabsTrigger value="reproduction">Reproduction</TabsTrigger>}
+          {horse.sex === 'male' && <TabsTrigger value="approval">Approbation</TabsTrigger>}
         </TabsList>
         <TabsContent value="stats" className="mt-4">
           <Card className="border-0 bg-white/60">
@@ -348,6 +350,27 @@ export default function HorseDetail() {
         {horse.sex === 'female' && (
           <TabsContent value="reproduction" className="mt-4">
             <ReproductionPanel mare={horse} />
+          </TabsContent>
+        )}
+        {horse.sex === 'male' && (
+          <TabsContent value="approval" className="mt-4 space-y-4">
+            <ApprovalBenefits status={horse.breeding_approval_status || 'not_evaluated'} />
+            {horse.breeding_approval_date && (
+              <Card className="border-0 bg-white/60">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-stone-600 text-sm">Date d'approbation</span>
+                    <span className="font-semibold text-stone-800">{new Date(horse.breeding_approval_date).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                  {horse.breeding_approval_breed && (
+                    <div className="flex justify-between">
+                      <span className="text-stone-600 text-sm">Race approuvée</span>
+                      <span className="font-semibold text-stone-800">{horse.breeding_approval_breed}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         )}
       </Tabs>

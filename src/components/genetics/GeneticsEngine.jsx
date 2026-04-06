@@ -388,6 +388,7 @@ export function estimateHorseValue(horse) {
   const age = horse.age ?? 0;
   const wins = horse.competition_wins || 0;
   const hasDisease = horse.health_genes?.some(g => g.status === 'affected');
+  const approvalStatus = horse.breeding_approval_status;
 
   let base;
 
@@ -413,6 +414,16 @@ export function estimateHorseValue(horse) {
   base *= winsMultiplier;
 
   if (hasDisease) base *= 0.4;
+
+  // Apply approval status multiplier
+  const approvalMultiplier = {
+    elite_approved: 2.0,
+    approved_for_sport_breeding: 1.5,
+    approved_for_breeding: 1.2,
+    rejected: 0.6,
+    not_evaluated: 1.0
+  };
+  base *= approvalMultiplier[approvalStatus] || 1.0;
 
   return Math.round(base / 100) * 100;
 }

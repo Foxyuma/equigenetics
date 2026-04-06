@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,31 @@ export default function HorseDetail() {
   const queryClient = useQueryClient();
   const [showSellDialog, setShowSellDialog] = useState(false);
   const [customPrice, setCustomPrice] = useState('');
+  const [generatingImage, setGeneratingImage] = useState(false);
+
+  useEffect(() => {
+    if (horse && !horse.image_url && !generatingImage) {
+      generateHorseImage();
+    }
+  }, [horse?.id]);
+
+  const generateHorseImage = async () => {
+    if (!horse) return;
+    setGeneratingImage(true);
+    const visibleGenes = horse.genotype
+      ? Object.entries(horse.genotype)
+          .filter(([, v]) => !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v))
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(', ')
+      : '';
+    const prompt = `Photographie professionnelle d'un cheval de race ${horse.breed}, robe ${horse.coat_color}, ${
+      horse.sex === 'male' ? 'étalon' : 'jument'
+    }, âgé de ${horse.age || 1} ans. ${visibleGenes ? `Marquages génétiques visibles : ${visibleGenes}.` : ''} Photo réaliste de haute qualité, cheval entier en plein air, fond naturel, lumière douce, style photo équestre professionnelle. Le cheval doit ressembler parfaitement à la race ${horse.breed} avec ses caractéristiques morphologiques typiques.`;
+    const { url } = await base44.integrations.Core.GenerateImage({ prompt });
+    await base44.entities.Horse.update(horse.id, { image_url: url });
+    queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
+    setGeneratingImage(false);
+  };
 
   const { data: horse, isLoading } = useQuery({
     queryKey: ['horse', horseId],
@@ -109,12 +134,27 @@ export default function HorseDetail() {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3">
           <Card className="border-0 bg-gradient-to-br from-amber-50 to-stone-100 overflow-hidden">
-            <CardContent className="p-6">
-              <HorseVisualizer
-                genotype={horse.genotype}
-                coatColor={horse.coat_color}
-                size={400}
-              />
+            <CardContent className="p-0 relative">
+              {horse.image_url && !generatingImage ? (
+                <img
+                  src={horse.image_url}
+                  alt={horse.name}
+                  className="w-full aspect-square object-cover rounded-xl"
+                />
+              ) : (
+                <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
+                  <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin" />
+                  <p className="text-sm text-stone-400">Génération de la photo...</p>
+                </div>
+              )}
+              {horse.image_url && !generatingImage && (
+                <button
+                  onClick={generateHorseImage}
+                  className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/40 hover:bg-black/60 text-white text-xs backdrop-blur-sm transition-colors"
+                >
+                  🔄 Regénérer
+                </button>
+              )}
             </CardContent>
           </Card>
         </div>

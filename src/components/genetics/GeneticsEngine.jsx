@@ -417,10 +417,11 @@ export function estimateHorseValue(horse) {
 
   // Apply approval status multiplier
   const approvalMultiplier = {
-    elite_approved: 2.0,
-    approved_for_sport_breeding: 1.5,
-    approved_for_breeding: 1.2,
-    rejected: 0.6,
+    elite: 2.0,
+    provisional: 1.5,
+    approved: 1.2,
+    approved_restricted: 1.1,
+    not_approved: 0.6,
     not_evaluated: 1.0
   };
   base *= approvalMultiplier[approvalStatus] || 1.0;
@@ -514,7 +515,7 @@ const STUDBOOK_RULES = {
 
 export function determineBreedFromParents(sireBreed, damBreed, sireApprovalStatus) {
   // If stallion not approved, foal is automatically OC
-  if (sireApprovalStatus && sireApprovalStatus !== 'approved_for_breeding' && sireApprovalStatus !== 'approved_for_sport_breeding' && sireApprovalStatus !== 'elite_approved') {
+  if (sireApprovalStatus && sireApprovalStatus !== 'approved' && sireApprovalStatus !== 'approved_restricted' && sireApprovalStatus !== 'provisional' && sireApprovalStatus !== 'elite') {
     return {
       breed: 'OC',
       isOC: true,

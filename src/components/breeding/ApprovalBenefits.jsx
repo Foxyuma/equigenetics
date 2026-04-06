@@ -1,10 +1,10 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, TrendingUp, Lock, Zap, Award } from 'lucide-react';
+import { CheckCircle2, XCircle, TrendingUp, Lock, Zap, Award, AlertTriangle } from 'lucide-react';
 
 const APPROVAL_BENEFITS = {
-  elite_approved: {
+  elite: {
     color: 'from-yellow-500 to-amber-500',
     bgColor: 'bg-yellow-50',
     borderColor: 'border-yellow-300',
@@ -21,38 +21,54 @@ const APPROVAL_BENEFITS = {
       { icon: <Award className="w-4 h-4" />, text: 'Visibilité maximale des poulains' }
     ]
   },
-  approved_for_sport_breeding: {
+  provisional: {
     color: 'from-green-500 to-emerald-500',
     bgColor: 'bg-green-50',
     borderColor: 'border-green-300',
     textColor: 'text-green-800',
     icon: '✅',
-    title: 'Bon Reproducteur',
-    subtitle: 'Approuvé pour la reproduction',
+    title: 'Approbation Provisoire',
+    subtitle: 'Étalon jeune en période probatoire',
     benefits: [
       { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
       { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.5' },
-      { icon: <Award className="w-4 h-4" />, text: 'Prix de saillie normal' },
-      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation standard' },
-      { icon: <Award className="w-4 h-4" />, text: 'Accès au marché spécialisé' }
+      { icon: <Award className="w-4 h-4" />, text: 'Prix de saillie standard' },
+      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation réduit' },
+      { icon: <Award className="w-4 h-4" />, text: 'Inspection future obligatoire' }
     ]
   },
-  approved_for_breeding: {
+  approved: {
     color: 'from-blue-500 to-cyan-500',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-300',
     textColor: 'text-blue-800',
     icon: '📋',
-    title: 'Utilisable Sous Conditions',
-    subtitle: 'Bon reproducteur avec restrictions',
+    title: 'Approuvé',
+    subtitle: 'Reproducteur reconnu',
     benefits: [
       { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
       { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.2' },
       { icon: <Award className="w-4 h-4" />, text: 'Prix de saillie standard' },
+      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation normal' }
+    ]
+  },
+  approved_restricted: {
+    color: 'from-amber-500 to-orange-500',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-300',
+    textColor: 'text-amber-800',
+    icon: '⚠️',
+    title: 'Approuvé avec Restrictions',
+    subtitle: 'Approbation limitée',
+    benefits: [
+      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
+      { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.1' },
+      { icon: <AlertTriangle className="w-4 h-4" />, text: 'Saillies limitées' },
+      { icon: <Award className="w-4 h-4" />, text: 'Juments sélectionnées uniquement' },
       { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation réduit' }
     ]
   },
-  rejected: {
+  not_approved: {
     color: 'from-red-500 to-rose-500',
     bgColor: 'bg-red-50',
     borderColor: 'border-red-300',

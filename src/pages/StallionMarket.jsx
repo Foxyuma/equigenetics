@@ -14,10 +14,11 @@ import { toast } from 'sonner';
 
 function calculateStallionPrice(basePrice, approvalStatus) {
   const multipliers = {
-    elite_approved: 1.5,
-    approved_for_sport_breeding: 1.2,
-    approved_for_breeding: 1.0,
-    rejected: 0.7,
+    elite: 1.5,
+    provisional: 1.2,
+    approved: 1.0,
+    approved_restricted: 0.9,
+    not_approved: 0.7,
     not_evaluated: 1.0
   };
   return Math.round(basePrice * (multipliers[approvalStatus] || 1.0));
@@ -247,10 +248,11 @@ export default function StallionMarket() {
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
                     <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
-                    {s.breeding_approval_status === 'elite_approved' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Étalon Star</Badge>}
-                    {s.breeding_approval_status === 'approved_for_sport_breeding' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">✅ Bon Reproducteur</Badge>}
-                    {s.breeding_approval_status === 'approved_for_breeding' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">📋 Utilisable</Badge>}
-                    {s.breeding_approval_status === 'rejected' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">❌ Non Approuvé</Badge>}
+                    {s.breeding_approval_status === 'elite' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Étalon Star</Badge>}
+                    {s.breeding_approval_status === 'provisional' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">✅ Provisoire</Badge>}
+                    {s.breeding_approval_status === 'approved' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">📋 Approuvé</Badge>}
+                    {s.breeding_approval_status === 'approved_restricted' && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">⚠️ Restreint</Badge>}
+                    {s.breeding_approval_status === 'not_approved' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">❌ Non Approuvé</Badge>}
                   </div>
                   {/* Avg stat */}
                   {s.stats && (

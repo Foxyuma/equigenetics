@@ -19,7 +19,6 @@ const menuGroups = [
       { path: "/Paddocks", label: "Paddocks", icon: LayoutGrid },
       { path: "/Staff", label: "Personnel", icon: Users },
       { path: "/Profile", label: "Mon Profil", icon: UserCircle },
-      { path: "/Transactions", label: "Transactions", icon: History },
     ]
   },
   {

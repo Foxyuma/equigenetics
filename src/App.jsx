@@ -14,6 +14,7 @@ import Breeding from './pages/Breeding';
 import Pedigree from './pages/Pedigree';
 import Competitions from './pages/Competitions';
 import Rankings from './pages/Rankings';
+import StallionInspection from './pages/StallionInspection';
 import Market from './pages/Market';
 import Shop from './pages/Shop';
 import Inventory from './pages/Inventory';
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
         <Route path="/Pedigree" element={<Pedigree />} />
         <Route path="/Competitions" element={<Competitions />} />
         <Route path="/Rankings" element={<Rankings />} />
+        <Route path="/StallionInspection" element={<StallionInspection />} />
         <Route path="/Market" element={<Market />} />
         <Route path="/Shop" element={<Shop />} />
         <Route path="/Inventory" element={<Inventory />} />

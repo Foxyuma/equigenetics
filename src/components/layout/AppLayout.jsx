@@ -15,7 +15,6 @@ const menuGroups = [
       { path: "/Breeding", label: "Élevage", icon: Heart },
       { path: "/Training", label: "Entraînement", icon: TrendingUp },
       { path: "/Pedigree", label: "Lignées", icon: GitBranch },
-      { path: "/Inventory", label: "Inventaire", icon: Package },
       { path: "/SeasonCalendar", label: "Calendrier", icon: Calendar },
       { path: "/Paddocks", label: "Paddocks", icon: LayoutGrid },
       { path: "/Staff", label: "Personnel", icon: Users },
@@ -45,6 +44,7 @@ const menuGroups = [
     items: [
       { path: "/Market", label: "Marché & Enchères", icon: ShoppingCart },
       { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
+      { path: "/Inventory", label: "Inventaire", icon: Package },
       { path: "/Shop", label: "Boutique", icon: Store },
       { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },
     ]

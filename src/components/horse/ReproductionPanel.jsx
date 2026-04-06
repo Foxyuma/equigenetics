@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
-import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue } from '../genetics/GeneticsEngine';
+import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge } from '../genetics/GeneticsEngine';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
@@ -18,8 +18,8 @@ export default function ReproductionPanel({ mare }) {
   const [selectedStallion, setSelectedStallion] = useState(null);
   const [stallionSource, setStallionSource] = useState('own');
   const [foalPreview, setFoalPreview] = useState(null);
-  const [breedingDateChoice, setBreedingDateChoice] = useState('immediate'); // 'immediate' | 'scheduled'
-  const [birthingFoal, setBirthingFoal] = useState(null); // BreedingRecord to birth
+  const [breedingDateChoice, setBreedingDateChoice] = useState('immediate');
+  const [birthingFoal, setBirthingFoal] = useState(null);
   const [foalName, setFoalName] = useState('');
   const queryClient = useQueryClient();
 
@@ -52,6 +52,10 @@ export default function ReproductionPanel({ mare }) {
     const childStats = generateRandomStats(selectedStallion.stats, mare.stats);
     const childHealth = inheritDiseases(selectedStallion.health_genes, mare.health_genes, mare.breed);
     const coatColor = determineCoatColor(childGenotype);
+    
+    const viability = checkFoalViability(selectedStallion.health_genes, mare.health_genes, mare.breed);
+    const deathAge = !viability.viable ? null : determineFoalDeathAge(childHealth);
+    
     setFoalPreview({
       genotype: childGenotype,
       stats: childStats,
@@ -59,6 +63,9 @@ export default function ReproductionPanel({ mare }) {
       coat_color: coatColor,
       sex: Math.random() > 0.5 ? 'male' : 'female',
       breed: selectedStallion.breed === mare.breed ? selectedStallion.breed : `${selectedStallion.breed} x ${mare.breed}`,
+      viable: viability.viable,
+      viability_cause: viability.cause,
+      death_age: deathAge,
     });
   };
 
@@ -135,7 +142,6 @@ export default function ReproductionPanel({ mare }) {
         foal_id: foal.id,
         foal_name: foalName,
       });
-      // Réputation
       const avgStat = Math.round(Object.values(foalData.stats || {}).reduce((a, b) => a + b, 0) / 7);
       const isPure = birthingFoal.foal_breed && !birthingFoal.foal_breed.includes(' x ');
       const affectedCount = foalData.health_genes?.filter(g => g.status === 'affected').length || 0;
@@ -164,7 +170,6 @@ export default function ReproductionPanel({ mare }) {
 
   return (
     <div className="space-y-6">
-      {/* Naissances prêtes */}
       {readyToBeborn.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
@@ -218,7 +223,6 @@ export default function ReproductionPanel({ mare }) {
         </div>
       )}
 
-      {/* Gestations en cours */}
       {waitingBreedings.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
@@ -241,7 +245,6 @@ export default function ReproductionPanel({ mare }) {
         </div>
       )}
 
-      {/* Nouvelle saillie */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-stone-700">Nouvelle saillie</h3>
         <Tabs value={stallionSource} onValueChange={(v) => { setStallionSource(v); setSelectedStallion(null); setFoalPreview(null); }}>
@@ -305,7 +308,6 @@ export default function ReproductionPanel({ mare }) {
           </TabsContent>
         </Tabs>
 
-        {/* Choix de la date */}
         {selectedStallion && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-stone-600">Date de la saillie</p>
@@ -336,7 +338,6 @@ export default function ReproductionPanel({ mare }) {
           </div>
         )}
 
-        {/* Simulate button */}
         {selectedStallion && !foalPreview && (
           <Button
             onClick={simulateBreeding}
@@ -347,7 +348,6 @@ export default function ReproductionPanel({ mare }) {
           </Button>
         )}
 
-        {/* Foal preview */}
         {foalPreview && (
           <Card className="border-0 bg-gradient-to-br from-amber-50/60 to-pink-50/60">
             <CardContent className="p-5 space-y-4">
@@ -357,6 +357,24 @@ export default function ReproductionPanel({ mare }) {
                   <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe peuvent varier lors de la naissance réelle.
                 </p>
               </div>
+              
+              {!foalPreview.viable && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200">
+                  <p className="text-xs font-semibold text-red-700 mb-1 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Poulain non-viable
+                  </p>
+                  <p className="text-xs text-red-600">{foalPreview.viability_cause}: Le poulain naîtra mort-né.</p>
+                </div>
+              )}
+              
+              {foalPreview.death_age !== null && foalPreview.death_age !== undefined && (
+                <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
+                  <p className="text-xs font-semibold text-orange-700 mb-1 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Durée de vie réduite
+                  </p>
+                  <p className="text-xs text-orange-600">Le poulain aura une espérance de vie limitée ({Math.floor(foalPreview.death_age * 12)} mois max).</p>
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-2">
                 <Badge className={`border-0 ${foalPreview.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>

@@ -9,14 +9,90 @@ const BREEDS = [
 ];
 
 const DISEASES = [
-  { name: "HYPP", fullName: "Paralysie Hyperkaliémique", severity: "grave", breeds: ["Quarter Horse", "Paint Horse", "Appaloosa"] },
-  { name: "GBED", fullName: "Glycogen Branching Enzyme Deficiency", severity: "letale", breeds: ["Quarter Horse", "Paint Horse"] },
-  { name: "HERDA", fullName: "Hereditary Equine Regional Dermal Asthenia", severity: "grave", breeds: ["Quarter Horse"] },
-  { name: "OLWS", fullName: "Overo Lethal White Syndrome", severity: "letale", breeds: ["Paint Horse"] },
-  { name: "CA", fullName: "Ataxie Cérébelleuse", severity: "grave", breeds: ["Arabe"] },
-  { name: "SCID", fullName: "Immunodéficience Combinée Sévère", severity: "letale", breeds: ["Arabe"] },
-  { name: "LFS", fullName: "Syndrome du Poulain Lavande", severity: "letale", breeds: ["Arabe"] },
-  { name: "PSSM", fullName: "Polysaccharide Storage Myopathy", severity: "modérée", breeds: ["Quarter Horse", "Percheron", "Comtois", "Boulonnais"] },
+  {
+    name: "HYPP",
+    fullName: "Hyperkalemic Periodic Paralysis",
+    gene: "HYPP",
+    dominance: "dominant",
+    severity: "grave",
+    breeds: ["Quarter Horse", "Paint Horse"],
+    lethal_homozygous: false,
+    lethal_age: null,
+    effects: ["crises musculaires", "tremblements", "paralysie possible"],
+    test_available: true,
+  },
+  {
+    name: "PSSM1",
+    fullName: "Polysaccharide Storage Myopathy",
+    gene: "PSSM",
+    dominance: "dominant",
+    severity: "modérée",
+    breeds: ["Quarter Horse", "Percheron", "Comtois", "Boulonnais", "Warmblood"],
+    lethal_homozygous: false,
+    lethal_age: null,
+    effects: ["baisse endurance", "récupération lente"],
+    test_available: true,
+  },
+  {
+    name: "HERDA",
+    fullName: "Hereditary Equine Regional Dermal Asthenia",
+    gene: "HERDA",
+    dominance: "recessive",
+    severity: "grave",
+    breeds: ["Quarter Horse"],
+    lethal_homozygous: false,
+    lethal_age: null,
+    effects: ["peau fragile", "blessures fréquentes"],
+    test_available: true,
+  },
+  {
+    name: "GBED",
+    fullName: "Glycogen Branching Enzyme Deficiency",
+    gene: "GBED",
+    dominance: "recessive",
+    severity: "letale",
+    breeds: ["Quarter Horse", "Paint Horse"],
+    lethal_homozygous: true,
+    lethal_age: null,
+    effects: ["mort avant ou peu après naissance"],
+    test_available: true,
+  },
+  {
+    name: "OLWS",
+    fullName: "Overo Lethal White Syndrome",
+    gene: "Frame",
+    dominance: "recessive",
+    severity: "letale",
+    breeds: ["Paint Horse", "Appaloosa"],
+    lethal_homozygous: true,
+    lethal_age: null,
+    effects: ["poulain blanc", "mort après naissance"],
+    test_available: true,
+  },
+  {
+    name: "SCID",
+    fullName: "Severe Combined Immunodeficiency",
+    gene: "SCID",
+    dominance: "recessive",
+    severity: "letale",
+    breeds: ["Arabe"],
+    lethal_homozygous: false,
+    lethal_age: 0.5,
+    effects: ["immunité inexistante", "mort entre 3 et 6 mois"],
+    test_available: true,
+  },
+  {
+    name: "LFS",
+    fullName: "Lavender Foal Syndrome",
+    gene: "LFS",
+    dominance: "recessive",
+    severity: "letale",
+    breeds: ["Arabe"],
+    lethal_homozygous: true,
+    lethal_age: null,
+    effects: ["poulain neurologique", "mort rapide"],
+    test_available: true,
+  },
   { name: "DSLD", fullName: "Degenerative Suspensory Ligament Desmitis", severity: "grave", breeds: ["Pur-Sang Anglais", "Arabe", "Selle Français"] },
   { name: "ERU", fullName: "Uvéite Récurrente Équine", severity: "modérée", breeds: ["Appaloosa"] },
 ];
@@ -40,7 +116,6 @@ function randomAllele(locus) {
 function inheritAllele(parentGenotype, locus) {
   if (!parentGenotype || !parentGenotype[locus]) return randomAllele(locus);
   const g = parentGenotype[locus];
-  // Parse the two alleles from the genotype string
   const parsed = parseGenotype(locus, g);
   return parsed[Math.floor(Math.random() * 2)];
 }
@@ -80,7 +155,6 @@ export function generateRandomGenotype(breed) {
     genotype[locus] = combineAlleles(locus, a1, a2);
   });
   
-  // Breed-specific adjustments
   if (breed === "Frison") {
     genotype.extension = "EE";
     genotype.agouti = "aa";
@@ -113,7 +187,6 @@ export function breedGenotype(fatherGenotype, motherGenotype) {
 export function determineCoatColor(genotype) {
   if (!genotype) return "Inconnu";
   
-  // Grey overrides everything visually
   if (genotype.grey === "GG" || genotype.grey === "Gg") return "Gris";
   
   const isBlack = genotype.extension !== "ee";
@@ -169,6 +242,24 @@ export function generateRandomStats(fatherStats, motherStats) {
   return stats;
 }
 
+export function checkFoalViability(fatherHealth, motherHealth, breed) {
+  const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed));
+  
+  for (const disease of relevantDiseases) {
+    const fatherGene = fatherHealth?.find(h => h.disease === disease.name);
+    const motherGene = motherHealth?.find(h => h.disease === disease.name);
+    
+    const fatherAffected = fatherGene?.status === "affected";
+    const motherAffected = motherGene?.status === "affected";
+    
+    if (fatherAffected && motherAffected && disease.lethal_homozygous) {
+      return { viable: false, cause: disease.name, reason: "stillborn" };
+    }
+  }
+  
+  return { viable: true };
+}
+
 export function inheritDiseases(fatherHealth, motherHealth, breed) {
   const childHealth = [];
   const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed) || Math.random() < 0.05);
@@ -188,7 +279,6 @@ export function inheritDiseases(fatherHealth, motherHealth, breed) {
     } else if (fatherCarrier || motherCarrier) {
       status = Math.random() < 0.5 ? "carrier" : "clear";
     } else {
-      // Spontaneous mutation chance
       if (Math.random() < 0.02) status = "carrier";
     }
     
@@ -205,7 +295,6 @@ export function generateStarterHorse(breed) {
   const stats = generateRandomStats();
   const healthGenes = [];
   
-  // Random chance of carrying diseases
   const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed));
   relevantDiseases.forEach(disease => {
     if (Math.random() < 0.15) {
@@ -248,37 +337,27 @@ export function getCompetitionScore(horse, discipline) {
     score += (horse.stats[stat] || 50) * weight;
   });
   
-  // Disease penalty
   const affected = horse.health_genes?.filter(h => h.status === "affected") || [];
   score -= affected.length * 10;
   
-  // Random variation
   score += (Math.random() - 0.5) * 15;
   
   return Math.max(0, Math.min(100, Math.round(score * 10) / 10));
 }
 
 const COAT_MULTIPLIERS = [
-  // Common
   { keywords: ['bai', 'alezan'], multiplier: 1.00 },
-  // Uncommon
   { keywords: ['noir', 'gris'], multiplier: 1.15 },
-  // Rare
   { keywords: ['palomino', 'isabelle', 'dun', 'cremello', 'perlino', 'smoky'], multiplier: 1.35 },
-  // Rare+ (roan)
   { keywords: ['roan'], multiplier: 1.40 },
-  // Very rare
   { keywords: ['silver', 'tobiano'], multiplier: 1.70 },
-  // Very rare+ (champagne)
   { keywords: ['champagne'], multiplier: 1.85 },
-  // Exceptional
   { keywords: ['perle', 'pearl', 'blanc', 'white'], multiplier: 2.50 },
 ];
 
 function getCoatMultiplier(coatColor) {
   if (!coatColor) return 1.00;
   const lower = coatColor.toLowerCase();
-  // Match from most specific (highest multiplier) to least
   for (let i = COAT_MULTIPLIERS.length - 1; i >= 0; i--) {
     if (COAT_MULTIPLIERS[i].keywords.some(k => lower.includes(k))) {
       return COAT_MULTIPLIERS[i].multiplier;
@@ -287,12 +366,21 @@ function getCoatMultiplier(coatColor) {
   return 1.00;
 }
 
-/**
- * Estime la valeur marchande d'un cheval en Genesis (€ x 1)
- * Basé sur les tranches réelles du marché équin :
- * Loisir €1k-8k | Amateur €8k-25k | Pro €25k-150k | Elite €150k+
- * Poulains €3k-15k | Jeunes (2-3 ans) €10k-40k
- */
+export function determineFoalDeathAge(healthGenes) {
+  if (!healthGenes || healthGenes.length === 0) return null;
+  
+  const lethalDiseases = DISEASES.filter(d => d.lethal_age !== null && d.lethal_age !== undefined);
+  
+  for (const gene of healthGenes) {
+    const disease = lethalDiseases.find(d => d.name === gene.disease);
+    if (disease && gene.status === "affected" && disease.lethal_age !== null) {
+      return disease.lethal_age;
+    }
+  }
+  
+  return null;
+}
+
 export function estimateHorseValue(horse) {
   const avgStat = horse.stats
     ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7)
@@ -304,35 +392,26 @@ export function estimateHorseValue(horse) {
   let base;
 
   if (age <= 1) {
-    // Poulains : €3 000 – €15 000
     base = 3000 + Math.max(0, (avgStat - 30)) * 240;
     base = Math.max(3000, Math.min(15000, base));
   } else if (age <= 3) {
-    // Jeunes 2-3 ans : €10 000 – €40 000
     base = 10000 + Math.max(0, (avgStat - 30)) * 857;
     base = Math.max(10000, Math.min(40000, base));
   } else if (avgStat < 45) {
-    // Loisir : €1 000 – €8 000
     base = 1000 + (avgStat / 45) * 7000;
   } else if (avgStat < 65) {
-    // Amateur sport : €8 000 – €25 000
     base = 8000 + ((avgStat - 45) / 20) * 17000;
   } else if (avgStat < 82) {
-    // Pro sport : €25 000 – €150 000
     base = 25000 + ((avgStat - 65) / 17) * 125000;
   } else {
-    // Elite / Champion : €150 000 – €1 000 000+
     base = 150000 + ((avgStat - 82) / 18) * 850000;
   }
 
-  // Multiplicateur robe
   base *= getCoatMultiplier(horse.coat_color);
 
-  // Bonus victoires : +10% par victoire, max ×3
   const winsMultiplier = Math.min(3, 1 + wins * 0.1);
   base *= winsMultiplier;
 
-  // Malus maladie génétique : -60%
   if (hasDisease) base *= 0.4;
 
   return Math.round(base / 100) * 100;

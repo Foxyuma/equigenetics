@@ -67,8 +67,13 @@ export default function HorseDetail() {
     const prompt = `Photographie professionnelle d'un cheval de race ${horse.breed}, robe ${horse.coat_color}, ${
       horse.sex === 'male' ? 'étalon' : 'jument'
     }, âgé de ${horse.age || 1} ans. ${visibleGenes ? `Marquages génétiques visibles : ${visibleGenes}.` : ''} Photo réaliste de haute qualité, cheval entier en plein air, fond naturel, lumière douce, style photo équestre professionnelle. Le cheval doit ressembler parfaitement à la race ${horse.breed} avec ses caractéristiques morphologiques typiques.`;
-    const { url } = await base44.integrations.Core.GenerateImage({ prompt });
-    await base44.entities.Horse.update(horse.id, { image_url: url });
+    const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({ prompt });
+    // Re-upload pour URL permanente
+    const response = await fetch(generatedUrl);
+    const blob = await response.blob();
+    const file = new File([blob], `horse_${horse.id}.jpg`, { type: 'image/jpeg' });
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    await base44.entities.Horse.update(horse.id, { image_url: file_url });
     queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
     setGeneratingImage(false);
   };

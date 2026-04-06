@@ -3,15 +3,15 @@ import { base44 } from '@/api/base44Client';
 import { useEffect } from 'react';
 
 const DAYS_PER_MONTH = 14;
-const MONTHS_PER_SEASON = 3; // 3 mois par saison
+const MONTHS_PER_YEAR = 8; // 8 mois par an → 2 cycles de 4 saisons
 const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
 
 function getSeasonForMonth(month) {
-  // month est 1-indexé, cycle de 12 mois
-  const m = ((month - 1) % 12) + 1;
-  if (m <= 3) return 'spring';
-  if (m <= 6) return 'summer';
-  if (m <= 9) return 'autumn';
+  // Cycle de 4 mois (2 mois par saison) → 2 cycles complets en 8 mois
+  const m = ((month - 1) % 4) + 1;
+  if (m <= 1) return 'spring';
+  if (m <= 2) return 'summer';
+  if (m <= 3) return 'autumn';
   return 'winter';
 }
 
@@ -58,7 +58,7 @@ export function useGameClock() {
       if (newDay > DAYS_PER_MONTH) {
         newDay = 1;
         newMonth += 1;
-        if (newMonth > 12) {
+        if (newMonth > MONTHS_PER_YEAR) {
           newMonth = 1;
           newYear += 1;
         }

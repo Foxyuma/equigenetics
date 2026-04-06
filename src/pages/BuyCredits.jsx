@@ -10,10 +10,10 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const PACKAGES = [
-  { id: 'p1', label: '100 Crédits', credits: 100, price: '1,99 €', rate: 'RATE_100', popular: false },
-  { id: 'p2', label: '300 Crédits', credits: 300, price: '4,99 €', rate: 'RATE_300', popular: true },
-  { id: 'p3', label: '700 Crédits', credits: 700, price: '9,99 €', rate: 'RATE_700', popular: false },
-  { id: 'p4', label: '1500 Crédits', credits: 1500, price: '19,99 €', rate: 'RATE_1500', popular: false },
+  { id: 'p1', label: '100 Crédits', credits: 100, price: '2,99 €', rate: 'RATE_100', popular: false },
+  { id: 'p2', label: '300 Crédits', credits: 300, price: '6,99 €', rate: 'RATE_300', popular: true },
+  { id: 'p3', label: '700 Crédits', credits: 700, price: '14,99 €', rate: 'RATE_700', popular: false },
+  { id: 'p4', label: '1500 Crédits', credits: 1500, price: '34,99 €', rate: 'RATE_1500', popular: false },
 ];
 
 export default function BuyCredits() {

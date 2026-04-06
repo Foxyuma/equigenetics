@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowUpCircle, ArrowDownCircle, History } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowUpCircle, ArrowDownCircle, History, RefreshCw, Sparkles, Coins } from 'lucide-react';
+import { toast } from 'sonner';
 
 const REASON_LABELS = {
   competition: '🏆 Compétition',
@@ -59,8 +65,17 @@ function TransactionRow({ tx }) {
   );
 }
 
+const CONVERT_RATES = [
+  { credits: 10, genesis: 5000, label: '10 ✦ → 5 000 ₲' },
+  { credits: 25, genesis: 15000, label: '25 ✦ → 15 000 ₲' },
+  { credits: 50, genesis: 35000, label: '50 ✦ → 35 000 ₲' },
+  { credits: 100, genesis: 80000, label: '100 ✦ → 80 000 ₲' },
+];
+
 export default function Transactions() {
   const [tab, setTab] = useState('all');
+  const [converting, setConverting] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -76,6 +91,31 @@ export default function Transactions() {
   const filtered = tab === 'all' ? transactions
     : transactions.filter(tx => tx.currency === tab);
 
+  const handleConvert = async (rate) => {
+    if ((user?.credits_balance ?? 0) < rate.credits) {
+      toast.error('Crédits insuffisants');
+      return;
+    }
+    setConverting(true);
+    const newCredits = (user.credits_balance ?? 0) - rate.credits;
+    const newGenesis = (user.genesis_balance ?? 0) + rate.genesis;
+    await base44.auth.updateMe({ credits_balance: newCredits, genesis_balance: newGenesis });
+    await Promise.all([
+      base44.entities.Transaction.create({
+        user_email: user.email, currency: 'credits', amount: -rate.credits,
+        balance_after: newCredits, reason: `Conversion en Genesis (${rate.label})`,
+      }),
+      base44.entities.Transaction.create({
+        user_email: user.email, currency: 'genesis', amount: rate.genesis,
+        balance_after: newGenesis, reason: `Conversion depuis Crédits (${rate.label})`,
+      }),
+    ]);
+    queryClient.invalidateQueries({ queryKey: ['me'] });
+    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    toast.success(`+${rate.genesis.toLocaleString('fr-FR')} ₲ ajoutés !`);
+    setConverting(false);
+  };
+
   const totalGenesis = transactions.filter(t => t.currency === 'genesis' && t.amount > 0).reduce((s, t) => s + t.amount, 0);
   const spentGenesis = transactions.filter(t => t.currency === 'genesis' && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
   const totalCredits = transactions.filter(t => t.currency === 'credits' && t.amount > 0).reduce((s, t) => s + t.amount, 0);
@@ -83,6 +123,10 @@ export default function Transactions() {
 
   return (
     <div className="space-y-6">
+      <Link to="/Stable" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors">
+        <ArrowLeft className="w-4 h-4" />Retour
+      </Link>
+
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow">
           <History className="w-5 h-5 text-white" />
@@ -92,6 +136,48 @@ export default function Transactions() {
           <p className="text-stone-500 text-sm">Consultez tous vos gains et dépenses passés</p>
         </div>
       </div>
+
+      {/* Balances */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-4">
+            <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Balance Genesis</p>
+            <p className="text-3xl font-extrabold text-amber-800">{(user?.genesis_balance ?? 0).toLocaleString('fr-FR')} <span className="text-lg">₲</span></p>
+          </CardContent>
+        </Card>
+        <Card className="border-violet-200 bg-violet-50">
+          <CardContent className="p-4">
+            <p className="text-xs text-violet-600 font-semibold uppercase tracking-wide mb-1">Balance Crédits</p>
+            <p className="text-3xl font-extrabold text-violet-800">{user?.credits_balance ?? 0} <span className="text-lg">✦</span></p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Conversion */}
+      <Card className="border-0 bg-gradient-to-br from-amber-50 to-violet-50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 text-amber-600" />
+            Convertir Crédits → Genesis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {CONVERT_RATES.map(rate => (
+              <button
+                key={rate.credits}
+                onClick={() => handleConvert(rate)}
+                disabled={converting || (user?.credits_balance ?? 0) < rate.credits}
+                className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-amber-200 bg-white hover:border-amber-400 hover:bg-amber-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm"
+              >
+                <span className="text-violet-600 font-bold">-{rate.credits} ✦</span>
+                <RefreshCw className="w-3.5 h-3.5 text-stone-400" />
+                <span className="text-amber-700 font-bold">+{rate.genesis.toLocaleString('fr-FR')} ₲</span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

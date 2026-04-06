@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Trash2, Heart, Dna, Activity, Trophy, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
@@ -53,21 +53,12 @@ export default function HorseDetail() {
     enabled: !!horseId,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Horse.delete(horseId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['horses'] });
-      navigate('/Stable');
-    },
-  });
-
   const toggleSaleMutation = useMutation({
     mutationFn: async () => {
-      await base44.entities.Horse.update(horseId, { 
-        is_for_sale: !horse.is_for_sale, 
-        price: horse.is_for_sale ? 0 : Math.round((Object.values(horse.stats || {}).reduce((a,b) => a+b, 0) / 7) * 50)
+      await base44.entities.Horse.update(horseId, {
+        is_for_sale: !horse.is_for_sale,
+        price: horse.is_for_sale ? 0 : Math.round((Object.values(horse.stats || {}).reduce((a, b) => a + b, 0) / 7) * 50)
       });
-      // Mise en vente d'un cheval malade = malus réputation
       if (!horse.is_for_sale && currentUser) {
         const affectedCount = horse.health_genes?.filter(g => g.status === 'affected').length || 0;
         const carrierCount = horse.health_genes?.filter(g => g.status === 'carrier').length || 0;
@@ -75,7 +66,6 @@ export default function HorseDetail() {
         if (penalty > 0) {
           const currentRep = currentUser.breeding_reputation ?? 0;
           await base44.auth.updateMe({ breeding_reputation: Math.max(0, currentRep - penalty) });
-          toast.warning(`⚠️ Cheval malade mis en vente : -${penalty} pts de réputation`);
         }
       }
     },
@@ -98,22 +88,20 @@ export default function HorseDetail() {
     </div>
   );
 
-  const avgStat = horse.stats ? Math.round(Object.values(horse.stats).reduce((a,b) => a+b, 0) / 7) : 0;
+  const avgStat = horse.stats ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7) : 0;
 
   return (
     <div className="space-y-6">
-      {/* Back button */}
       <Link to="/Stable" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors">
         <ArrowLeft className="w-4 h-4" />Retour à l'écurie
       </Link>
 
-      {/* Header */}
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/3">
           <Card className="border-0 bg-gradient-to-br from-amber-50 to-stone-100 overflow-hidden">
             <CardContent className="p-6">
-              <HorseVisualizer 
-                genotype={horse.genotype} 
+              <HorseVisualizer
+                genotype={horse.genotype}
                 coatColor={horse.coat_color}
                 size={400}
               />
@@ -139,13 +127,9 @@ export default function HorseDetail() {
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 {horse.is_for_sale ? 'Retirer' : 'Vendre'}
               </Button>
-              <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700" onClick={() => deleteMutation.mutate()}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
             </div>
           </div>
 
-          {/* Estimated Value — owner only */}
           {currentUser && horse.created_by === currentUser.email && horse.estimated_value > 0 && (
             <Card className="border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">
               <CardContent className="p-4">
@@ -163,7 +147,6 @@ export default function HorseDetail() {
             </Card>
           )}
 
-          {/* Quick stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Card className="border-0 bg-white/60">
               <CardContent className="p-4 text-center">
@@ -195,7 +178,6 @@ export default function HorseDetail() {
             </Card>
           </div>
 
-          {/* Parents */}
           {(parents?.father || parents?.mother) && (
             <div className="flex gap-3">
               {parents?.father && (
@@ -225,7 +207,6 @@ export default function HorseDetail() {
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="stats" className="w-full">
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="stats">Compétences</TabsTrigger>

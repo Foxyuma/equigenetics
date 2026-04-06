@@ -501,11 +501,21 @@ const STUDBOOK_RULES = {
   }
 };
 
-export function determineBreedFromParents(sireBreed, damBreed) {
+export function determineBreedFromParents(sireBreed, damBreed, sireApprovalStatus) {
+  // If stallion not approved, foal is automatically OC
+  if (sireApprovalStatus && sireApprovalStatus !== 'approved' && sireApprovalStatus !== 'approved_with_restrictions' && sireApprovalStatus !== 'elite_approved') {
+    return {
+      breed: 'OC',
+      isOC: true,
+      message: `⚠️ Warning: The stallion is not approved for breeding. The foal will be registered as OC (Unknown Origins). Depending on the dam's studbook rules, the foal may still be eligible for the dam's registry.`
+    };
+  }
+
+  // Check if cross is recognized in studbook rules
   for (const breed in STUDBOOK_RULES) {
     const rules = STUDBOOK_RULES[breed];
     const match = rules.acceptedCrosses.find(c => c.sire === sireBreed && c.dam === damBreed);
-    if (match) return { breed: match.result, isOC: false };
+    if (match) return { breed: match.result, isOC: false, approved: true };
   }
 
   return {

@@ -147,6 +147,27 @@
       "type": "number",
       "default": 0,
       "description": "Valeur marchande estim\u00e9e en Genesis (visible uniquement par le propri\u00e9taire)"
+    },
+    "breeding_approval_status": {
+      "type": "string",
+      "enum": [
+        "not_evaluated",
+        "not_approved",
+        "approved",
+        "approved_with_restrictions",
+        "elite_approved"
+      ],
+      "default": "not_evaluated",
+      "description": "Statut d'approbation \u00e0 la monte (studbook approval)"
+    },
+    "breeding_approval_breed": {
+      "type": "string",
+      "description": "Race pour laquelle l'approbation a \u00e9t\u00e9 donn\u00e9e"
+    },
+    "breeding_approval_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de l'approbation/inspection"
     }
   },
   "required": [

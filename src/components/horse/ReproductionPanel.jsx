@@ -55,7 +55,7 @@ export default function ReproductionPanel({ mare }) {
     
     const viability = checkFoalViability(selectedStallion.health_genes, mare.health_genes, mare.breed);
     const deathAge = !viability.viable ? null : determineFoalDeathAge(childHealth);
-    const breedResult = determineBreedFromParents(selectedStallion.breed, mare.breed);
+    const breedResult = determineBreedFromParents(selectedStallion.breed, mare.breed, selectedStallion.breeding_approval_status);
     
     setFoalPreview({
       genotype: childGenotype,
@@ -342,13 +342,24 @@ export default function ReproductionPanel({ mare }) {
         )}
 
         {selectedStallion && !foalPreview && (
-          <Button
-            onClick={simulateBreeding}
-            className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
-          >
-            <FlaskConical className="w-4 h-4 mr-2" />
-            Simuler le croisement avec {selectedStallion.stallion_name}
-          </Button>
+          <div className="space-y-3">
+            {selectedStallion.breeding_approval_status && selectedStallion.breeding_approval_status !== 'approved' && selectedStallion.breeding_approval_status !== 'approved_with_restrictions' && selectedStallion.breeding_approval_status !== 'elite_approved' && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border-2 border-amber-200">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-800">
+                  <p className="font-semibold mb-1">⚠️ Breeding approval notice</p>
+                  <p className="text-xs">If the stallion is not approved by the studbook, the foal will be registered as OC (Unknown Origins). Depending on studbook rules, the foal may be eligible for the dam's studbook.</p>
+                </div>
+              </div>
+            )}
+            <Button
+              onClick={simulateBreeding}
+              className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
+            >
+              <FlaskConical className="w-4 h-4 mr-2" />
+              Simuler le croisement avec {selectedStallion.stallion_name}
+            </Button>
+          </div>
         )}
 
         {foalPreview && (
@@ -362,11 +373,11 @@ export default function ReproductionPanel({ mare }) {
               </div>
               
               {foalPreview.isOC && (
-                <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
-                  <p className="text-xs font-semibold text-orange-700 mb-1 flex items-center gap-1">
+                <div className="p-3 rounded-xl bg-amber-50 border-2 border-amber-200">
+                  <p className="text-xs font-semibold text-amber-800 mb-1 flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5" /> Enregistrement comme OC
                   </p>
-                  <p className="text-xs text-orange-600">{foalPreview.ocMessage}</p>
+                  <p className="text-xs text-amber-700">{foalPreview.ocMessage}</p>
                 </div>
               )}
               

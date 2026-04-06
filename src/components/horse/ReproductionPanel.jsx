@@ -85,15 +85,23 @@ export default function ReproductionPanel({ mare }) {
       const isPure = selectedStallion.breed === mare.breed;
       const affectedCount = foalPreview?.health_genes?.filter(g => g.status === 'affected').length || 0;
       const carrierCount = foalPreview?.health_genes?.filter(g => g.status === 'carrier').length || 0;
-      const repGain = 50 + (isPure ? 25 : 0) + (affectedCount === 0 ? 15 : 0)
+      // Détection gènes rares (champagne, silver, dun, roan simultanés)
+      const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
+      const rareCount = rareGenes.filter(g => foalPreview.genotype?.[g] && foalPreview.genotype[g] !== 'nn').length;
+      const rareBonus = rareCount >= 2 ? 5 : 0; // +5 pour gène rare
+      const studbookBonus = isPure ? 8 : 0; // +8 poulain approuvé studbook (race pure)
+      const repGain = 50 + studbookBonus + rareBonus + (affectedCount === 0 ? 15 : 0)
         + Math.round((avgStat - 50) * 0.5) - (affectedCount * 40) - (carrierCount * 10);
       await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
-      return repGain;
+      return { repGain, rareBonus, studbookBonus };
     },
-    onSuccess: (repGain) => {
+    onSuccess: ({ repGain, rareBonus, studbookBonus }) => {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
-      queryClient.invalidateQueries({ queryKey: ['me'] });
-      toast.success(`Poulain né ! ${repGain >= 0 ? '+' : ''}${repGain} pts réputation 🐴`);
+      queryClient.invalidateQueries({ queryKey: ['breeding-records'] });
+      let bonusMsg = '';
+      if (studbookBonus) bonusMsg += ' +studbook';
+      if (rareBonus) bonusMsg += ' +gène rare';
+      toast.success(`Poulain né ! ${repGain >= 0 ? '+' : ''}${repGain} pts réputation${bonusMsg} 🐴`);
       setFoalPreview(null);
       setFoalName('');
       setSelectedStallion(null);

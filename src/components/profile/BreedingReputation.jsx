@@ -2,13 +2,11 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 
 const TIERS = [
-  { min: 0,    label: 'Novice',        color: 'text-stone-500',  bg: 'bg-stone-100',  border: 'border-stone-200', icon: '🌱' },
-  { min: 100,  label: 'Amateur',       color: 'text-green-600',  bg: 'bg-green-50',   border: 'border-green-200', icon: '🌿' },
-  { min: 500,  label: 'Confirmé',      color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',  icon: '🔵' },
-  { min: 1500, label: 'Expert',        color: 'text-violet-600', bg: 'bg-violet-50',  border: 'border-violet-200',icon: '💜' },
-  { min: 4000, label: 'Maître',        color: 'text-amber-600',  bg: 'bg-amber-50',   border: 'border-amber-200', icon: '⭐' },
-  { min: 8000, label: 'Grand Maître',  color: 'text-orange-600', bg: 'bg-orange-50',  border: 'border-orange-200',icon: '🏅' },
-  { min: 15000,label: 'Légendaire',    color: 'text-red-600',    bg: 'bg-red-50',     border: 'border-red-200',   icon: '🔥' },
+  { min: 0,    label: 'New Breeder',       color: 'text-stone-500',  bg: 'bg-stone-100',  border: 'border-stone-200', icon: '🌱' },
+  { min: 100,  label: 'Established Stable', color: 'text-green-600',  bg: 'bg-green-50',   border: 'border-green-200', icon: '🏡' },
+  { min: 500,  label: 'Renowned Breeder',   color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',  icon: '🔵' },
+  { min: 1200, label: 'Elite Bloodlines',   color: 'text-violet-600', bg: 'bg-violet-50',  border: 'border-violet-200',icon: '💜' },
+  { min: 3000, label: 'Legendary Stud',     color: 'text-amber-600',  bg: 'bg-amber-50',   border: 'border-amber-200', icon: '⭐' },
 ];
 
 function getTier(points) {

@@ -64,6 +64,11 @@ export default function Competitions() {
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const competeMutation = useMutation({
     mutationFn: async () => {
       const score = getCompetitionScore(selectedHorse, selectedDiscipline);
@@ -76,12 +81,13 @@ export default function Competitions() {
       const allScores = [score, ...npcScores].sort((a, b) => b - a);
       const rank = allScores.indexOf(score) + 1;
       const prize = rank === 1 ? 500 : rank === 2 ? 300 : rank === 3 ? 150 : 0;
+      const isOlympic = discipline.olympic;
       
       const comp = await base44.entities.Competition.create({
         name: `${discipline.name} — ${level.name}`,
         discipline: selectedDiscipline,
         level: selectedLevel,
-        is_olympic: discipline.olympic,
+        is_olympic: isOlympic,
         horse_id: selectedHorse.id,
         horse_name: selectedHorse.name,
         score,
@@ -102,12 +108,20 @@ export default function Competitions() {
         });
       }
 
-      return { ...comp, npcScores: allScores, rank };
+      // Réputation : victoire +10, championnat olympique +30
+      let repGain = 0;
+      if (rank === 1) repGain = isOlympic ? 30 : 10;
+      if (repGain > 0 && currentUser) {
+        await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
+      }
+
+      return { ...comp, npcScores: allScores, rank, repGain };
     },
     onSuccess: (data) => {
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['all-competitions'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
     }
   });
 
@@ -272,6 +286,12 @@ export default function Competitions() {
                   <div className="mt-4 flex items-center justify-center gap-2 text-amber-600">
                     <Star className="w-4 h-4" />
                     <span className="font-semibold">+{result.prize} pts de prestige</span>
+                  </div>
+                )}
+                {result.repGain > 0 && (
+                  <div className="mt-2 flex items-center justify-center gap-2 text-violet-600">
+                    <Trophy className="w-4 h-4" />
+                    <span className="font-semibold">+{result.repGain} pts réputation {result.repGain >= 30 ? '🏆 Championnat olympique !' : ''}</span>
                   </div>
                 )}
               </CardContent>

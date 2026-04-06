@@ -77,6 +77,11 @@ export default function SeasonManager({ compact = false }) {
   const config = SEASON_CONFIG[currentSeason.current_season] || SEASON_CONFIG.spring;
   const Icon = config.icon;
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me-season'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const advanceSeasonMutation = useMutation({
     mutationFn: async () => {
       const seasonOrder = ['spring', 'summer', 'autumn', 'winter'];
@@ -85,7 +90,7 @@ export default function SeasonManager({ compact = false }) {
       const nextConfig = SEASON_CONFIG[nextSeason];
 
       const now = new Date();
-      const endsAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      const endsAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
       const data = {
         current_season: nextSeason,
@@ -98,6 +103,11 @@ export default function SeasonManager({ compact = false }) {
         available_competitions: nextConfig.competitions,
       };
 
+      // +1 réputation par saison d'activité
+      if (currentUser) {
+        await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + 1 });
+      }
+
       if (currentSeason.id) {
         return base44.entities.Season.update(currentSeason.id, data);
       } else {
@@ -106,7 +116,9 @@ export default function SeasonManager({ compact = false }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['seasons'] });
-      toast.success('Nouvelle saison commencée !');
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['me-season'] });
+      toast.success('Nouvelle saison commencée ! +1 pt réputation 🌿');
     },
   });
 

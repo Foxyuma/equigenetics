@@ -56,13 +56,15 @@ export default function Market() {
   const buyMutation = useMutation({
     mutationFn: async (horse) => {
       await base44.entities.Horse.update(horse.id, { is_for_sale: false, price: 0 });
-      // Bonus de réputation si le vendeur EST le joueur courant (vente aboutie)
+      // Réputation vendeur : +3 vente locale, +6 vente internationale
       if (currentUser && horse.created_by === currentUser.email) {
-        const affectedCount = horse.health_genes?.filter(g => g.status === 'affected').length || 0;
-        const avgStat = horse.stats ? Math.round(Object.values(horse.stats).reduce((a,b)=>a+b,0)/7) : 50;
-        const bonus = 40 + Math.round((avgStat - 50) * 0.3) - (affectedCount * 20);
+        const buyerEmail = horse.owner_email || '';
+        const sellerDomain = currentUser.email.split('@')[1] || '';
+        const buyerDomain = buyerEmail.split('@')[1] || '';
+        const isInternational = buyerDomain && buyerDomain !== sellerDomain;
+        const saleBonus = isInternational ? 6 : 3;
         const currentRep = currentUser.breeding_reputation ?? 0;
-        await base44.auth.updateMe({ breeding_reputation: Math.max(0, currentRep + bonus) });
+        await base44.auth.updateMe({ breeding_reputation: currentRep + saleBonus });
       }
     },
     onSuccess: () => {

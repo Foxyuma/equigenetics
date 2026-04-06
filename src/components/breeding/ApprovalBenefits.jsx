@@ -10,7 +10,8 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-yellow-300',
     textColor: 'text-yellow-800',
     icon: '⭐',
-    title: 'Elite Approved',
+    title: 'Étalon Star',
+    subtitle: 'Reproducteur d\'élite',
     benefits: [
       { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
       { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 2.0' },
@@ -26,7 +27,8 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-green-300',
     textColor: 'text-green-800',
     icon: '✅',
-    title: 'Approved for Sport Breeding',
+    title: 'Bon Reproducteur',
+    subtitle: 'Approuvé pour la reproduction',
     benefits: [
       { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
       { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.5' },
@@ -41,7 +43,8 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-blue-300',
     textColor: 'text-blue-800',
     icon: '📋',
-    title: 'Approved for Breeding',
+    title: 'Utilisable Sous Conditions',
+    subtitle: 'Bon reproducteur avec restrictions',
     benefits: [
       { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
       { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.2' },
@@ -55,7 +58,8 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-red-300',
     textColor: 'text-red-800',
     icon: '❌',
-    title: 'Rejected',
+    title: 'Non Approuvé',
+    subtitle: 'Reproduction en OC uniquement',
     benefits: [
       { icon: <XCircle className="w-4 h-4" />, text: 'Reproduction possible mais poulains en OC' },
       { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 0.6' },
@@ -69,7 +73,8 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-stone-300',
     textColor: 'text-stone-800',
     icon: '❓',
-    title: 'Not Yet Evaluated',
+    title: 'Non Évalué',
+    subtitle: 'En attente d\'inspection studbook',
     benefits: [
       { icon: <Zap className="w-4 h-4" />, text: 'Reproduction avec poulains potentiellement OC' },
       { icon: <Award className="w-4 h-4" />, text: 'Valeur neutre' },
@@ -107,7 +112,7 @@ export default function ApprovalBenefits({ status, compact = false }) {
           <span className="text-3xl">{benefits.icon}</span>
           <div>
             <h3 className={`text-xl font-bold ${benefits.textColor}`}>{benefits.title}</h3>
-            <p className={`text-sm ${benefits.textColor} opacity-75`}>Avantages du statut</p>
+            <p className={`text-sm ${benefits.textColor} opacity-75`}>{benefits.subtitle}</p>
           </div>
         </div>
 

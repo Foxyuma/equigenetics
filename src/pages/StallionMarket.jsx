@@ -247,9 +247,10 @@ export default function StallionMarket() {
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
                     <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
-                    {s.breeding_approval_status === 'elite_approved' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Elite</Badge>}
-                    {s.breeding_approval_status === 'approved_for_sport_breeding' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">✅ Sport</Badge>}
-                    {s.breeding_approval_status === 'approved_for_breeding' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">📋 Breeding</Badge>}
+                    {s.breeding_approval_status === 'elite_approved' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Étalon Star</Badge>}
+                    {s.breeding_approval_status === 'approved_for_sport_breeding' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">✅ Bon Reproducteur</Badge>}
+                    {s.breeding_approval_status === 'approved_for_breeding' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">📋 Utilisable</Badge>}
+                    {s.breeding_approval_status === 'rejected' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">❌ Non Approuvé</Badge>}
                   </div>
                   {/* Avg stat */}
                   {s.stats && (

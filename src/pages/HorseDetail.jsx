@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,8 @@ export default function HorseDetail() {
   const horseId = urlParams.get('id');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [showSellDialog, setShowSellDialog] = useState(false);
+  const [customPrice, setCustomPrice] = useState('');
 
   const { data: horse, isLoading } = useQuery({
     queryKey: ['horse', horseId],
@@ -56,11 +61,11 @@ export default function HorseDetail() {
   });
 
   const toggleSaleMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (salePrice) => {
       const value = estimateHorseValue(horse);
       await base44.entities.Horse.update(horseId, {
         is_for_sale: !horse.is_for_sale,
-        price: horse.is_for_sale ? 0 : value,
+        price: horse.is_for_sale ? 0 : salePrice,
         estimated_value: value,
       });
       if (!horse.is_for_sale && currentUser) {
@@ -76,6 +81,7 @@ export default function HorseDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horse', horseId] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
+      setShowSellDialog(false);
     },
   });
 
@@ -127,11 +133,58 @@ export default function HorseDetail() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => toggleSaleMutation.mutate()}>
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                {horse.is_for_sale ? 'Retirer' : 'Vendre'}
-              </Button>
+              {horse.is_for_sale ? (
+                <Button variant="outline" size="sm" onClick={() => toggleSaleMutation.mutate(0)}>
+                  <ShoppingCart className="w-4 h-4 mr-1" />
+                  Retirer de la vente
+                </Button>
+              ) : currentUser && horse.created_by === currentUser.email ? (
+                <Button variant="outline" size="sm" onClick={() => {
+                  setCustomPrice(String(estimateHorseValue(horse)));
+                  setShowSellDialog(true);
+                }}>
+                  <ShoppingCart className="w-4 h-4 mr-1" />
+                  Mettre en vente
+                </Button>
+              ) : null}
             </div>
+
+            <Dialog open={showSellDialog} onOpenChange={setShowSellDialog}>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>Mettre {horse.name} en vente</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-2">
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700">
+                    Valeur estimée : <strong>{estimateHorseValue(horse).toLocaleString('fr-FR')} ₲</strong>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="custom-price">Prix de vente (₲ Genesis)</Label>
+                    <Input
+                      id="custom-price"
+                      type="number"
+                      min={1}
+                      value={customPrice}
+                      onChange={e => setCustomPrice(e.target.value)}
+                      className="text-lg font-semibold"
+                    />
+                    {Number(customPrice) < estimateHorseValue(horse) && (
+                      <p className="text-xs text-orange-500">⚠️ Prix inférieur à la valeur estimée</p>
+                    )}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowSellDialog(false)}>Annuler</Button>
+                  <Button
+                    disabled={!customPrice || Number(customPrice) <= 0 || toggleSaleMutation.isPending}
+                    onClick={() => toggleSaleMutation.mutate(Number(customPrice))}
+                    className="bg-stone-800 hover:bg-stone-900"
+                  >
+                    Confirmer la vente
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {currentUser && horse.created_by === currentUser.email && (

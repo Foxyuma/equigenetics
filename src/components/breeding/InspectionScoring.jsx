@@ -128,12 +128,74 @@ const APPROVAL_THRESHOLDS = {
   rejected: { min: 0, status: 'not_approved', label: 'Refusé', icon: '❌' }
 };
 
-export function getApprovalStatus(score) {
-  if (score >= APPROVAL_THRESHOLDS.elite.min) return APPROVAL_THRESHOLDS.elite;
-  if (score >= APPROVAL_THRESHOLDS.premium.min) return APPROVAL_THRESHOLDS.premium;
-  if (score >= APPROVAL_THRESHOLDS.approved.min) return APPROVAL_THRESHOLDS.approved;
-  if (score >= APPROVAL_THRESHOLDS.restricted.min) return APPROVAL_THRESHOLDS.restricted;
-  return APPROVAL_THRESHOLDS.rejected;
+export function detectAutoRestrictions(horse) {
+  const restrictions = [];
+
+  // Restriction 1: Porteur de maladie génétique surveillée
+  const carrierDiseases = horse.health_genes?.filter(h => h.status === 'carrier') || [];
+  if (carrierDiseases.length > 0) {
+    restrictions.push({
+      type: 'carrier_diseases',
+      reason: `Porteur de ${carrierDiseases.length} maladie(s) génétique(s)`,
+      severity: 'high',
+      forceRestricted: true
+    });
+  }
+
+  // Restriction 2: Modèle correct mais faible locomotion
+  if (horse.stats) {
+    const conformationScore = Math.min(30, Math.round(
+      (horse.stats.strength || 50) * 0.4 + (horse.stats.agility || 50) * 0.3 + (horse.stats.temperament || 50) * 0.3
+    ));
+    const locomotionScore = Math.min(20, Math.round(
+      (horse.stats.agility || 50) * 0.4 + (horse.stats.speed || 50) * 0.35 + (horse.stats.endurance || 50) * 0.25
+    ));
+
+    if (conformationScore >= 18 && locomotionScore < 10) {
+      restrictions.push({
+        type: 'low_locomotion',
+        reason: 'Modèle correct mais locomotion insuffisante',
+        severity: 'medium',
+        forceRestricted: true
+      });
+    }
+  }
+
+  // Restriction 3: Bonnes origines mais peu de résultats compétitifs
+  if (horse.stats && horse.competition_wins !== undefined) {
+    const performanceScore = Math.round(
+      (horse.stats.jumping || 50) * 0.25 + (horse.stats.dressage || 50) * 0.25 +
+      (horse.stats.endurance || 50) * 0.25 + (horse.stats.speed || 50) * 0.25
+    );
+    if (performanceScore >= 70 && horse.competition_wins < 2 && horse.age >= 4) {
+      restrictions.push({
+        type: 'unproven_performance',
+        reason: 'Potentiel bon mais résultats insuffisants',
+        severity: 'medium',
+        forceRestricted: true
+      });
+    }
+  }
+
+  return restrictions;
+}
+
+export function getApprovalStatus(score, horse) {
+  const autoRestrictions = horse ? detectAutoRestrictions(horse) : [];
+  const hasForceRestriction = autoRestrictions.some(r => r.forceRestricted);
+
+  // Si restriction forcée détectée, limiter au statut "restricted"
+  if (hasForceRestriction && score >= APPROVAL_THRESHOLDS.approved.min) {
+    return { ...APPROVAL_THRESHOLDS.restricted, autoRestrictions };
+  }
+
+  let status = APPROVAL_THRESHOLDS.rejected;
+  if (score >= APPROVAL_THRESHOLDS.elite.min) status = APPROVAL_THRESHOLDS.elite;
+  else if (score >= APPROVAL_THRESHOLDS.premium.min) status = APPROVAL_THRESHOLDS.premium;
+  else if (score >= APPROVAL_THRESHOLDS.approved.min) status = APPROVAL_THRESHOLDS.approved;
+  else if (score >= APPROVAL_THRESHOLDS.restricted.min) status = APPROVAL_THRESHOLDS.restricted;
+
+  return { ...status, autoRestrictions };
 }
 
 export function getScoreColor(score) {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle2, Award, Zap, TrendingUp, Gift, Frown } from 'lucide-react';
 import { toast } from 'sonner';
-import { calculateInspectionScore, getApprovalStatus, getScoreColor, SCORING_CRITERIA, GENETIC_BONUSES } from '../components/breeding/InspectionScoring';
+import { calculateInspectionScore, getApprovalStatus, getScoreColor, SCORING_CRITERIA } from '../components/breeding/InspectionScoring';
 
 const INSPECTION_CRITERIA = {
   'Arabian': {
@@ -146,7 +146,7 @@ export default function StallionInspection() {
       // Facturer les frais d'inscription au testage (150 genesis)
       const testingEnrollmentCost = 150;
       const balance = currentUser?.genesis_balance || 0;
-      if (balance < vetRadioCost) {
+      if (balance < testingEnrollmentCost) {
         throw new Error(`Fonds insuffisants. Frais d'inscription au testage : ${testingEnrollmentCost} ₲`);
       }
 
@@ -180,7 +180,7 @@ export default function StallionInspection() {
         user_email: currentUser.email,
         currency: 'genesis',
         amount: 0,
-        balance_after: balance - vetRadioCost,
+        balance_after: balance - testingEnrollmentCost,
         reason: `Inspection - ${stallion.name} (${approvalStatus})`,
       });
 
@@ -189,7 +189,7 @@ export default function StallionInspection() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       setInspectionResults(data);
-      const approvalData = getApprovalStatus(data.score);
+      const approvalData = getApprovalStatus(data.score, data.stallion);
       toast.success(`${data.stallion.name}: ${approvalData.icon} ${approvalData.label} (${Math.round(data.score)}/100)`);
     },
     onError: (err) => toast.error(err.message),
@@ -198,7 +198,7 @@ export default function StallionInspection() {
   if (inspectionResults) {
     const { stallion, score, status, scoreData } = inspectionResults;
     const criteria = INSPECTION_CRITERIA[stallion.breed];
-    const approvalData = getApprovalStatus(score);
+    const approvalData = getApprovalStatus(score, stallion);
     const colorGradient = getScoreColor(score);
     const statusConfig = {
       elite: { color: 'bg-yellow-50 border-yellow-300', text: 'text-yellow-800' },

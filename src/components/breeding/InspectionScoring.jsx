@@ -323,6 +323,69 @@ export function calculateInbreedingCoefficient(parentHorses) {
   return Math.min(0.25, avgCoefficient + 0.05); // Cap à 25%
 }
 
+// === PIPELINE FINAL D'INSPECTION ===
+// Orchestre les 6 étapes du système d'approbation
+export function performFullInspection(horse, parentHorses, healthRecord) {
+  const inspection = {
+    horse_id: horse.id,
+    horse_name: horse.name,
+    breed: horse.breed,
+    age: horse.age,
+    timestamp: new Date().toISOString()
+  };
+
+  // ÉTAPE 1: Calcul des sous-notes
+  const scoreData = calculateInspectionScore(horse);
+  inspection.baseScore = scoreData.total;
+  inspection.breakdown = scoreData.breakdown;
+  inspection.baseGenetic = scoreData;
+
+  // ÉTAPE 2: Application des pondérations selon la race (DÉJÀ INCLUSE dans calculateInspectionScore)
+  // Les poids par race sont appliqués lors du calcul des scores de chaque catégorie
+
+  // ÉTAPE 3: Calcul du score total /100
+  // Le score total est déjà calculé dans calculateInspectionScore
+  inspection.totalScore = scoreData.total;
+
+  // ÉTAPE 4: Vérification des blocages
+  const blocages = {
+    autoRejects: detectAutoRejects(horse, healthRecord),
+    autoRestrictions: detectAutoRestrictions(horse)
+  };
+  inspection.blocages = blocages;
+  inspection.isBlocked = blocages.autoRejects.length > 0;
+
+  // Si refus automatique, retourner directement
+  if (inspection.isBlocked) {
+    inspection.finalStatus = APPROVAL_THRESHOLDS.rejected.status;
+    inspection.finalLabel = APPROVAL_THRESHOLDS.rejected.label;
+    inspection.finalIcon = APPROVAL_THRESHOLDS.rejected.icon;
+    inspection.blockedReason = blocages.autoRejects[0].reason;
+    inspection.zone = null;
+    inspection.modifiers = { bonuses: [], penalties: [] };
+    return inspection;
+  }
+
+  // ÉTAPE 5: Détermination de la zone de probabilité
+  const zone = APPROVAL_PROBABILITY_ZONES.find(
+    z => inspection.totalScore >= z.range[0] && inspection.totalScore <= z.range[1]
+  );
+  inspection.zone = zone?.name || 'Zone inconnue';
+  inspection.zoneRange = zone?.range || [0, 0];
+
+  // ÉTAPE 6: Tirage aléatoire du statut final
+  const approvalResult = getRandomApprovalStatus(inspection.totalScore);
+  inspection.finalStatus = approvalResult.status;
+  inspection.finalLabel = approvalResult.label;
+  inspection.finalIcon = approvalResult.icon;
+
+  // Ajouter les modificateurs appliqués (bonus/malus)
+  inspection.modifiers = { bonuses: scoreData.bonuses, penalties: scoreData.penalties };
+  inspection.restrictions = blocages.autoRestrictions;
+
+  return inspection;
+}
+
 const APPROVAL_THRESHOLDS = {
   elite: { min: 90, status: 'elite', label: 'Elite', icon: '⭐' },
   premium: { min: 80, status: 'provisional', label: 'Premium', icon: '🌟' },

@@ -582,12 +582,12 @@ const STUDBOOK_RULES = {
 };
 
 export function determineBreedFromParents(sireBreed, damBreed, sireApprovalStatus) {
-  // Si l'étalon n'est pas approuvé, le poulain est automatiquement OC
+  // Si l'étalon n'est pas approuvé → poulain OC automatiquement
   if (sireApprovalStatus && sireApprovalStatus !== 'approved' && sireApprovalStatus !== 'approved_restricted' && sireApprovalStatus !== 'provisional' && sireApprovalStatus !== 'elite') {
     return {
       breed: 'OC',
       isOC: true,
-      message: `⚠️ L'étalon n'est pas approuvé à la monte. Le poulain sera enregistré comme OC (Origines Constatées).`
+      message: `⚠️ L'étalon n'est pas approuvé à la monte. Le poulain sera enregistré comme OC (Origines Constatées). Exception : le poulain peut potentiellement être accepté au studbook maternel si la mère est de race pure.`
     };
   }
 

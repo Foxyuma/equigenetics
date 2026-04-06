@@ -75,27 +75,29 @@ export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, i
           </Button>
         ) : (() => {
           const mode = getCurrencyMode(item.rarity);
+          const creditsForRare = Math.max(1, Math.round(item.price * 0.1)); // 10% du prix en crédits
+          if (mode === 'both') {
+            return (
+              <Button
+                onClick={() => onBuy?.('both')}
+                disabled={isBuying}
+                className="w-full bg-gradient-to-r from-amber-600 to-violet-600 hover:from-amber-700 hover:to-violet-700 text-sm text-white"
+              >
+                <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="font-bold ml-1">₲</span>&nbsp;+&nbsp;{creditsForRare} <span>✦</span>
+              </Button>
+            );
+          }
+          if (mode === 'credits') {
+            return (
+              <Button onClick={() => onBuy?.('credits')} disabled={isBuying} className="w-full bg-violet-600 hover:bg-violet-700 text-sm">
+                <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1">✦</span> Crédits
+              </Button>
+            );
+          }
           return (
-            <div className="flex flex-col gap-2">
-              {(mode === 'genesis' || mode === 'both') && (
-                <Button
-                  onClick={() => onBuy?.('genesis')}
-                  disabled={isBuying}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-sm"
-                >
-                  <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1 font-bold">₲</span> Genesis
-                </Button>
-              )}
-              {(mode === 'credits' || mode === 'both') && (
-                <Button
-                  onClick={() => onBuy?.('credits')}
-                  disabled={isBuying}
-                  className="w-full bg-violet-600 hover:bg-violet-700 text-sm"
-                >
-                  <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1">✶</span> Crédits
-                </Button>
-              )}
-            </div>
+            <Button onClick={() => onBuy?.('genesis')} disabled={isBuying} className="w-full bg-amber-600 hover:bg-amber-700 text-sm">
+              <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1 font-bold">₲</span> Genesis
+            </Button>
           );
         })()}
       </CardContent>

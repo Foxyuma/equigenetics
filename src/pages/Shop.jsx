@@ -29,11 +29,20 @@ export default function Shop() {
 
   const buyMutation = useMutation({
     mutationFn: async ({ item, currency }) => {
-      // Vérification solde
+      const creditsForRare = Math.max(1, Math.round(item.price * 0.1));
       if (currency === 'genesis') {
         const balance = currentUser?.genesis_balance ?? 0;
         if (balance < item.price) throw new Error('Solde Genesis insuffisant');
         await base44.auth.updateMe({ genesis_balance: balance - item.price });
+      } else if (currency === 'both') {
+        const genBalance = currentUser?.genesis_balance ?? 0;
+        const credBalance = currentUser?.credits_balance ?? 0;
+        if (genBalance < item.price) throw new Error('Solde Genesis insuffisant');
+        if (credBalance < creditsForRare) throw new Error(`Crédits insuffisants (${creditsForRare} ✦ requis)`);
+        await base44.auth.updateMe({
+          genesis_balance: genBalance - item.price,
+          credits_balance: credBalance - creditsForRare,
+        });
       } else {
         const balance = currentUser?.credits_balance ?? 0;
         if (balance < item.price) throw new Error('Crédits insuffisants');

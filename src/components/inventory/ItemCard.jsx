@@ -25,7 +25,14 @@ const typeIcons = {
   supplement: "💪",
 };
 
-export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, isInventory }) {
+// common/uncommon → Genesis only | rare → Genesis + Credits | legendary → Credits only
+const getCurrencyMode = (rarity) => {
+  if (rarity === 'legendary') return 'credits';
+  if (rarity === 'rare') return 'both';
+  return 'genesis';
+};
+
+export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, isInventory, isBuying }) {
   const getEffectDescription = (effect) => {
     if (!effect) return "";
     const parts = [];
@@ -66,14 +73,31 @@ export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, i
           >
             <Zap className="w-3 h-3 mr-1" />Utiliser
           </Button>
-        ) : (
-          <Button 
-            onClick={() => onBuy?.(item)} 
-            className="w-full bg-stone-800 hover:bg-stone-900 text-sm"
-          >
-            <ShoppingCart className="w-3 h-3 mr-1" />{item.price} pts
-          </Button>
-        )}
+        ) : (() => {
+          const mode = getCurrencyMode(item.rarity);
+          return (
+            <div className="flex flex-col gap-2">
+              {(mode === 'genesis' || mode === 'both') && (
+                <Button
+                  onClick={() => onBuy?.('genesis')}
+                  disabled={isBuying}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-sm"
+                >
+                  <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1 font-bold">₲</span> Genesis
+                </Button>
+              )}
+              {(mode === 'credits' || mode === 'both') && (
+                <Button
+                  onClick={() => onBuy?.('credits')}
+                  disabled={isBuying}
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-sm"
+                >
+                  <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1">✶</span> Crédits
+                </Button>
+              )}
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
   );

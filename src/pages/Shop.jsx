@@ -12,6 +12,11 @@ export default function Shop() {
   const [filterType, setFilterType] = useState('all');
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['shop-items'],
     queryFn: () => base44.entities.Item.list('-rarity', 100),
@@ -23,12 +28,21 @@ export default function Shop() {
   });
 
   const buyMutation = useMutation({
-    mutationFn: async (item) => {
+    mutationFn: async ({ item, currency }) => {
+      // Vérification solde
+      if (currency === 'genesis') {
+        const balance = currentUser?.genesis_balance ?? 0;
+        if (balance < item.price) throw new Error('Solde Genesis insuffisant');
+        await base44.auth.updateMe({ genesis_balance: balance - item.price });
+      } else {
+        const balance = currentUser?.credits_balance ?? 0;
+        if (balance < item.price) throw new Error('Crédits insuffisants');
+        await base44.auth.updateMe({ credits_balance: balance - item.price });
+      }
+
       const existing = inventory.find(inv => inv.item_id === item.id);
       if (existing) {
-        await base44.entities.Inventory.update(existing.id, {
-          quantity: existing.quantity + 1
-        });
+        await base44.entities.Inventory.update(existing.id, { quantity: existing.quantity + 1 });
       } else {
         await base44.entities.Inventory.create({
           item_id: item.id,
@@ -40,9 +54,13 @@ export default function Shop() {
         });
       }
     },
-    onSuccess: (_, item) => {
+    onSuccess: (_, { item }) => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
       toast.success(`${item.name} acheté !`);
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
 
@@ -86,7 +104,8 @@ export default function Shop() {
                 <ItemCard 
                   key={item.id} 
                   item={item} 
-                  onBuy={() => buyMutation.mutate(item)}
+                  onBuy={(currency) => buyMutation.mutate({ item, currency })}
+                  isBuying={buyMutation.isPending}
                   isInventory={false}
                 />
               ))}

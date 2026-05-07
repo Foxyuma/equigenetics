@@ -42,6 +42,11 @@ export default function Competitions() {
 
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: horses = [] } = useQuery({
     queryKey: ['horses', currentUser?.email],
     queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
@@ -71,11 +76,6 @@ export default function Competitions() {
   const selectedHorse = horses.find(h => h.id === selectedHorseId);
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
-
-  const { data: currentUser } = useQuery({
-    queryKey: ['me'],
-    queryFn: () => base44.auth.me(),
-  });
 
   // Resolve any pending competitions whose competition_date has passed midnight
   useEffect(() => {

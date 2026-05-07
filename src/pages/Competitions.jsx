@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,7 +38,6 @@ export default function Competitions() {
   const [selectedDiscipline, setSelectedDiscipline] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('novice');
   const [selectedHorseId, setSelectedHorseId] = useState('');
-  const [result, setResult] = useState(null);
   const [tab, setTab] = useState('compete');
 
   const queryClient = useQueryClient();
@@ -50,7 +50,13 @@ export default function Competitions() {
 
   const { data: allCompetitions = [] } = useQuery({
     queryKey: ['all-competitions', currentUser?.email],
-    queryFn: () => base44.entities.Competition.filter({ created_by: currentUser.email }, '-created_date', 50),
+    queryFn: () => base44.entities.Competition.filter({ created_by: currentUser.email, status: 'completed' }, '-created_date', 50),
+    enabled: !!currentUser?.email,
+  });
+
+  const { data: pendingCompetitions = [] } = useQuery({
+    queryKey: ['pending-competitions', currentUser?.email],
+    queryFn: () => base44.entities.Competition.filter({ created_by: currentUser.email, status: 'registered' }, '-created_date', 20),
     enabled: !!currentUser?.email,
   });
 
@@ -71,59 +77,76 @@ export default function Competitions() {
     queryFn: () => base44.auth.me(),
   });
 
-  const competeMutation = useMutation({
-    mutationFn: async () => {
-      const score = getCompetitionScore(selectedHorse, selectedDiscipline);
-      
-      // Generate NPC competitors
-      const npcScores = Array.from({ length: 7 }, () => 
-        Math.round((30 + Math.random() * 60 + (LEVELS.findIndex(l => l.id === selectedLevel) * 8)) * 10) / 10
+  // Resolve any pending competitions whose competition_date has passed midnight
+  useEffect(() => {
+    if (!pendingCompetitions.length || !currentUser) return;
+    const today = new Date().toISOString().split('T')[0];
+    const toResolve = pendingCompetitions.filter(c => c.competition_date && c.competition_date <= today);
+    if (toResolve.length === 0) return;
+    toResolve.forEach(c => resolveMutation.mutate(c));
+  }, [pendingCompetitions, currentUser]);
+
+  const resolveMutation = useMutation({
+    mutationFn: async (comp) => {
+      const horse = await base44.entities.Horse.filter({ id: comp.horse_id }).then(r => r[0]);
+      if (!horse) return;
+      const score = getCompetitionScore(horse, comp.discipline);
+      const isOlympic = DISCIPLINES.find(d => d.id === comp.discipline)?.olympic || false;
+      const levelIdx = LEVELS.findIndex(l => l.id === comp.level);
+      const npcScores = Array.from({ length: 7 }, () =>
+        Math.round((30 + Math.random() * 60 + levelIdx * 8) * 10) / 10
       );
-      
       const allScores = [score, ...npcScores].sort((a, b) => b - a);
       const rank = allScores.indexOf(score) + 1;
-      const prize = rank === 1 ? 500 : rank === 2 ? 300 : rank === 3 ? 150 : 0;
+      await base44.entities.Competition.update(comp.id, { score, rank, status: 'completed', npc_scores: allScores });
+      if (rank <= 3) {
+        await base44.entities.Horse.update(horse.id, {
+          competition_wins: (horse.competition_wins || 0) + (rank === 1 ? 1 : 0),
+          energy: Math.max(0, (horse.energy || 100) - 15),
+        });
+      } else {
+        await base44.entities.Horse.update(horse.id, { energy: Math.max(0, (horse.energy || 100) - 10) });
+      }
+      let repGain = rank === 1 ? (isOlympic ? 30 : 10) : 0;
+      if (repGain > 0 && currentUser) {
+        await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['horses', currentUser?.email] });
+      queryClient.invalidateQueries({ queryKey: ['all-competitions', currentUser?.email] });
+      queryClient.invalidateQueries({ queryKey: ['pending-competitions', currentUser?.email] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+
+  const competeMutation = useMutation({
+    mutationFn: async () => {
       const isOlympic = discipline.olympic;
-      
-      const comp = await base44.entities.Competition.create({
+      // Schedule for midnight tonight
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const competitionDate = tomorrow.toISOString().split('T')[0];
+
+      await base44.entities.Competition.create({
         name: `${discipline.name} — ${level.name}`,
         discipline: selectedDiscipline,
         level: selectedLevel,
         is_olympic: isOlympic,
         horse_id: selectedHorse.id,
         horse_name: selectedHorse.name,
-        score,
-        rank,
-        prize,
-        status: 'completed',
+        score: null,
+        rank: null,
+        prize: null,
+        status: 'registered',
+        competition_date: competitionDate,
       });
-
-      // Update horse wins and energy
-      if (rank <= 3) {
-        await base44.entities.Horse.update(selectedHorse.id, {
-          competition_wins: (selectedHorse.competition_wins || 0) + (rank === 1 ? 1 : 0),
-          energy: Math.max(0, (selectedHorse.energy || 100) - 15),
-        });
-      } else {
-        await base44.entities.Horse.update(selectedHorse.id, {
-          energy: Math.max(0, (selectedHorse.energy || 100) - 10),
-        });
-      }
-
-      // Réputation : victoire +10, championnat olympique +30
-      let repGain = 0;
-      if (rank === 1) repGain = isOlympic ? 30 : 10;
-      if (repGain > 0 && currentUser) {
-        await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
-      }
-
-      return { ...comp, npcScores: allScores, rank, repGain };
     },
-    onSuccess: (data) => {
-      setResult(data);
-      queryClient.invalidateQueries({ queryKey: ['horses'] });
-      queryClient.invalidateQueries({ queryKey: ['all-competitions'] });
-      queryClient.invalidateQueries({ queryKey: ['me'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending-competitions', currentUser?.email] });
+      setSelectedHorseId('');
+      setSelectedDiscipline('');
+      toast.success('Inscription confirmée ! Résultats demain à minuit 🌙');
     }
   });
 
@@ -244,7 +267,24 @@ export default function Competitions() {
             </Card>
           )}
 
-          {/* Compete button */}
+          {/* Pending competitions */}
+          {pendingCompetitions.length > 0 && (
+            <Card className="border-0 bg-blue-50 border border-blue-200">
+              <CardContent className="p-4">
+                <p className="text-sm font-semibold text-blue-800 mb-2">🌙 Inscriptions en attente (résultats à minuit)</p>
+                <div className="space-y-2">
+                  {pendingCompetitions.map(c => (
+                    <div key={c.id} className="flex items-center justify-between text-sm text-blue-700 bg-white/60 rounded-lg p-2">
+                      <span>{c.horse_name} — {c.name}</span>
+                      <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">Le {c.competition_date}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Register button */}
           <div className="flex justify-center">
             <Button
               onClick={() => competeMutation.mutate()}
@@ -257,48 +297,9 @@ export default function Competitions() {
               ) : (
                 <Trophy className="w-5 h-5 mr-2" />
               )}
-              Lancer la compétition !
+              Inscrire pour demain à minuit
             </Button>
           </div>
-
-          {/* Result */}
-          {result && (
-            <Card className={`border-0 ${result.rank <= 3 ? 'bg-gradient-to-br from-amber-50 to-yellow-50' : 'bg-white/60'}`}>
-              <CardContent className="p-6 text-center">
-                <span className="text-5xl block mb-3">{rankMedal(result.rank)}</span>
-                <h3 className="text-2xl font-bold text-stone-800 mb-1">
-                  {result.rank === 1 ? 'Victoire !' : result.rank <= 3 ? 'Podium !' : `${result.rank}ème place`}
-                </h3>
-                <p className="text-stone-500 mb-4">Score : <span className="font-bold text-stone-800">{result.score?.toFixed(1)}</span> pts</p>
-                
-                {/* Scoreboard */}
-                <div className="max-w-sm mx-auto space-y-1">
-                  {result.npcScores?.map((s, i) => (
-                    <div key={i} className={`flex items-center justify-between p-2 rounded-lg text-sm ${
-                      s === result.score ? 'bg-amber-100 font-bold' : 'bg-stone-50'
-                    }`}>
-                      <span>{rankMedal(i + 1)}</span>
-                      <span>{s === result.score ? selectedHorse.name : `Concurrent ${i + 1}`}</span>
-                      <span>{s.toFixed(1)} pts</span>
-                    </div>
-                  ))}
-                </div>
-
-                {result.prize > 0 && (
-                  <div className="mt-4 flex items-center justify-center gap-2 text-amber-600">
-                    <Star className="w-4 h-4" />
-                    <span className="font-semibold">+{result.prize} pts de prestige</span>
-                  </div>
-                )}
-                {result.repGain > 0 && (
-                  <div className="mt-2 flex items-center justify-center gap-2 text-violet-600">
-                    <Trophy className="w-4 h-4" />
-                    <span className="font-semibold">+{result.repGain} pts réputation {result.repGain >= 30 ? '🏆 Championnat olympique !' : ''}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         <TabsContent value="history" className="mt-4">

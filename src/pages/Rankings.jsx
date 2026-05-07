@@ -8,6 +8,11 @@ import { Trophy, TrendingUp, Zap, Award, Medal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Rankings() {
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: horses = [] } = useQuery({
     queryKey: ['horses-rankings'],
     queryFn: () => base44.entities.Horse.list('-competition_wins', 100),
@@ -60,7 +65,7 @@ export default function Rankings() {
       <CardContent>
         <div className="space-y-2">
           {horses.map((h, idx) => (
-            <Link key={h.id} to={`/HorseDetail?id=${h.id}`}>
+            <Link key={h.id} to={h.created_by === currentUser?.email ? `/HorseDetail?id=${h.id}` : `/PublicHorseProfile?id=${h.id}`}>
               <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-8 flex items-center justify-center">

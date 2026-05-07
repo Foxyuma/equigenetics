@@ -102,13 +102,15 @@ export default function StallionInspection() {
   });
 
   const { data: horses = [] } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 200),
+    queryKey: ['horses', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
   });
 
   const { data: healthRecords = [] } = useQuery({
-    queryKey: ['health-records'],
-    queryFn: () => base44.entities.HealthRecord.list('-created_date', 200),
+    queryKey: ['health-records', currentUser?.email],
+    queryFn: () => base44.entities.HealthRecord.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
   });
 
   const { data: geneticTests = [] } = useQuery({

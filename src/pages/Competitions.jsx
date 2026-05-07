@@ -43,13 +43,15 @@ export default function Competitions() {
   const queryClient = useQueryClient();
 
   const { data: horses = [] } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 200),
+    queryKey: ['horses', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
   });
 
   const { data: allCompetitions = [] } = useQuery({
-    queryKey: ['all-competitions'],
-    queryFn: () => base44.entities.Competition.list('-created_date', 50),
+    queryKey: ['all-competitions', currentUser?.email],
+    queryFn: () => base44.entities.Competition.filter({ created_by: currentUser.email }, '-created_date', 50),
+    enabled: !!currentUser?.email,
   });
 
   const { data: seasons = [] } = useQuery({

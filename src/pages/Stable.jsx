@@ -15,9 +15,15 @@ export default function Stable() {
   const [filterBreed, setFilterBreed] = useState('all');
   const [filterSex, setFilterSex] = useState('all');
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: horses = [], isLoading } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 100),
+    queryKey: ['horses', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
   });
 
   const filtered = horses.filter(h => {

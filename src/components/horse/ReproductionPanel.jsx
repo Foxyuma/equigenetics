@@ -25,7 +25,11 @@ export default function ReproductionPanel({ mare }) {
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
-  const { data: ownHorses = [] } = useQuery({ queryKey: ['horses'], queryFn: () => base44.entities.Horse.list('-created_date', 200) });
+  const { data: ownHorses = [] } = useQuery({
+    queryKey: ['horses', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
+  });
   const { data: stallionOffers = [] } = useQuery({ queryKey: ['stallion-offers'], queryFn: () => base44.entities.StallionOffer.list('-created_date', 200) });
   const { data: pendingBreedings = [] } = useQuery({
     queryKey: ['breeding-pending', mare.id],

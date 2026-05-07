@@ -18,14 +18,21 @@ export default function Breeding() {
   const [motherId, setMotherId] = useState('');
   const [foalPreview, setFoalPreview] = useState(null);
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: horses = [] } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 200),
+    queryKey: ['horses', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
   });
 
   const { data: records = [] } = useQuery({
-    queryKey: ['breeding-records'],
-    queryFn: () => base44.entities.BreedingRecord.list('-created_date', 20),
+    queryKey: ['breeding-records', currentUser?.email],
+    queryFn: () => base44.entities.BreedingRecord.filter({ created_by: currentUser.email }, '-created_date', 20),
+    enabled: !!currentUser?.email,
   });
 
   const { data: seasons = [] } = useQuery({

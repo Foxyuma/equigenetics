@@ -14,14 +14,21 @@ export default function Training() {
   const [selectedHorseId, setSelectedHorseId] = useState('');
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: horses = [] } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 200),
+    queryKey: ['horses', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
   });
 
   const { data: trainingHistory = [] } = useQuery({
-    queryKey: ['training-history'],
-    queryFn: () => base44.entities.Training.list('-created_date', 50),
+    queryKey: ['training-history', currentUser?.email],
+    queryFn: () => base44.entities.Training.filter({ created_by: currentUser.email }, '-created_date', 50),
+    enabled: !!currentUser?.email,
   });
 
   const selectedHorse = horses.find(h => h.id === selectedHorseId);

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter } from 'lucide-react';
 import HorseCard from '../components/horse/HorseCard';
 import { BREEDS } from '../components/genetics/GeneticsEngine';
+import OnboardingWizard from '../components/onboarding/OnboardingWizard';
 
 const HORSE_NAMES_MALE = ["Tornado", "Eclipse", "Sultan", "Orage", "Apollo", "Zéphyr", "Atlas", "Titan", "Merlin", "Sirius"];
 const HORSE_NAMES_FEMALE = ["Luna", "Aurore", "Perle", "Tempête", "Étoile", "Jade", "Iris", "Stella", "Naya", "Olympe"];
@@ -32,6 +33,11 @@ export default function Stable() {
     if (filterSex !== 'all' && h.sex !== filterSex) return false;
     return true;
   });
+
+  // Show onboarding if no horses yet
+  if (!isLoading && horses.length === 0 && currentUser) {
+    return <OnboardingWizard />;
+  }
 
   return (
     <div className="space-y-6">

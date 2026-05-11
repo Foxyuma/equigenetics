@@ -77,15 +77,6 @@ export default function Competitions() {
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
 
-  // Resolve any pending competitions whose competition_date has passed midnight
-  useEffect(() => {
-    if (!pendingCompetitions.length || !currentUser) return;
-    const today = new Date().toISOString().split('T')[0];
-    const toResolve = pendingCompetitions.filter(c => c.competition_date && c.competition_date <= today);
-    if (toResolve.length === 0) return;
-    toResolve.forEach(c => resolveMutation.mutate(c));
-  }, [pendingCompetitions, currentUser]);
-
   const resolveMutation = useMutation({
     mutationFn: async (comp) => {
       const horse = await base44.entities.Horse.filter({ id: comp.horse_id }).then(r => r[0]);
@@ -119,6 +110,15 @@ export default function Competitions() {
       queryClient.invalidateQueries({ queryKey: ['me'] });
     },
   });
+
+  // Resolve any pending competitions whose competition_date has passed midnight
+  useEffect(() => {
+    if (!pendingCompetitions.length || !currentUser) return;
+    const today = new Date().toISOString().split('T')[0];
+    const toResolve = pendingCompetitions.filter(c => c.competition_date && c.competition_date <= today);
+    if (toResolve.length === 0) return;
+    toResolve.forEach(c => resolveMutation.mutate(c));
+  }, [pendingCompetitions, currentUser]);
 
   const competeMutation = useMutation({
     mutationFn: async () => {

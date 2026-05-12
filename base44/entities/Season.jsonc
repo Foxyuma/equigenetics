@@ -1,0 +1,82 @@
+{
+  "name": "Season",
+  "type": "object",
+  "properties": {
+    "current_season": {
+      "type": "string",
+      "enum": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "default": "spring",
+      "description": "Saison actuelle"
+    },
+    "season_number": {
+      "type": "number",
+      "description": "Num\u00e9ro de la saison (compteur)",
+      "default": 1
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "D\u00e9but de la saison actuelle"
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fin de la saison actuelle"
+    },
+    "weather": {
+      "type": "string",
+      "enum": [
+        "sunny",
+        "rainy",
+        "cloudy",
+        "snowy",
+        "windy"
+      ],
+      "description": "M\u00e9t\u00e9o de la saison"
+    },
+    "fertility_modifier": {
+      "type": "number",
+      "description": "Modificateur de fertilit\u00e9 (%)",
+      "default": 100
+    },
+    "illness_probability": {
+      "type": "number",
+      "description": "Probabilit\u00e9 de maladie (%)",
+      "default": 15
+    },
+    "available_competitions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Disciplines disponibles cette saison",
+      "default": []
+    }
+  },
+  "required": [
+    "current_season"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

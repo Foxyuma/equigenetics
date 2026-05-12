@@ -1,0 +1,40 @@
+{
+  "name": "StableFinances",
+  "type": "object",
+  "properties": {
+    "balance": {
+      "type": "number",
+      "default": 5000,
+      "description": "Solde en pts de prestige"
+    },
+    "total_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "total_spent": {
+      "type": "number",
+      "default": 0
+    },
+    "last_payroll_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "user"
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "ItemUsage",
+  "type": "object",
+  "properties": {
+    "horse_id": {
+      "type": "string"
+    },
+    "horse_name": {
+      "type": "string"
+    },
+    "item_id": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "item_type": {
+      "type": "string"
+    },
+    "effect_applied": {
+      "type": "object",
+      "description": "Effect that was applied"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the effect expires"
+    }
+  },
+  "required": [
+    "horse_id",
+    "item_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "name": "TradeOffer",
+  "type": "object",
+  "properties": {
+    "sender_email": {
+      "type": "string",
+      "description": "Email of sender"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Name of sender"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of recipient"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Name of recipient"
+    },
+    "offered_horses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "horse_id": {
+            "type": "string"
+          },
+          "horse_name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Horses offered by sender",
+      "default": []
+    },
+    "offered_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Items offered by sender",
+      "default": []
+    },
+    "requested_horses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "horse_id": {
+            "type": "string"
+          },
+          "horse_name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Horses requested from recipient",
+      "default": []
+    },
+    "requested_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Items requested from recipient",
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optional message with the offer"
+    }
+  },
+  "required": [
+    "sender_email",
+    "recipient_email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "user"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "data.recipient_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "data.recipient_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "data.sender_email": "{{user.email}}"
+    }
+  }
+}

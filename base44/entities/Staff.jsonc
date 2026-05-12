@@ -1,0 +1,101 @@
+{
+  "name": "Staff",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom de l'employ\u00e9"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "groom",
+        "vet",
+        "trainer",
+        "manager"
+      ],
+      "description": "R\u00f4le du membre du personnel"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "junior",
+        "senior",
+        "expert"
+      ],
+      "default": "junior"
+    },
+    "speciality": {
+      "type": "string",
+      "description": "Sp\u00e9cialit\u00e9 unique"
+    },
+    "salary": {
+      "type": "number",
+      "description": "Salaire mensuel en pts"
+    },
+    "hired_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "bonuses": {
+      "type": "object",
+      "description": "Bonus passifs appliqu\u00e9s",
+      "properties": {
+        "energy_recovery_bonus": {
+          "type": "number",
+          "default": 0
+        },
+        "illness_risk_reduction": {
+          "type": "number",
+          "default": 0
+        },
+        "training_success_bonus": {
+          "type": "number",
+          "default": 0
+        },
+        "breeding_success_bonus": {
+          "type": "number",
+          "default": 0
+        },
+        "competition_score_bonus": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "morale": {
+      "type": "number",
+      "default": 100,
+      "description": "Moral de l'employ\u00e9 0-100"
+    }
+  },
+  "required": [
+    "name",
+    "role",
+    "salary"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "user"
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "name": "Auction",
+  "type": "object",
+  "properties": {
+    "horse_id": {
+      "type": "string",
+      "description": "ID du cheval en vente"
+    },
+    "horse_name": {
+      "type": "string"
+    },
+    "horse_breed": {
+      "type": "string"
+    },
+    "horse_coat_color": {
+      "type": "string"
+    },
+    "horse_stats": {
+      "type": "object"
+    },
+    "horse_image_url": {
+      "type": "string"
+    },
+    "seller_email": {
+      "type": "string",
+      "description": "Email du vendeur"
+    },
+    "seller_name": {
+      "type": "string"
+    },
+    "starting_price": {
+      "type": "number",
+      "default": 100
+    },
+    "current_bid": {
+      "type": "number",
+      "default": 0
+    },
+    "current_bidder_email": {
+      "type": "string"
+    },
+    "current_bidder_name": {
+      "type": "string"
+    },
+    "bid_count": {
+      "type": "number",
+      "default": 0
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de fin de l'ench\u00e8re"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "ended",
+        "cancelled"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "horse_id",
+    "seller_email",
+    "starting_price",
+    "ends_at"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "data.seller_email": "{{user.email}}"
+        },
+        {
+          "data.current_bidder_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.seller_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

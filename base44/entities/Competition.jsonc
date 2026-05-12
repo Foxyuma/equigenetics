@@ -1,0 +1,89 @@
+{
+  "name": "Competition",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "discipline": {
+      "type": "string",
+      "enum": [
+        "dressage",
+        "show_jumping",
+        "cross_country",
+        "endurance",
+        "reining",
+        "barrel_racing",
+        "polo",
+        "eventing",
+        "vaulting",
+        "driving",
+        "trail",
+        "western_pleasure"
+      ]
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "novice",
+        "intermediate",
+        "advanced",
+        "elite",
+        "olympic"
+      ]
+    },
+    "is_olympic": {
+      "type": "boolean",
+      "default": false
+    },
+    "horse_id": {
+      "type": "string"
+    },
+    "horse_name": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number"
+    },
+    "rank": {
+      "type": "number"
+    },
+    "prize": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "registered",
+        "completed"
+      ],
+      "default": "registered"
+    }
+  },
+  "required": [
+    "name",
+    "discipline",
+    "horse_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.status": "completed"
+        }
+      ]
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History, Zap } from 'lucide-react';
+import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History, Zap, BookOpen } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
 import GameClockDisplay from './GameClockDisplay';
@@ -13,6 +13,7 @@ const menuGroups = [
     items: [
       { path: "/Stable", label: "Mes Chevaux", icon: Home },
       { path: "/Breeding", label: "Élevage", icon: Heart },
+      { path: "/BreedingBook", label: "Carnet d'élevage", icon: BookOpen },
       { path: "/Training", label: "Entraînement", icon: TrendingUp },
       { path: "/Pedigree", label: "Lignées", icon: GitBranch },
       { path: "/SeasonCalendar", label: "Calendrier", icon: Calendar },

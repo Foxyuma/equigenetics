@@ -1,0 +1,74 @@
+{
+  "name": "Paddock",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom de l'enclos"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "pasture",
+        "training",
+        "recovery",
+        "quarantine",
+        "foaling"
+      ],
+      "default": "pasture",
+      "description": "Type d'enclos"
+    },
+    "capacity": {
+      "type": "number",
+      "default": 4,
+      "description": "Nombre maximum de chevaux"
+    },
+    "assigned_horses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "horse_id": {
+            "type": "string"
+          },
+          "horse_name": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Chevaux assign\u00e9s"
+    },
+    "morale_bonus": {
+      "type": "number",
+      "default": 0,
+      "description": "Bonus de moral accord\u00e9"
+    },
+    "energy_recovery_rate": {
+      "type": "number",
+      "default": 10,
+      "description": "R\u00e9cup\u00e9ration d'\u00e9nergie par heure"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

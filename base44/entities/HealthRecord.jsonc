@@ -1,0 +1,123 @@
+{
+  "name": "HealthRecord",
+  "type": "object",
+  "properties": {
+    "horse_id": {
+      "type": "string",
+      "description": "ID du cheval"
+    },
+    "horse_name": {
+      "type": "string",
+      "description": "Nom du cheval"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "critical"
+      ],
+      "default": "good",
+      "description": "\u00c9tat de sant\u00e9 g\u00e9n\u00e9ral"
+    },
+    "current_illness": {
+      "type": "string",
+      "description": "Maladie actuelle (null si sain)"
+    },
+    "illness_severity": {
+      "type": "string",
+      "enum": [
+        "mild",
+        "moderate",
+        "severe"
+      ],
+      "description": "S\u00e9v\u00e9rit\u00e9 de la maladie"
+    },
+    "illness_started": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de d\u00e9but de la maladie"
+    },
+    "symptoms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Sympt\u00f4mes actuels",
+      "default": []
+    },
+    "treatment_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "medication": {
+            "type": "string"
+          },
+          "duration_days": {
+            "type": "number"
+          },
+          "administered": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Plan de traitement",
+      "default": []
+    },
+    "energy_penalty": {
+      "type": "number",
+      "description": "Malus d'\u00e9nergie d\u00fb \u00e0 la maladie",
+      "default": 0
+    },
+    "performance_penalty": {
+      "type": "number",
+      "description": "Malus de performance (0-100)",
+      "default": 0
+    },
+    "vaccination_status": {
+      "type": "object",
+      "properties": {
+        "influenza": {
+          "type": "string",
+          "format": "date"
+        },
+        "tetanus": {
+          "type": "string",
+          "format": "date"
+        },
+        "rhinopneumonie": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "description": "Dates des vaccinations"
+    },
+    "last_checkup": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Dernier contr\u00f4le v\u00e9t\u00e9rinaire"
+    }
+  },
+  "required": [
+    "horse_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "user"
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

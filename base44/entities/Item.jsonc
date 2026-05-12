@@ -1,0 +1,90 @@
+{
+  "name": "Item",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Item name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "food",
+        "medicine",
+        "care",
+        "supplement"
+      ],
+      "description": "Item category"
+    },
+    "description": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji icon"
+    },
+    "price": {
+      "type": "number",
+      "description": "Purchase price"
+    },
+    "effect": {
+      "type": "object",
+      "description": "Item effects",
+      "properties": {
+        "energy_boost": {
+          "type": "number",
+          "description": "Energy restoration 0-100"
+        },
+        "heals_disease": {
+          "type": "boolean",
+          "description": "Temporarily suppresses genetic disease symptoms"
+        },
+        "stat_boost": {
+          "type": "string",
+          "description": "Which stat to boost (speed, endurance, etc.)"
+        },
+        "boost_amount": {
+          "type": "number",
+          "description": "Amount to boost stat"
+        },
+        "duration_days": {
+          "type": "number",
+          "description": "Effect duration in days"
+        }
+      }
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "common",
+        "uncommon",
+        "rare",
+        "legendary"
+      ],
+      "default": "common"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "price"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

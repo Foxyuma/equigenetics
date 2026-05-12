@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BREEDS, determineCoatColor } from '../genetics/GeneticsEngine';
 import { toast } from 'sonner';
 
-// Gènes visibles que le joueur peut choisir
+// Gènes visibles que le joueur peut choisir (seulement Extension et Agouti)
 const VISIBLE_LOCI = [
   {
     key: 'extension',
@@ -30,32 +30,14 @@ const VISIBLE_LOCI = [
       { value: 'aa', label: 'aa — Pas d\'agouti (noir total si E/_)' },
     ],
   },
-  {
-    key: 'grey',
-    label: 'Grey (G locus)',
-    desc: 'Le cheval grisonne progressivement',
-    options: [
-      { value: 'gg', label: 'gg — Non-gris' },
-      { value: 'Gg', label: 'Gg — Gris hétérozygote' },
-      { value: 'GG', label: 'GG — Gris homozygote' },
-    ],
-  },
-  {
-    key: 'cream',
-    label: 'Crème (Cr locus)',
-    desc: 'Dilue la robe → palomino, buckskin, cremello…',
-    options: [
-      { value: 'nn', label: 'nn — Pas de crème' },
-      { value: 'Crn', label: 'Crn — Une copie (palomino / buckskin)' },
-      { value: 'CrCr', label: 'CrCr — Double dilution (cremello / perlino)' },
-    ],
-  },
 ];
 
-// Gènes cachés (tirés aléatoirement parmi ceux-ci)
-const HIDDEN_LOCI = ['tobiano', 'roan', 'dun', 'champagne', 'silver'];
+// Gènes cachés (tirés aléatoirement — grey, cream, tobiano, roan, dun, champagne, silver)
+const HIDDEN_LOCI = ['grey', 'cream', 'tobiano', 'roan', 'dun', 'champagne', 'silver'];
 
 const HIDDEN_OPTIONS = {
+  grey: ['gg', 'Gg', 'GG'],
+  cream: ['nn', 'Crn', 'CrCr'],
   tobiano: ['nn', 'TOn', 'TOTO'],
   roan: ['nn', 'RNn'],
   dun: ['dd', 'Dd', 'DD'],
@@ -63,15 +45,18 @@ const HIDDEN_OPTIONS = {
   silver: ['zz', 'Zz', 'ZZ'],
 };
 
+// Poids de probabilité : la majorité des loci seront à la valeur neutre
 function pickRandomHidden() {
-  // 2 ou 3 loci cachés avec valeur aléatoire, le reste à la valeur neutre
-  const count = 2 + Math.floor(Math.random() * 2);
-  const picked = [...HIDDEN_LOCI].sort(() => Math.random() - 0.5).slice(0, count);
   const result = {};
-  HIDDEN_LOCI.forEach(l => { result[l] = HIDDEN_OPTIONS[l][0]; });
-  picked.forEach(l => {
+  HIDDEN_LOCI.forEach(l => {
     const opts = HIDDEN_OPTIONS[l];
-    result[l] = opts[Math.floor(Math.random() * opts.length)];
+    // 70% chance valeur neutre (index 0), 30% chance valeur non-neutre
+    const roll = Math.random();
+    if (roll < 0.70) {
+      result[l] = opts[0];
+    } else {
+      result[l] = opts[1 + Math.floor(Math.random() * (opts.length - 1))];
+    }
   });
   return result;
 }
@@ -96,8 +81,6 @@ export default function OnboardingWizard({ onComplete }) {
   const [visibleGenes, setVisibleGenes] = useState({
     extension: 'Ee',
     agouti: 'Aa',
-    grey: 'gg',
-    cream: 'nn',
   });
 
   // Hidden genes stable across renders
@@ -111,11 +94,24 @@ export default function OnboardingWizard({ onComplete }) {
       const genotype = { ...visibleGenes, ...hiddenGenes };
       const coat_color = determineCoatColor(genotype);
       const stats = generateBaseStats();
+
+      // Générer une image de la robe via IA
+      let image_url = null;
+      try {
+        const sexLabel = sex === 'male' ? 'stallion' : 'mare';
+        const result = await base44.integrations.Core.GenerateImage({
+          prompt: `A beautiful ${coat_color} ${breed} ${sexLabel} horse, full body side view, realistic photograph, natural lighting, green meadow background, high quality equine photography`,
+        });
+        image_url = result.url;
+      } catch (e) {
+        // image non bloquante
+      }
+
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
         sex,
-        age: 3 + Math.floor(Math.random() * 3), // 3-5 ans
+        age: 3 + Math.floor(Math.random() * 3),
         genotype,
         coat_color,
         stats,
@@ -124,6 +120,7 @@ export default function OnboardingWizard({ onComplete }) {
         competition_wins: 0,
         is_for_sale: false,
         price: 0,
+        ...(image_url && { image_url }),
       });
     },
     onSuccess: () => {
@@ -262,10 +259,10 @@ export default function OnboardingWizard({ onComplete }) {
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-stone-400">Gènes cachés</span>
+                    <span className="text-stone-400">Gènes cachés ({Object.keys(hiddenGenes).length} loci)</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {Object.entries(hiddenGenes).map(([k]) => (
-                        <Badge key={k} className="bg-stone-200 text-stone-500 border-0 text-xs">🔒 {k}: ?</Badge>
+                      {Object.keys(hiddenGenes).map(k => (
+                        <Badge key={k} className="bg-stone-200 text-stone-500 border-0 text-xs">🔒 {k}</Badge>
                       ))}
                     </div>
                   </div>
@@ -299,7 +296,7 @@ export default function OnboardingWizard({ onComplete }) {
                 {createMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Création…
+                    Génération de la robe…
                   </span>
                 ) : '🐴 Créer mon cheval'}
               </Button>

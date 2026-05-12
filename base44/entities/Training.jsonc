@@ -1,0 +1,61 @@
+{
+  "name": "Training",
+  "type": "object",
+  "properties": {
+    "horse_id": {
+      "type": "string"
+    },
+    "horse_name": {
+      "type": "string"
+    },
+    "stat_trained": {
+      "type": "string",
+      "description": "Which stat was trained"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard",
+        "extreme"
+      ],
+      "description": "Training difficulty level"
+    },
+    "energy_cost": {
+      "type": "number",
+      "description": "Energy consumed"
+    },
+    "success": {
+      "type": "boolean",
+      "description": "Whether training was successful"
+    },
+    "stat_gain": {
+      "type": "number",
+      "description": "Stat points gained"
+    },
+    "training_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "horse_id",
+    "stat_trained",
+    "difficulty"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BREEDS, determineCoatColor } from '../genetics/GeneticsEngine';
+import { buildHorseImagePrompt, extractMarkingsDescription } from '../../lib/horseImagePrompt';
 import { toast } from 'sonner';
 
 // Gènes visibles que le joueur peut choisir (seulement Extension et Agouti)
@@ -95,14 +96,20 @@ export default function OnboardingWizard({ onComplete }) {
       const coat_color = determineCoatColor(genotype);
       const stats = generateBaseStats();
 
-      // Générer une image de la robe via IA
+      // Générer une image poulain via IA
+      const markings = extractMarkingsDescription(coat_color, genotype);
       let image_url = null;
+      let foal_image_url = null;
       try {
-        const sexLabel = sex === 'male' ? 'stallion' : 'mare';
-        const result = await base44.integrations.Core.GenerateImage({
-          prompt: `A beautiful ${coat_color} ${breed} ${sexLabel} horse, full body side view, realistic photograph, natural lighting, green meadow background, high quality equine photography`,
-        });
-        image_url = result.url;
+        const prompt = buildHorseImagePrompt({ breed, coat_color, sex, isFoal: true, markings });
+        const result = await base44.integrations.Core.GenerateImage({ prompt });
+        // Re-upload pour URL permanente
+        const response = await fetch(result.url);
+        const blob = await response.blob();
+        const file = new File([blob], `horse_foal_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        image_url = file_url;
+        foal_image_url = file_url;
       } catch (e) {
         // image non bloquante
       }
@@ -111,9 +118,11 @@ export default function OnboardingWizard({ onComplete }) {
         name: name.trim(),
         breed,
         sex,
-        age: 3 + Math.floor(Math.random() * 3),
+        age: 0,
         genotype,
         coat_color,
+        markings_description: markings,
+        foal_image_url,
         stats,
         health_genes: [],
         energy: 100,

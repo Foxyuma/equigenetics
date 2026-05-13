@@ -23,7 +23,19 @@
     },
     "image_url": {
       "type": "string",
-      "description": "Horse image URL"
+      "description": "Current horse image URL (foal or adult depending on age)"
+    },
+    "foal_image_url": {
+      "type": "string",
+      "description": "Image g\u00e9n\u00e9r\u00e9e \u00e0 la naissance (poulain) \u2014 conserv\u00e9e \u00e0 vie"
+    },
+    "adult_image_url": {
+      "type": "string",
+      "description": "Image g\u00e9n\u00e9r\u00e9e \u00e0 l'\u00e2ge adulte (\u22653 ans) \u2014 g\u00e9n\u00e9r\u00e9e une seule fois"
+    },
+    "markings_description": {
+      "type": "string",
+      "description": "Description textuelle des marquages/couleurs g\u00e9n\u00e9r\u00e9e \u00e0 la naissance pour assurer la continuit\u00e9 poulain\u2192adulte"
     },
     "father_id": {
       "type": "string",
@@ -174,35 +186,5 @@
     "name",
     "breed",
     "sex"
-  ],
-  "rls": {
-    "create": {
-      "created_by": "{{user.email}}"
-    },
-    "read": {},
-    "update": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    }
-  }
+  ]
 }

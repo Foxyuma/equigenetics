@@ -12,6 +12,7 @@ import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart } from 'lucide-re
 import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
 import { estimateHorseValue } from '../components/genetics/GeneticsEngine';
+import { buildHorseImagePrompt, extractMarkingsDescription } from '../lib/horseImagePrompt';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
 import HorseVisualizer from '../components/horse/HorseVisualizer';
@@ -56,34 +57,35 @@ export default function HorseDetail() {
     queryFn: () => base44.auth.me(),
   });
 
-  const generateHorseImage = async () => {
-    if (!horse) return;
+  const generateAdultImage = async () => {
+    if (!horse || horse.adult_image_url || generatingImage) return;
     setGeneratingImage(true);
-    const visibleGenes = horse.genotype
-      ? Object.entries(horse.genotype)
-          .filter(([, v]) => !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v))
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(', ')
-      : '';
-    const prompt = `Photographie professionnelle d'un cheval de race ${horse.breed}, robe ${horse.coat_color}, ${
-      horse.sex === 'male' ? 'étalon' : 'jument'
-    }, âgé de ${horse.age || 1} ans. ${visibleGenes ? `Marquages génétiques visibles : ${visibleGenes}.` : ''} Photo réaliste de haute qualité, cheval entier en plein air, fond naturel, lumière douce, style photo équestre professionnelle. Le cheval doit ressembler parfaitement à la race ${horse.breed} avec ses caractéristiques morphologiques typiques.`;
+    const markings = horse.markings_description || extractMarkingsDescription(horse.coat_color, horse.genotype);
+    const prompt = buildHorseImagePrompt({
+      breed: horse.breed,
+      coat_color: horse.coat_color,
+      sex: horse.sex,
+      isFoal: false,
+      markings,
+    });
     const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({ prompt });
-    // Re-upload pour URL permanente
     const response = await fetch(generatedUrl);
     const blob = await response.blob();
-    const file = new File([blob], `horse_${horse.id}.jpg`, { type: 'image/jpeg' });
+    const file = new File([blob], `horse_adult_${horse.id}.jpg`, { type: 'image/jpeg' });
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.entities.Horse.update(horse.id, { image_url: file_url });
+    await base44.entities.Horse.update(horse.id, { adult_image_url: file_url, image_url: file_url });
     queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
     setGeneratingImage(false);
   };
 
+  // Auto-génère l'image adulte une seule fois quand l'âge atteint ≥ 3 ans
   useEffect(() => {
-    if (horse && !horse.image_url && !generatingImage) {
-      generateHorseImage();
+    if (!horse || generatingImage) return;
+    const isAdult = (horse.age || 0) >= 3;
+    if (isAdult && !horse.adult_image_url) {
+      generateAdultImage();
     }
-  }, [horse?.id]);
+  }, [horse?.id, horse?.age]);
 
   const { data: competitions = [] } = useQuery({
     queryKey: ['horse-competitions', horseId],
@@ -153,13 +155,15 @@ export default function HorseDetail() {
                   <p className="text-sm text-stone-400">Génération de la photo...</p>
                 </div>
               )}
-              {horse.image_url && !generatingImage && (
-                <button
-                  onClick={generateHorseImage}
-                  className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/40 hover:bg-black/60 text-white text-xs backdrop-blur-sm transition-colors"
-                >
-                  🔄 Regénérer
-                </button>
+              {horse.foal_image_url && horse.image_url === horse.adult_image_url && (
+                <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">
+                  📸 Photo adulte
+                </div>
+              )}
+              {horse.foal_image_url && horse.image_url === horse.foal_image_url && (
+                <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">
+                  🐴 Photo poulain
+                </div>
               )}
             </CardContent>
           </Card>

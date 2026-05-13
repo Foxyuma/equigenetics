@@ -4,11 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle2, Beaker, Dna, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle2, Beaker, Dna, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { useGameClock } from '../hooks/useGameClock';
 import GeneticPanel from '../components/horse/GeneticPanel';
-import StatBar from '../components/horse/StatBar';
 
 const TEST_TYPES = {
   health_panel: {
@@ -34,20 +32,6 @@ const TEST_TYPES = {
   }
 };
 
-// Le testage ne se fait que jour 3 automne, résultats jour 4 à 3h du matin
-function isTestingDay(gameClock) {
-  if (!gameClock) return false;
-  const AUTUMN_MONTH = 3; // Automne = mois 3 sur 4
-  return gameClock.month === AUTUMN_MONTH && gameClock.day === 3;
-}
-
-function isResultsReady(test, gameClock) {
-  if (!test || !gameClock) return false;
-  const testDate = new Date(test.created_date);
-  const AUTUMN_MONTH = 3;
-  // Résultats prêts si on est au jour 4 du même mois automne ou après
-  return gameClock.month === AUTUMN_MONTH && gameClock.day >= 4 && testDate.getMonth() === new Date().getMonth();
-}
 
 export default function GeneticTest() {
   const [selectedHorse, setSelectedHorse] = useState(null);
@@ -55,7 +39,6 @@ export default function GeneticTest() {
   const [showResults, setShowResults] = useState(null);
 
   const queryClient = useQueryClient();
-  const { clock: gameClock } = useGameClock();
 
   const { data: currentUser } = useQuery({
     queryKey: ['me'],
@@ -63,8 +46,9 @@ export default function GeneticTest() {
   });
 
   const { data: horses = [] } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 100),
+    queryKey: ['horses-mine'],
+    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser?.email }, '-created_date', 100),
+    enabled: !!currentUser,
   });
 
   const { data: testHistory = [] } = useQuery({
@@ -330,29 +314,6 @@ export default function GeneticTest() {
           </p>
         </div>
 
-        {/* Info jour de test */}
-        <Card className={`border-2 ${isTestingDay(gameClock) ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50'}`}>
-          <CardContent className="p-4 flex items-start gap-3">
-            {isTestingDay(gameClock) ? (
-              <>
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-emerald-700">
-                  <p className="font-semibold">📋 Jour de testage !</p>
-                  <p className="text-xs">Vous êtes le jour 3 de l'automne. Les résultats tomberont le jour 4 à 3h du matin.</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-700">
-                  <p className="font-semibold">⏰ Les tests se font le jour 3 de l'automne</p>
-                  <p className="text-xs">Revenez à cette date pour passer vos tests génétiques.</p>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Object.entries(TEST_TYPES).map(([testKey, testConfig]) => {
             const alreadyTested = testHistory.some(t => t.test_type === testKey);
@@ -361,12 +322,12 @@ export default function GeneticTest() {
             return (
               <Card
                 key={testKey}
-                className={`border-2 transition-all ${isTestingDay(gameClock) ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'} ${
+                className={`border-2 transition-all cursor-pointer ${
                     selectedTest === testKey
                       ? 'border-blue-400 bg-blue-50/50'
                       : 'border-stone-200 hover:border-blue-300'
                   }`}
-                  onClick={() => isTestingDay(gameClock) && setSelectedTest(selectedTest === testKey ? null : testKey)}
+                  onClick={() => setSelectedTest(selectedTest === testKey ? null : testKey)}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -396,7 +357,7 @@ export default function GeneticTest() {
                   <div className="pt-4 space-y-2 border-t border-stone-200">
                     <p className="text-lg font-bold text-blue-600">{testConfig.price} ₲</p>
 
-                    {selectedTest === testKey && isTestingDay(gameClock) && (
+                    {selectedTest === testKey && (
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -425,33 +386,22 @@ export default function GeneticTest() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {testHistory.map(test => {
-                  const resultsReady = isResultsReady(test, gameClock);
-                  return (
+                {testHistory.map(test => (
                     <div
                       key={test.id}
-                      className={`p-3 rounded-lg border flex items-center justify-between ${
-                        resultsReady ? 'bg-emerald-50 border-emerald-200' : 'bg-stone-50 border-stone-200'
-                      }`}
+                      className="p-3 rounded-lg border flex items-center justify-between bg-emerald-50 border-emerald-200"
                     >
                       <div>
                         <p className="font-semibold text-stone-800">{TEST_TYPES[test.test_type]?.label}</p>
                         <p className="text-xs text-stone-500">
-                          {new Date(test.created_date).toLocaleDateString('fr-FR')}
-                          {resultsReady && ' - ✅ Résultats disponibles'}
-                          {!resultsReady && ' - ⏳ En attente'}
+                          {new Date(test.created_date).toLocaleDateString('fr-FR')} · {test.cost} ₲
                         </p>
                       </div>
-                      {resultsReady ? (
-                        <Button size="sm" variant="outline" onClick={() => setShowResults(test)}>
-                          Voir résultats
-                        </Button>
-                      ) : (
-                        <Badge variant="outline">{test.cost} ₲</Badge>
-                      )}
+                      <Button size="sm" variant="outline" onClick={() => setShowResults(test)}>
+                        Voir résultats
+                      </Button>
                     </div>
-                  );
-                })}
+                  ))}
               </div>
             </CardContent>
           </Card>

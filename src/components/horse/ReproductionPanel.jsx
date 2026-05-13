@@ -8,6 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
 import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge, determineBreedFromParents } from '../genetics/GeneticsEngine';
+
+function calcDynamicPrice(stallion) {
+  if (!stallion || stallion.is_own) return 0;
+  const stats = stallion.stats || {};
+  const keys = Object.keys(stats);
+  const avg = keys.length > 0 ? keys.reduce((s, k) => s + (stats[k] || 0), 0) / keys.length : 50;
+  let base = 1000 + Math.max(0, avg - 50) * 200;
+  const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
+  const geno = stallion.genotype || {};
+  const rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'dd' && geno[g] !== 'zz').length;
+  base += rareCount * 1500;
+  base += (stallion.competition_wins || 0) * 300;
+  const mult = { elite_approved: 2.0, approved_for_sport_breeding: 1.6, approved_for_breeding: 1.3, not_evaluated: 1.0, rejected: 0.7 }[stallion.breeding_approval_status] || 1.0;
+  return Math.max(800, Math.min(50000, Math.round(base * mult)));
+}
 import { getBreedingImpact } from '../breeding/InspectionScoring';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
@@ -80,7 +95,7 @@ export default function ReproductionPanel({ mare }) {
   const confirmBreedingMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser) throw new Error('Non connecté');
-      const price = selectedStallion.price ?? 0;
+      const price = selectedStallion.is_own ? 0 : calcDynamicPrice(selectedStallion);
       if (price > 0) {
         const balance = currentUser.genesis_balance ?? 0;
         if (balance < price) throw new Error('Fonds insuffisants');
@@ -283,12 +298,19 @@ export default function ReproductionPanel({ mare }) {
                             <p className="font-bold text-stone-800 text-sm">{s.stallion_name}</p>
                             <p className="text-xs text-stone-400">{s.owner_name}</p>
                           </div>
-                          {s.price > 0
-                             ? <div>
-                                 <p className="text-amber-700 font-bold text-sm">{s.price.toLocaleString('fr-FR')} ₲</p>
-                                 {breedingImpact.priceMultiplier !== 1 && <p className="text-xs text-stone-400">×{breedingImpact.priceMultiplier}</p>}
+                          {s.is_own
+                             ? <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
+                             : <div className="text-right">
+                                 <p className="text-amber-700 font-bold text-sm">{calcDynamicPrice(s).toLocaleString('fr-FR')} ₲</p>
+                                 {s.breeding_approval_status && s.breeding_approval_status !== 'not_evaluated' && (
+                                   <p className="text-xs text-stone-400">
+                                     {s.breeding_approval_status === 'elite_approved' ? '⭐ Élite ×2' :
+                                      s.breeding_approval_status === 'approved_for_sport_breeding' ? '🏆 Sport ×1.6' :
+                                      s.breeding_approval_status === 'approved_for_breeding' ? '✅ Approuvé ×1.3' :
+                                      s.breeding_approval_status === 'rejected' ? '❌ Rejeté ×0.7' : ''}
+                                   </p>
+                                 )}
                                </div>
-                             : <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
                            }
                         </div>
                         <div className="flex flex-wrap gap-1">
@@ -495,7 +517,7 @@ export default function ReproductionPanel({ mare }) {
                   className="flex-1 bg-stone-800 hover:bg-stone-900"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  Confirmer la saillie{selectedStallion.price > 0 ? ` — ${selectedStallion.price.toLocaleString('fr-FR')} ₲` : ''}
+                  {(() => { const p = selectedStallion.is_own ? 0 : calcDynamicPrice(selectedStallion); return `Confirmer la saillie${p > 0 ? ` — ${p.toLocaleString('fr-FR')} ₲` : ''}`; })()}
                 </Button>
                 <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
               </div>

@@ -12,16 +12,47 @@ import StatBar from '../components/horse/StatBar';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import { toast } from 'sonner';
 
-function calculateStallionPrice(basePrice, approvalStatus) {
-  const multipliers = {
-    elite: 1.5,
-    provisional: 1.2,
-    approved: 1.0,
-    approved_restricted: 0.9,
-    not_approved: 0.7,
-    not_evaluated: 1.0
+/**
+ * Calcule le prix de saillie dynamique en fonction :
+ * - de la moyenne des stats (qualité sportive)
+ * - du nombre de gènes rares (champagne, silver, dun, roan)
+ * - du statut d'approbation studbook
+ * - des victoires en compétition (si connues)
+ */
+function calculateStallionPrice(stallion) {
+  const stats = stallion.stats || {};
+  const statKeys = Object.keys(stats);
+  const avgStat = statKeys.length > 0
+    ? Math.round(statKeys.reduce((sum, k) => sum + (stats[k] || 0), 0) / statKeys.length)
+    : 50;
+
+  // Base: 1 000 + 200 pts par point de stat au-dessus de 50
+  const statBonus = Math.max(0, avgStat - 50) * 200;
+  let base = 1000 + statBonus;
+
+  // Bonus gènes rares
+  const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
+  const geno = stallion.genotype || {};
+  const rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'dd' && geno[g] !== 'zz').length;
+  base += rareCount * 1500;
+
+  // Bonus victoires
+  const wins = stallion.competition_wins || 0;
+  base += wins * 300;
+
+  // Multiplicateur d'approbation studbook
+  const approvalMultipliers = {
+    elite_approved: 2.0,
+    approved_for_sport_breeding: 1.6,
+    approved_for_breeding: 1.3,
+    not_evaluated: 1.0,
+    rejected: 0.7,
   };
-  return Math.round(basePrice * (multipliers[approvalStatus] || 1.0));
+  const mult = approvalMultipliers[stallion.breeding_approval_status] || 1.0;
+  base = Math.round(base * mult);
+
+  // Clamp: 800 → 50 000
+  return Math.max(800, Math.min(50000, base));
 }
 
 const NPC_STALLION_NAMES = {
@@ -60,7 +91,15 @@ function generateNPCStallions() {
           return g;
         });
       }
-      stallions.push({
+      // Statut d'approbation aléatoire pour les NPC (majorité approuvés car sélectionnés)
+      const approvalRoll = Math.random();
+      let breeding_approval_status;
+      if (approvalRoll < 0.15) breeding_approval_status = 'elite_approved';
+      else if (approvalRoll < 0.45) breeding_approval_status = 'approved_for_sport_breeding';
+      else if (approvalRoll < 0.80) breeding_approval_status = 'approved_for_breeding';
+      else breeding_approval_status = 'not_evaluated';
+
+      const stallionObj = {
         stallion_name: names[i],
         breed,
         coat_color: starter.coat_color,
@@ -68,12 +107,15 @@ function generateNPCStallions() {
         genotype: starter.genotype,
         stats: boostedStats,
         health_genes,
-        price: 3000 + Math.floor(Math.random() * 12000),
         owner_name: "Haras Nationaux",
         owner_email: "haras@national.equigenesis",
         is_npc: true,
+        breeding_approval_status,
         description: `Étalon de race ${breed} sélectionné par les Haras Nationaux pour ses qualités génétiques.`,
-      });
+      };
+      // Prix calculé dynamiquement
+      stallionObj.price = calculateStallionPrice(stallionObj);
+      stallions.push(stallionObj);
     }
   });
   return stallions;
@@ -116,10 +158,10 @@ export default function StallionMarket() {
     );
   }
 
-  // Calculate dynamic prices based on approval status
+  // Le prix stocké est déjà dynamique ; on l'expose tel quel
   const stallionsWithDynamicPrices = filteredStallions.map(s => ({
     ...s,
-    dynamicPrice: calculateStallionPrice(s.price || 5000, s.breeding_approval_status)
+    dynamicPrice: s.price || calculateStallionPrice(s),
   }));
 
   const simulateBreeding = () => {
@@ -248,11 +290,11 @@ export default function StallionMarket() {
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
                     <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
-                    {s.breeding_approval_status === 'elite' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Étalon Star</Badge>}
-                    {s.breeding_approval_status === 'provisional' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">✅ Provisoire</Badge>}
-                    {s.breeding_approval_status === 'approved' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">📋 Approuvé</Badge>}
-                    {s.breeding_approval_status === 'approved_restricted' && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">⚠️ Restreint</Badge>}
-                    {s.breeding_approval_status === 'not_approved' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">❌ Non Approuvé</Badge>}
+                    {s.breeding_approval_status === 'elite_approved' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Élite</Badge>}
+                    {s.breeding_approval_status === 'approved_for_sport_breeding' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">🏆 Sport</Badge>}
+                    {s.breeding_approval_status === 'approved_for_breeding' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">✅ Approuvé</Badge>}
+                    {s.breeding_approval_status === 'not_evaluated' && <Badge className="bg-stone-100 text-stone-500 border-0 text-xs">— Non évalué</Badge>}
+                    {s.breeding_approval_status === 'rejected' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">❌ Rejeté</Badge>}
                   </div>
                   {/* Avg stat */}
                   {s.stats && (

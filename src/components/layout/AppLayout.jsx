@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
 import GameClockDisplay from './GameClockDisplay';
 import { base44 } from '@/api/base44Client';
+import { useGameNotifications } from '@/hooks/useGameNotifications';
 
 const menuGroups = [
   {
@@ -62,6 +63,8 @@ export default function AppLayout() {
     queryKey: ['current-user-nav'],
     queryFn: () => base44.auth.me(),
   });
+
+  useGameNotifications();
 
   useEffect(() => {
     if (!currentUser) return;

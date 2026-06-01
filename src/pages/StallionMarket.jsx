@@ -56,16 +56,24 @@ function calculateStallionPrice(stallion) {
 }
 
 const NPC_STALLION_NAMES = {
-  "Thoroughbred": ["Northern Dancer II", "Galileo's Legacy", "Frankel Star", "Sea The Stars Jr"],
   "Arabian": ["Desert Prince", "Al Farid", "Regal Mirage", "Sahara Wind"],
-  "Warmblood": ["Hanoverian King", "Westphalian Gold", "Dutch Master", "KWPN Royale"],
-  "Quarter Horse": ["Peppy San Badger Jr", "Hollywood Dun It", "Smart Like Juice", "Whiz's Echo"],
-  "Appaloosa": ["Spotted Eagle", "Leopard Prince", "Snowflake Chief", "Pawnee Cloud"],
-  "Paint": ["Flashy Overo", "Tobiano King", "Color Me Bold", "Pinto Warrior"],
+  "Thoroughbred": ["Northern Dancer II", "Galileo's Legacy", "Frankel Star", "Sea The Stars Jr"],
   "Friesian": ["Nero van de Waard", "Tsjalle 454", "Jasper's Pride", "Friesian Night"],
-  "Andalusian": ["Fuego de Espana", "Lusitano Rey", "Don Pablo", "Maestro Real"],
-  "Morgan": ["Figure's Line", "Ethan Allen III", "Justin Morgan Jr", "Vermont Pride"],
-  "Tennessee Walker": ["Midnight Sun Jr", "Pride of Morning", "Walking Tall", "Southern Grace"],
+  "Lipizzaner": ["Conversano Storno", "Neapolitano Favory", "Maestoso Alba", "Pluto Theodorosta"],
+  "Anglo-Arabian": ["Fakir du Cadran", "Inshallah de Muze", "Jalil de Reve", "Kaïros de L'Isle"],
+  "Haflinger": ["Hadrian von Seebach", "Landro vom Hohen Weg", "Mauro von Jerzens", "Norbert vom Alpenbach"],
+  "Connemara": ["Finn MacCool", "Ballynahinch Grey", "Dun Na Ri", "Knockmore Hero"],
+  "Selle Français": ["Baloubet du Rouet Jr", "Calvaro Z", "Diamant de Semilly II", "Espoir de la Loge"],
+  "KWPN": ["Bustique", "Hickstead", "Verdades", "Totilas Z"],
+  "Hanoverian": ["Weltmeyer II", "Sandro Hit Jr", "Blue Hors Don Schufro", "Donnerhall Jr"],
+  "Holsteiner": ["Casall Jr", "Cador", "Calido I Jr", "Contefino"],
+  "Oldenburg": ["Fürstenball", "Vitalis", "Belissimo M Jr", "Hochadel"],
+  "Belgian Warmblood": ["Calvaro F.C.", "Querlybet Hero", "Griseldi", "Nonstop"],
+  "Quarter Horse": ["Peppy San Badger Jr", "Hollywood Dun It", "Smart Like Juice", "Whiz's Echo"],
+  "Paint Horse": ["Flashy Overo", "Tobiano King", "Color Me Bold", "Pinto Warrior"],
+  "Appaloosa": ["Spotted Eagle", "Leopard Prince", "Snowflake Chief", "Pawnee Cloud"],
+  "Shire": ["Black Knight", "Thunder", "Goliath", "Sampson"],
+  "Shetland": ["Mini Thunder", "Tiny King", "Little Prince", "Pixie"],
 };
 
 function generateNPCStallions() {

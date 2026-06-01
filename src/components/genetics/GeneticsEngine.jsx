@@ -1,25 +1,31 @@
 // Horse Genetics Engine - handles inheritance, coat color determination, disease transmission
+import { BREED_PROFILES, getBreedDisciplineBonus } from '@/lib/breedProfiles';
 
-// Races européennes principales pour l'élevage sport
+// Toutes les races jouables
 const BREEDS = [
-  // Studbooks fermés (sangs purs uniquement)
+  // Sangs purs / orientaux
   "Arabian",
   "Thoroughbred",
   "Friesian",
   "Lipizzaner",
-  
-  // Studbooks semi-ouverts (acceptent certains apports)
+  // Semi-ouverts
   "Anglo-Arabian",
   "Haflinger",
   "Connemara",
-  
-  // Warmblood européens (studbooks ouverts, sportifs)
+  // Warmblood européens sport
   "Selle Français",
   "KWPN",
   "Hanoverian",
   "Holsteiner",
   "Oldenburg",
-  "Belgian Warmblood"
+  "Belgian Warmblood",
+  // Western / américains
+  "Quarter Horse",
+  "Paint Horse",
+  "Appaloosa",
+  // Races lourdes / poneys
+  "Shire",
+  "Shetland",
 ];
 
 const DISEASES = [
@@ -188,20 +194,41 @@ export function generateRandomGenotype(breed) {
     const a2 = randomAllele(locus);
     genotype[locus] = combineAlleles(locus, a1, a2);
   });
-  
-  if (breed === "Frison") {
-    genotype.extension = "EE";
-    genotype.agouti = "aa";
-    genotype.grey = "gg";
+
+  // Appliquer les gènes forcés depuis le profil de race
+  const profile = BREED_PROFILES[breed];
+  if (profile?.forcedGenotype) {
+    Object.assign(genotype, profile.forcedGenotype);
+  }
+
+  // Gris fréquent selon la race
+  const greyFreq = profile?.greyFrequency ?? 0.10;
+  if (Math.random() < greyFreq && !profile?.forcedGenotype?.grey) {
+    genotype.grey = Math.random() < 0.3 ? "GG" : "Gg";
+  }
+
+  // Cas spéciaux legacy
+  if (breed === "Haflinger") {
+    // Alezan obligatoire (ee) + crins lavés = pas de crème ni grey
+    genotype.extension = "ee";
     genotype.cream = "nn";
+    genotype.grey = "gg";
+    genotype.tobiano = "nn";
+    genotype.roan = "nn";
   }
-  if (breed === "Fjord") {
-    genotype.dun = Math.random() > 0.2 ? "DD" : "Dd";
+  if (breed === "Lipizzaner") {
+    // Quasi tous gris
+    genotype.grey = Math.random() < 0.85 ? "Gg" : "gg";
   }
-  if (breed === "Camargue") {
-    genotype.grey = Math.random() > 0.3 ? "Gg" : "GG";
+  if (breed === "Appaloosa") {
+    // Pattern LP simulé par roan
+    genotype.roan = "RNn";
   }
-  
+  if (breed === "Paint Horse") {
+    // Tobiano fréquent
+    if (Math.random() < 0.7) genotype.tobiano = "TOn";
+  }
+
   return genotype;
 }
 
@@ -367,21 +394,17 @@ export function generateRandomStats(fatherStats, motherStats) {
 }
 
 export function checkFoalViability(fatherHealth, motherHealth, breed) {
-  const relevantDiseases = DISEASES.filter(d => d.breeds.some(b => b === breed));
+  const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed));
   
   for (const disease of relevantDiseases) {
-    if (!disease.lethal_homozygous) continue;
     const fatherGene = fatherHealth?.find(h => h.disease === disease.name);
     const motherGene = motherHealth?.find(h => h.disease === disease.name);
     
-    const fatherCarries = fatherGene?.status === "affected" || fatherGene?.status === "carrier";
-    const motherCarries = motherGene?.status === "affected" || motherGene?.status === "carrier";
+    const fatherAffected = fatherGene?.status === "affected";
+    const motherAffected = motherGene?.status === "affected";
     
-    // Pour les récessifs létaux : les deux porteurs → 25% chance de mort
-    if (fatherCarries && motherCarries && disease.dominance === "recessive") {
-      if (Math.random() < 0.25) {
-        return { viable: false, cause: disease.name, reason: "stillborn" };
-      }
+    if (fatherAffected && motherAffected && disease.lethal_homozygous) {
+      return { viable: false, cause: disease.name, reason: "stillborn" };
     }
   }
   
@@ -456,10 +479,16 @@ export function inheritDiseases(fatherHealth, motherHealth, breed) {
 
 export function generateStarterHorse(breed) {
   const genotype = generateRandomGenotype(breed);
-  // Stats de départ bas : 15-35 par défaut
+  // Stats de départ bas : 15-35 par défaut, puis bonus race
   const statNames = ["speed", "endurance", "agility", "strength", "temperament", "jumping", "dressage"];
   const stats = {};
   statNames.forEach(s => { stats[s] = Math.round(15 + Math.random() * 20); });
+  // Appliquer les bonus/malus de race
+  const profile = BREED_PROFILES[breed];
+  if (profile) {
+    Object.entries(profile.statBonuses || {}).forEach(([s, b]) => { stats[s] = Math.min(100, (stats[s] || 0) + Math.round(b * 0.5)); });
+    Object.entries(profile.statPenalties || {}).forEach(([s, p]) => { stats[s] = Math.max(5, (stats[s] || 0) + Math.round(p * 0.5)); });
+  }
 
   const healthGenes = [];
   const relevantDiseases = DISEASES.filter(d => d.breeds.some(b => b === breed));
@@ -487,30 +516,37 @@ export function generateStarterHorse(breed) {
 export function getCompetitionScore(horse, discipline) {
   if (!horse?.stats) return 0;
   const weights = {
-    dressage: { dressage: 0.4, temperament: 0.3, agility: 0.2, strength: 0.1 },
-    show_jumping: { jumping: 0.4, agility: 0.25, speed: 0.2, strength: 0.15 },
-    cross_country: { endurance: 0.3, jumping: 0.25, speed: 0.25, agility: 0.2 },
-    endurance: { endurance: 0.5, speed: 0.2, strength: 0.2, temperament: 0.1 },
-    reining: { agility: 0.35, temperament: 0.3, speed: 0.2, dressage: 0.15 },
-    barrel_racing: { speed: 0.4, agility: 0.35, temperament: 0.15, endurance: 0.1 },
-    polo: { speed: 0.3, agility: 0.3, temperament: 0.2, endurance: 0.2 },
-    eventing: { jumping: 0.25, dressage: 0.25, endurance: 0.25, speed: 0.25 },
-    vaulting: { temperament: 0.4, dressage: 0.3, strength: 0.2, agility: 0.1 },
-    driving: { temperament: 0.3, endurance: 0.3, strength: 0.25, dressage: 0.15 },
-    trail: { temperament: 0.35, endurance: 0.3, agility: 0.2, speed: 0.15 },
+    dressage:         { dressage: 0.4, temperament: 0.3, agility: 0.2, strength: 0.1 },
+    show_jumping:     { jumping: 0.4, agility: 0.25, speed: 0.2, strength: 0.15 },
+    cross_country:    { endurance: 0.3, jumping: 0.25, speed: 0.25, agility: 0.2 },
+    endurance:        { endurance: 0.5, speed: 0.2, strength: 0.2, temperament: 0.1 },
+    reining:          { agility: 0.35, temperament: 0.3, speed: 0.2, dressage: 0.15 },
+    barrel_racing:    { speed: 0.4, agility: 0.35, temperament: 0.15, endurance: 0.1 },
+    polo:             { speed: 0.3, agility: 0.3, temperament: 0.2, endurance: 0.2 },
+    eventing:         { jumping: 0.25, dressage: 0.25, endurance: 0.25, speed: 0.25 },
+    vaulting:         { temperament: 0.4, dressage: 0.3, strength: 0.2, agility: 0.1 },
+    driving:          { temperament: 0.3, endurance: 0.3, strength: 0.25, dressage: 0.15 },
+    trail:            { temperament: 0.35, endurance: 0.3, agility: 0.2, speed: 0.15 },
     western_pleasure: { temperament: 0.4, dressage: 0.3, agility: 0.2, speed: 0.1 },
+    racing:           { speed: 0.5, endurance: 0.3, agility: 0.2 },
   };
   
   const w = weights[discipline] || weights.dressage;
   let score = 0;
   Object.entries(w).forEach(([stat, weight]) => {
-    score += (horse.stats[stat] || 50) * weight;
+    score += (horse.stats[stat] || 20) * weight;
   });
-  
+
+  // Bonus de race par discipline (prédispositions génétiques)
+  const breedBonus = getBreedDisciplineBonus(horse.breed, discipline);
+  score += breedBonus * 0.3; // Converti en points de score (plafonné plus bas)
+
+  // Malus maladies génétiques
   const affected = horse.health_genes?.filter(h => h.status === "affected") || [];
-  score -= affected.length * 10;
+  score -= affected.length * 8;
   
-  score += (Math.random() - 0.5) * 15;
+  // Aléatoire journalier ±7 pts
+  score += (Math.random() - 0.5) * 14;
   
   return Math.max(0, Math.min(100, Math.round(score * 10) / 10));
 }
@@ -554,54 +590,50 @@ export function determineFoalDeathAge(healthGenes) {
 export function estimateHorseValue(horse) {
   const avgStat = horse.stats
     ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7)
-    : 20;
+    : 30;
   const age = horse.age ?? 0;
   const wins = horse.competition_wins || 0;
   const hasDisease = horse.health_genes?.some(g => g.status === 'affected');
   const approvalStatus = horse.breeding_approval_status;
 
-  // Courbe progressive — stats moyennes de départ ~20-25
-  // Un cheval starter vaut ~200-600 ₲
-  // Un cheval bien entraîné (stat ~60) : ~10 000 ₲
-  // Un champion (stat ~85+) : jusqu'à 300 000 ₲
+  // Base selon les stats — courbe progressive calibrée pour débutants
+  // Stats moyennes de départ ~25-35, les bons chevaux atteignent 60-75 avec effort
   let base;
-  if (avgStat < 25) {
-    base = 100 + avgStat * 12;                          // 100 → 400
-  } else if (avgStat < 40) {
-    base = 400 + (avgStat - 25) * 40;                  // 400 → 1 000
-  } else if (avgStat < 55) {
-    base = 1000 + (avgStat - 40) * 200;                // 1 000 → 4 000
-  } else if (avgStat < 70) {
-    base = 4000 + (avgStat - 55) * 600;                // 4 000 → 13 000
-  } else if (avgStat < 82) {
-    base = 13000 + (avgStat - 70) * 2500;              // 13 000 → 43 000
+  if (avgStat < 30) {
+    base = 500 + avgStat * 20;                               // 500 → 1 100
+  } else if (avgStat < 50) {
+    base = 1100 + (avgStat - 30) * 80;                      // 1 100 → 2 700
+  } else if (avgStat < 65) {
+    base = 2700 + (avgStat - 50) * 500;                     // 2 700 → 10 200
+  } else if (avgStat < 80) {
+    base = 10200 + (avgStat - 65) * 2500;                   // 10 200 → 47 700
   } else {
-    base = 43000 + (avgStat - 82) * 14000;             // 43 000 → 295 000 à stat 100
+    base = 47700 + (avgStat - 80) * 6000;                   // 47 700 → 167 700 à stat 100
   }
 
   // Modificateur robe
   base *= getCoatMultiplier(horse.coat_color);
 
-  // Victoires : +4% par victoire, max ×1.8
-  const winsMultiplier = Math.min(1.8, 1 + wins * 0.04);
+  // Victoires : +5% par victoire, max ×2
+  const winsMultiplier = Math.min(2, 1 + wins * 0.05);
   base *= winsMultiplier;
 
   // Maladie génétique : forte décote
-  if (hasDisease) base *= 0.3;
+  if (hasDisease) base *= 0.35;
 
   // Approbation studbook
   const approvalMultiplier = {
-    elite_approved: 1.6,
-    approved_for_sport_breeding: 1.3,
-    approved_for_breeding: 1.1,
+    elite_approved: 1.8,
+    approved_for_sport_breeding: 1.4,
+    approved_for_breeding: 1.15,
     not_evaluated: 1.0,
     rejected: 0.6,
   };
   base *= approvalMultiplier[approvalStatus] || 1.0;
 
   // Âge : les poulains valent moins
-  if (age <= 1) base *= 0.35;
-  else if (age <= 3) base *= 0.6;
+  if (age <= 1) base *= 0.4;
+  else if (age <= 3) base *= 0.65;
 
   // Plafond absolu : 300 000 ₲
   return Math.min(300000, Math.round(base / 100) * 100);

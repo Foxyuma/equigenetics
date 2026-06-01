@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Medal, Zap, Star } from 'lucide-react';
 import { getCompetitionScore } from '../components/genetics/GeneticsEngine';
+import { getBreedDisciplineBonus } from '../lib/breedProfiles';
 import SeasonManager from '../components/season/SeasonManager';
 
 const DISCIPLINES = [
@@ -258,6 +259,15 @@ export default function Competitions() {
                     </p>
                   </div>
                 </div>
+                {(() => {
+                  const bonus = getBreedDisciplineBonus(selectedHorse.breed, selectedDiscipline);
+                  if (bonus > 0) return (
+                    <div className="mt-3 p-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs flex items-center gap-2">
+                      🏆 Prédisposition {selectedHorse.breed} pour cette discipline (+{bonus} pts race)
+                    </div>
+                  );
+                  return null;
+                })()}
                 {selectedHorse.health_genes?.some(h => h.status === 'affected') && (
                   <div className="mt-3 p-2 rounded-lg bg-red-50 text-red-600 text-xs flex items-center gap-2">
                     ⚠️ Ce cheval est atteint d'une maladie génétique — performances réduites

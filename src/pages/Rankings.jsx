@@ -18,6 +18,11 @@ export default function Rankings() {
     queryFn: () => base44.entities.Horse.list('-competition_wins', 100),
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+  });
+
   const { data: competitions = [] } = useQuery({
     queryKey: ['competitions-all'],
     queryFn: () => base44.entities.Competition.list('-created_date', 200),
@@ -64,16 +69,28 @@ export default function Rankings() {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {horses.map((h, idx) => (
-            <Link key={h.id} to={h.created_by === currentUser?.email ? `/HorseDetail?id=${h.id}` : `/PublicHorseProfile?id=${h.id}`}>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 flex items-center justify-center">
+          {horses.map((h, idx) => {
+            const owner = users.find(u => u.email === h.created_by);
+            const horseLink = h.created_by === currentUser?.email ? `/HorseDetail?id=${h.id}` : `/PublicHorseProfile?id=${h.id}`;
+            const ownerLink = owner ? `/PlayerProfile?id=${owner.id}` : null;
+            return (
+              <div key={h.id} className="flex items-center justify-between p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-8 flex items-center justify-center flex-shrink-0">
                     {getRankBadge(idx + 1)}
                   </div>
-                  <div>
-                    <p className="font-semibold text-stone-800 text-sm">{h.name}</p>
-                    <p className="text-xs text-stone-500">{h.breed}</p>
+                  <div className="min-w-0">
+                    <Link to={horseLink}>
+                      <p className="font-semibold text-stone-800 text-sm hover:text-amber-700 transition-colors">{h.name}</p>
+                    </Link>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-xs text-stone-500">{h.breed}</p>
+                      {ownerLink && (
+                        <Link to={ownerLink} className="text-xs text-indigo-500 hover:text-indigo-700 hover:underline transition-colors">
+                          {owner?.full_name || h.created_by}
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -86,8 +103,8 @@ export default function Rankings() {
                   </p>
                 </div>
               </div>
-            </Link>
-          ))}
+            );
+          })}
           {horses.length === 0 && (
             <p className="text-center text-stone-400 py-8 text-sm">Aucune donnée disponible</p>
           )}

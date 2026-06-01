@@ -31,6 +31,7 @@ import BuyCredits from './pages/BuyCredits';
 import GeneticTest from './pages/GeneticTest';
 import PublicHorseProfile from './pages/PublicHorseProfile';
 import BreedingBook from './pages/BreedingBook';
+import PlayerProfile from './pages/PlayerProfile';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -83,6 +84,7 @@ const AuthenticatedApp = () => {
         <Route path="/GeneticTest" element={<GeneticTest />} />
         <Route path="/PublicHorseProfile" element={<PublicHorseProfile />} />
         <Route path="/BreedingBook" element={<BreedingBook />} />
+        <Route path="/PlayerProfile" element={<PlayerProfile />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

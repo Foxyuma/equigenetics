@@ -8,9 +8,18 @@
     "horse_name": {
       "type": "string"
     },
+    "training_type": {
+      "type": "string",
+      "description": "Type d'entra\u00eenement (longe, libert\u00e9, dressage, etc.)"
+    },
     "stat_trained": {
       "type": "string",
-      "description": "Which stat was trained"
+      "description": "Stat principale entra\u00een\u00e9e"
+    },
+    "stats_gained": {
+      "type": "object",
+      "description": "Map des gains par comp\u00e9tence {speed: 3, endurance: 2}",
+      "default": {}
     },
     "difficulty": {
       "type": "string",
@@ -24,15 +33,33 @@
     },
     "energy_cost": {
       "type": "number",
-      "description": "Energy consumed"
+      "description": "\u00c9nergie physique consomm\u00e9e"
+    },
+    "mental_energy_cost": {
+      "type": "number",
+      "description": "Fatigue mentale consomm\u00e9e",
+      "default": 0
     },
     "success": {
       "type": "boolean",
-      "description": "Whether training was successful"
+      "description": "Always true now"
     },
     "stat_gain": {
       "type": "number",
-      "description": "Stat points gained"
+      "description": "Total stat points gained"
+    },
+    "side_effects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Effets secondaires (blessure l\u00e9g\u00e8re, stress, ennui...)",
+      "default": []
+    },
+    "is_foal_session": {
+      "type": "boolean",
+      "default": false,
+      "description": "S\u00e9ance poulain (<3 ans)"
     },
     "training_date": {
       "type": "string",
@@ -41,21 +68,6 @@
   },
   "required": [
     "horse_id",
-    "stat_trained",
-    "difficulty"
-  ],
-  "rls": {
-    "create": {
-      "created_by": "{{user.email}}"
-    },
-    "read": {
-      "created_by": "{{user.email}}"
-    },
-    "update": {
-      "created_by": "{{user.email}}"
-    },
-    "delete": {
-      "created_by": "{{user.email}}"
-    }
-  }
+    "training_type"
+  ]
 }

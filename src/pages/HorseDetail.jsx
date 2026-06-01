@@ -19,6 +19,7 @@ import HorseVisualizer from '../components/horse/HorseVisualizer';
 import CareerPanel from '../components/horse/CareerPanel';
 import ReproductionPanel from '../components/horse/ReproductionPanel';
 import ApprovalBenefits from '../components/breeding/ApprovalBenefits';
+import StallionOfferPanel from '../components/horse/StallionOfferPanel';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -359,6 +360,13 @@ export default function HorseDetail() {
         {horse.sex === 'male' && (
           <TabsContent value="approval" className="mt-4 space-y-4">
             <ApprovalBenefits status={horse.breeding_approval_status || 'not_evaluated'} />
+            {currentUser && horse.created_by === currentUser.email && (
+              <Card className="border-0 bg-white/60">
+                <CardContent className="p-6">
+                  <StallionOfferPanel stallion={horse} currentUser={currentUser} />
+                </CardContent>
+              </Card>
+            )}
             {horse.breeding_approval_date && (
               <Card className="border-0 bg-white/60">
                 <CardContent className="p-4 space-y-2">

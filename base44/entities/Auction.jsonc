@@ -66,38 +66,5 @@
     "seller_email",
     "starting_price",
     "ends_at"
-  ],
-  "rls": {
-    "create": {
-      "created_by": "{{user.email}}"
-    },
-    "read": {},
-    "update": {
-      "$or": [
-        {
-          "data.seller_email": "{{user.email}}"
-        },
-        {
-          "data.current_bidder_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "data.seller_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    }
-  }
+  ]
 }

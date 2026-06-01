@@ -23,19 +23,19 @@
     },
     "image_url": {
       "type": "string",
-      "description": "Current horse image URL (foal or adult depending on age)"
+      "description": "Current horse image URL"
     },
     "foal_image_url": {
       "type": "string",
-      "description": "Image g\u00e9n\u00e9r\u00e9e \u00e0 la naissance (poulain) \u2014 conserv\u00e9e \u00e0 vie"
+      "description": "Image g\u00e9n\u00e9r\u00e9e \u00e0 la naissance (poulain)"
     },
     "adult_image_url": {
       "type": "string",
-      "description": "Image g\u00e9n\u00e9r\u00e9e \u00e0 l'\u00e2ge adulte (\u22653 ans) \u2014 g\u00e9n\u00e9r\u00e9e une seule fois"
+      "description": "Image g\u00e9n\u00e9r\u00e9e \u00e0 l'\u00e2ge adulte (\u22653 ans)"
     },
     "markings_description": {
       "type": "string",
-      "description": "Description textuelle des marquages/couleurs g\u00e9n\u00e9r\u00e9e \u00e0 la naissance pour assurer la continuit\u00e9 poulain\u2192adulte"
+      "description": "Description textuelle des marquages/couleurs"
     },
     "father_id": {
       "type": "string",
@@ -54,40 +54,31 @@
       "description": "Full genetic profile",
       "properties": {
         "extension": {
-          "type": "string",
-          "description": "E locus (EE, Ee, ee)"
+          "type": "string"
         },
         "agouti": {
-          "type": "string",
-          "description": "A locus (AA, Aa, aa)"
+          "type": "string"
         },
         "cream": {
-          "type": "string",
-          "description": "Cr locus (CrCr, Crn, nn)"
+          "type": "string"
         },
         "grey": {
-          "type": "string",
-          "description": "G locus (GG, Gg, gg)"
+          "type": "string"
         },
         "tobiano": {
-          "type": "string",
-          "description": "TO locus (TOTO, TOn, nn)"
+          "type": "string"
         },
         "roan": {
-          "type": "string",
-          "description": "RN locus (RNn, nn)"
+          "type": "string"
         },
         "dun": {
-          "type": "string",
-          "description": "D locus (DD, Dd, dd)"
+          "type": "string"
         },
         "champagne": {
-          "type": "string",
-          "description": "CH locus (CHn, nn)"
+          "type": "string"
         },
         "silver": {
-          "type": "string",
-          "description": "Z locus (ZZ, Zz, zz)"
+          "type": "string"
         }
       }
     },
@@ -140,8 +131,25 @@
     },
     "energy": {
       "type": "number",
-      "description": "Current energy 0-100",
+      "description": "\u00c9nergie physique 0-100",
       "default": 100
+    },
+    "mental_energy": {
+      "type": "number",
+      "description": "\u00c9nergie mentale 0-100",
+      "default": 100
+    },
+    "character": {
+      "type": "string",
+      "enum": [
+        "energique",
+        "anxieux",
+        "intelligent",
+        "paresseux",
+        "courageux",
+        "docile"
+      ],
+      "description": "Caract\u00e8re du cheval \u2014 influence les entra\u00eenements"
     },
     "competition_wins": {
       "type": "number",
@@ -157,8 +165,7 @@
     },
     "estimated_value": {
       "type": "number",
-      "default": 0,
-      "description": "Valeur marchande estim\u00e9e en Genesis (visible uniquement par le propri\u00e9taire)"
+      "default": 0
     },
     "breeding_approval_status": {
       "type": "string",
@@ -169,17 +176,33 @@
         "approved_for_sport_breeding",
         "elite_approved"
       ],
-      "default": "not_evaluated",
-      "description": "Statut d'approbation \u00e0 la monte (studbook approval)"
+      "default": "not_evaluated"
     },
     "breeding_approval_breed": {
-      "type": "string",
-      "description": "Race pour laquelle l'approbation a \u00e9t\u00e9 donn\u00e9e"
+      "type": "string"
     },
     "breeding_approval_date": {
       "type": "string",
-      "format": "date",
-      "description": "Date de l'approbation/inspection"
+      "format": "date"
+    },
+    "foal_training_completed": {
+      "type": "object",
+      "description": "Suivi des comp\u00e9tences poulain (manipulation, d\u00e9sensibilisation, embarquement)",
+      "properties": {
+        "manipulation": {
+          "type": "number",
+          "default": 0
+        },
+        "desensibilisation": {
+          "type": "number",
+          "default": 0
+        },
+        "embarquement": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "default": {}
     }
   },
   "required": [

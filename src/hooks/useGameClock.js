@@ -15,25 +15,26 @@ function getSeasonForMonth(month) {
   return 'winter';
 }
 
-// Retourne l'heure du prochain tick (3h AM aujourd'hui ou demain)
-function getNext3AM() {
+// Retourne le timestamp UTC du dernier 02h00 UTC
+function getLast2AMUTC() {
   const now = new Date();
-  const tick = new Date(now);
-  tick.setHours(3, 0, 0, 0);
-  if (now >= tick) tick.setDate(tick.getDate() + 1);
-  return tick;
+  // Construire 02:00 UTC d'aujourd'hui
+  const today2AM = new Date(Date.UTC(
+    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 2, 0, 0, 0
+  ));
+  // Si maintenant < 02:00 UTC → le dernier tick est hier à 02:00 UTC
+  if (now < today2AM) {
+    today2AM.setUTCDate(today2AM.getUTCDate() - 1);
+  }
+  return today2AM;
 }
 
-// Est-ce que le dernier tick a eu lieu avant le dernier 3h AM ?
+// Est-ce que le dernier tick a eu lieu avant le dernier 02h00 UTC ?
 function needsTick(lastTickReal) {
   if (!lastTickReal) return true;
   const last = new Date(lastTickReal);
-  const now = new Date();
-  const todayTick = new Date(now);
-  todayTick.setHours(3, 0, 0, 0);
-  // Si maintenant > 3h aujourd'hui et dernier tick < 3h aujourd'hui → besoin de tick
-  if (now >= todayTick && last < todayTick) return true;
-  return false;
+  const last2AM = getLast2AMUTC();
+  return last < last2AM;
 }
 
 export function useGameClock() {

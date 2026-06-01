@@ -2,6 +2,10 @@
   "name": "StallionOffer",
   "type": "object",
   "properties": {
+    "stallion_id": {
+      "type": "string",
+      "description": "ID du cheval \u00e9talon (si joueur)"
+    },
     "stallion_name": {
       "type": "string"
     },
@@ -43,32 +47,31 @@
     },
     "description": {
       "type": "string"
+    },
+    "is_open": {
+      "type": "boolean",
+      "default": true,
+      "description": "Vente libre (true) ou r\u00e9serv\u00e9 \u00e0 un joueur (false)"
+    },
+    "reserved_for_email": {
+      "type": "string",
+      "description": "Email du joueur r\u00e9serv\u00e9 (si is_open = false)"
+    },
+    "reserved_for_name": {
+      "type": "string",
+      "description": "Nom du joueur r\u00e9serv\u00e9"
+    },
+    "breeding_approval_status": {
+      "type": "string"
+    },
+    "competition_wins": {
+      "type": "number",
+      "default": 0
     }
   },
   "required": [
     "stallion_name",
     "breed",
     "price"
-  ],
-  "rls": {
-    "create": {
-      "created_by": "{{user.email}}"
-    },
-    "read": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "data.is_npc": true
-        }
-      ]
-    },
-    "update": {
-      "created_by": "{{user.email}}"
-    },
-    "delete": {
-      "created_by": "{{user.email}}"
-    }
-  }
+  ]
 }

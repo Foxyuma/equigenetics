@@ -146,7 +146,7 @@ export default function StallionMarket() {
     }
   }, [isLoading, stallions.length]);
 
-  const mares = horses.filter(h => h.sex === 'female');
+  const mares = horses.filter(h => h.sex === 'female' && h.created_by_id === currentUser?.id);
   const selectedMare = mares.find(h => h.id === selectedMareId);
 
   let filteredStallions = filterBreed === 'all' ? stallions : stallions.filter(s => s.breed === filterBreed);

@@ -29,7 +29,10 @@ const DISEASES = [
     gene: "HYPP",
     dominance: "dominant",
     severity: "grave",
+    // Dominant : un seul allèle suffit → porteur = atteint
+    // Taux porteur initial ~2% dans la population QH
     breeds: ["Quarter Horse", "Paint Horse"],
+    base_carrier_rate: 0.02,
     lethal_homozygous: false,
     lethal_age: null,
     effects: ["crises musculaires", "tremblements", "paralysie possible"],
@@ -41,10 +44,11 @@ const DISEASES = [
     gene: "PSSM",
     dominance: "dominant",
     severity: "modérée",
-    breeds: ["Quarter Horse", "Percheron", "Comtois", "Boulonnais", "Warmblood"],
+    breeds: ["Quarter Horse", "Paint Horse", "Warmblood", "Hanoverian", "KWPN", "Holsteiner", "Oldenburg", "Belgian Warmblood", "Selle Français"],
+    base_carrier_rate: 0.08,
     lethal_homozygous: false,
     lethal_age: null,
-    effects: ["baisse endurance", "récupération lente"],
+    effects: ["baisse endurance", "récupération lente", "fatigue musculaire"],
     test_available: true,
   },
   {
@@ -53,7 +57,8 @@ const DISEASES = [
     gene: "HERDA",
     dominance: "recessive",
     severity: "grave",
-    breeds: ["Quarter Horse"],
+    breeds: ["Quarter Horse", "Paint Horse"],
+    base_carrier_rate: 0.04,
     lethal_homozygous: false,
     lethal_age: null,
     effects: ["peau fragile", "blessures fréquentes"],
@@ -66,6 +71,7 @@ const DISEASES = [
     dominance: "recessive",
     severity: "letale",
     breeds: ["Quarter Horse", "Paint Horse"],
+    base_carrier_rate: 0.05,
     lethal_homozygous: true,
     lethal_age: null,
     effects: ["mort avant ou peu après naissance"],
@@ -77,7 +83,8 @@ const DISEASES = [
     gene: "Frame",
     dominance: "recessive",
     severity: "letale",
-    breeds: ["Paint Horse", "Appaloosa"],
+    breeds: ["Paint Horse"],
+    base_carrier_rate: 0.15,
     lethal_homozygous: true,
     lethal_age: null,
     effects: ["poulain blanc", "mort après naissance"],
@@ -89,7 +96,8 @@ const DISEASES = [
     gene: "SCID",
     dominance: "recessive",
     severity: "letale",
-    breeds: ["Arabe"],
+    breeds: ["Arabian"],
+    base_carrier_rate: 0.10,
     lethal_homozygous: false,
     lethal_age: 0.5,
     effects: ["immunité inexistante", "mort entre 3 et 6 mois"],
@@ -101,14 +109,26 @@ const DISEASES = [
     gene: "LFS",
     dominance: "recessive",
     severity: "letale",
-    breeds: ["Arabe"],
+    breeds: ["Arabian"],
+    base_carrier_rate: 0.06,
     lethal_homozygous: true,
     lethal_age: null,
     effects: ["poulain neurologique", "mort rapide"],
     test_available: true,
   },
-  { name: "DSLD", fullName: "Degenerative Suspensory Ligament Desmitis", severity: "grave", breeds: ["Pur-Sang Anglais", "Arabe", "Selle Français"] },
-  { name: "ERU", fullName: "Uvéite Récurrente Équine", severity: "modérée", breeds: ["Appaloosa"] },
+  {
+    name: "WFFS",
+    fullName: "Warmblood Fragile Foal Syndrome",
+    gene: "WFFS",
+    dominance: "recessive",
+    severity: "letale",
+    breeds: ["Warmblood", "Hanoverian", "KWPN", "Holsteiner", "Oldenburg", "Belgian Warmblood", "Selle Français"],
+    base_carrier_rate: 0.10,
+    lethal_homozygous: true,
+    lethal_age: null,
+    effects: ["peau et articulations fragiles", "mort à la naissance ou peu après"],
+    test_available: true,
+  },
 ];
 
 function randomAllele(locus) {
@@ -334,10 +354,12 @@ export function generateRandomStats(fatherStats, motherStats) {
   const stats = {};
   
   statNames.forEach(stat => {
-    const fatherVal = fatherStats?.[stat] || (30 + Math.random() * 40);
-    const motherVal = motherStats?.[stat] || (30 + Math.random() * 40);
+    // Base aléatoire débutant : 15–35
+    const fatherVal = fatherStats?.[stat] ?? (15 + Math.random() * 20);
+    const motherVal = motherStats?.[stat] ?? (15 + Math.random() * 20);
     const avg = (fatherVal + motherVal) / 2;
-    const variation = (Math.random() - 0.5) * 30;
+    // Variation ±10 pour les poulains (hérédité imparfaite)
+    const variation = (Math.random() - 0.5) * 20;
     stats[stat] = Math.max(5, Math.min(100, Math.round(avg + variation)));
   });
   
@@ -364,31 +386,67 @@ export function checkFoalViability(fatherHealth, motherHealth, breed) {
 
 export function inheritDiseases(fatherHealth, motherHealth, breed) {
   const childHealth = [];
-  const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed) || Math.random() < 0.05);
-  
+  // Maladies pertinentes pour la race + mutation spontanée très rare
+  const relevantDiseases = DISEASES.filter(d => d.breeds.some(b => b === breed));
+
   relevantDiseases.forEach(disease => {
     const fatherGene = fatherHealth?.find(h => h.disease === disease.name);
     const motherGene = motherHealth?.find(h => h.disease === disease.name);
-    
-    const fatherCarrier = fatherGene?.status === "carrier" || fatherGene?.status === "affected";
-    const motherCarrier = motherGene?.status === "carrier" || motherGene?.status === "affected";
-    
+
+    const fatherStatus = fatherGene?.status || "clear";
+    const motherStatus = motherGene?.status || "clear";
+
+    const isDominant = disease.dominance === "dominant";
     let status = "clear";
-    if (fatherCarrier && motherCarrier) {
-      const roll = Math.random();
-      if (roll < 0.25) status = "affected";
-      else if (roll < 0.75) status = "carrier";
-    } else if (fatherCarrier || motherCarrier) {
-      status = Math.random() < 0.5 ? "carrier" : "clear";
+
+    if (isDominant) {
+      // Dominant : carrier = affected (un allèle suffit)
+      // Sain × Sain → 0% atteint
+      // Porteur/Atteint × Sain → ~50% atteints
+      // Porteur/Atteint × Porteur/Atteint → ~75% atteints (25% sains)
+      const fatherAffected = fatherStatus === "carrier" || fatherStatus === "affected";
+      const motherAffected = motherStatus === "carrier" || motherStatus === "affected";
+      if (fatherAffected && motherAffected) {
+        status = Math.random() < 0.75 ? "affected" : "clear";
+      } else if (fatherAffected || motherAffected) {
+        status = Math.random() < 0.5 ? "affected" : "clear";
+      }
+      // Pour les dominants, pas de "porteur sain" — atteint ou sain
     } else {
-      if (Math.random() < 0.02) status = "carrier";
+      // Récessif : porteur (N/n) ou atteint (n/n)
+      // Porteur × Sain → 50% porteurs, 0% atteints
+      // Porteur × Porteur → 25% atteints, 50% porteurs, 25% sains
+      // Atteint × Porteur → 50% atteints, 50% porteurs
+      // Atteint × Sain → 50% porteurs (parents : atteint = n/n, sain = N/N → tous N/n)
+      const fatherIsCarrier = fatherStatus === "carrier";
+      const fatherIsAffected = fatherStatus === "affected";
+      const motherIsCarrier = motherStatus === "carrier";
+      const motherIsAffected = motherStatus === "affected";
+
+      if (fatherIsAffected && motherIsAffected) {
+        status = "affected"; // n/n × n/n = 100% atteints
+      } else if (fatherIsAffected && motherIsCarrier || fatherIsCarrier && motherIsAffected) {
+        status = Math.random() < 0.5 ? "affected" : "carrier"; // 50/50
+      } else if (fatherIsAffected || motherIsAffected) {
+        status = "carrier"; // Atteint × Sain → 100% porteurs
+      } else if (fatherIsCarrier && motherIsCarrier) {
+        const roll = Math.random();
+        if (roll < 0.25) status = "affected";
+        else if (roll < 0.75) status = "carrier";
+        // 25% sains
+      } else if (fatherIsCarrier || motherIsCarrier) {
+        status = Math.random() < 0.5 ? "carrier" : "clear";
+      } else {
+        // Mutation spontanée ultra-rare
+        if (Math.random() < 0.005) status = "carrier";
+      }
     }
-    
+
     if (status !== "clear") {
       childHealth.push({ disease: disease.name, status });
     }
   });
-  
+
   return childHealth;
 }
 
@@ -486,49 +544,53 @@ export function determineFoalDeathAge(healthGenes) {
 export function estimateHorseValue(horse) {
   const avgStat = horse.stats
     ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7)
-    : 50;
+    : 30;
   const age = horse.age ?? 0;
   const wins = horse.competition_wins || 0;
   const hasDisease = horse.health_genes?.some(g => g.status === 'affected');
   const approvalStatus = horse.breeding_approval_status;
 
+  // Base selon les stats — courbe progressive calibrée pour débutants
+  // Stats moyennes de départ ~25-35, les bons chevaux atteignent 60-75 avec effort
   let base;
-
-  if (age <= 1) {
-    base = 3000 + Math.max(0, (avgStat - 30)) * 240;
-    base = Math.max(3000, Math.min(15000, base));
-  } else if (age <= 3) {
-    base = 10000 + Math.max(0, (avgStat - 30)) * 857;
-    base = Math.max(10000, Math.min(40000, base));
-  } else if (avgStat < 45) {
-    base = 1000 + (avgStat / 45) * 7000;
+  if (avgStat < 30) {
+    base = 500 + avgStat * 20;                               // 500 → 1 100
+  } else if (avgStat < 50) {
+    base = 1100 + (avgStat - 30) * 80;                      // 1 100 → 2 700
   } else if (avgStat < 65) {
-    base = 8000 + ((avgStat - 45) / 20) * 17000;
-  } else if (avgStat < 82) {
-    base = 25000 + ((avgStat - 65) / 17) * 125000;
+    base = 2700 + (avgStat - 50) * 500;                     // 2 700 → 10 200
+  } else if (avgStat < 80) {
+    base = 10200 + (avgStat - 65) * 2500;                   // 10 200 → 47 700
   } else {
-    base = 150000 + ((avgStat - 82) / 18) * 850000;
+    base = 47700 + (avgStat - 80) * 6000;                   // 47 700 → 167 700 à stat 100
   }
 
+  // Modificateur robe
   base *= getCoatMultiplier(horse.coat_color);
 
-  const winsMultiplier = Math.min(3, 1 + wins * 0.1);
+  // Victoires : +5% par victoire, max ×2
+  const winsMultiplier = Math.min(2, 1 + wins * 0.05);
   base *= winsMultiplier;
 
-  if (hasDisease) base *= 0.4;
+  // Maladie génétique : forte décote
+  if (hasDisease) base *= 0.35;
 
-  // Apply approval status multiplier
+  // Approbation studbook
   const approvalMultiplier = {
-    elite: 2.0,
-    provisional: 1.5,
-    approved: 1.2,
-    approved_restricted: 1.1,
-    not_approved: 0.6,
-    not_evaluated: 1.0
+    elite_approved: 1.8,
+    approved_for_sport_breeding: 1.4,
+    approved_for_breeding: 1.15,
+    not_evaluated: 1.0,
+    rejected: 0.6,
   };
   base *= approvalMultiplier[approvalStatus] || 1.0;
 
-  return Math.round(base / 100) * 100;
+  // Âge : les poulains valent moins
+  if (age <= 1) base *= 0.4;
+  else if (age <= 3) base *= 0.65;
+
+  // Plafond absolu : 300 000 ₲
+  return Math.min(300000, Math.round(base / 100) * 100);
 }
 
 // Studbook rules pour les races européennes

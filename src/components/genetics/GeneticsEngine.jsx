@@ -367,17 +367,21 @@ export function generateRandomStats(fatherStats, motherStats) {
 }
 
 export function checkFoalViability(fatherHealth, motherHealth, breed) {
-  const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed));
+  const relevantDiseases = DISEASES.filter(d => d.breeds.some(b => b === breed));
   
   for (const disease of relevantDiseases) {
+    if (!disease.lethal_homozygous) continue;
     const fatherGene = fatherHealth?.find(h => h.disease === disease.name);
     const motherGene = motherHealth?.find(h => h.disease === disease.name);
     
-    const fatherAffected = fatherGene?.status === "affected";
-    const motherAffected = motherGene?.status === "affected";
+    const fatherCarries = fatherGene?.status === "affected" || fatherGene?.status === "carrier";
+    const motherCarries = motherGene?.status === "affected" || motherGene?.status === "carrier";
     
-    if (fatherAffected && motherAffected && disease.lethal_homozygous) {
-      return { viable: false, cause: disease.name, reason: "stillborn" };
+    // Pour les récessifs létaux : les deux porteurs → 25% chance de mort
+    if (fatherCarries && motherCarries && disease.dominance === "recessive") {
+      if (Math.random() < 0.25) {
+        return { viable: false, cause: disease.name, reason: "stillborn" };
+      }
     }
   }
   
@@ -452,13 +456,19 @@ export function inheritDiseases(fatherHealth, motherHealth, breed) {
 
 export function generateStarterHorse(breed) {
   const genotype = generateRandomGenotype(breed);
-  const stats = generateRandomStats();
+  // Stats de départ bas : 15-35 par défaut
+  const statNames = ["speed", "endurance", "agility", "strength", "temperament", "jumping", "dressage"];
+  const stats = {};
+  statNames.forEach(s => { stats[s] = Math.round(15 + Math.random() * 20); });
+
   const healthGenes = [];
-  
-  const relevantDiseases = DISEASES.filter(d => d.breeds.includes(breed));
+  const relevantDiseases = DISEASES.filter(d => d.breeds.some(b => b === breed));
   relevantDiseases.forEach(disease => {
-    if (Math.random() < 0.15) {
-      healthGenes.push({ disease: disease.name, status: "carrier" });
+    const rate = disease.base_carrier_rate ?? 0.05;
+    if (Math.random() < rate) {
+      // Pour les dominants, porteur = atteint
+      const status = disease.dominance === "dominant" ? "affected" : "carrier";
+      healthGenes.push({ disease: disease.name, status });
     }
   });
   
@@ -544,50 +554,54 @@ export function determineFoalDeathAge(healthGenes) {
 export function estimateHorseValue(horse) {
   const avgStat = horse.stats
     ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7)
-    : 30;
+    : 20;
   const age = horse.age ?? 0;
   const wins = horse.competition_wins || 0;
   const hasDisease = horse.health_genes?.some(g => g.status === 'affected');
   const approvalStatus = horse.breeding_approval_status;
 
-  // Base selon les stats — courbe progressive calibrée pour débutants
-  // Stats moyennes de départ ~25-35, les bons chevaux atteignent 60-75 avec effort
+  // Courbe progressive — stats moyennes de départ ~20-25
+  // Un cheval starter vaut ~200-600 ₲
+  // Un cheval bien entraîné (stat ~60) : ~10 000 ₲
+  // Un champion (stat ~85+) : jusqu'à 300 000 ₲
   let base;
-  if (avgStat < 30) {
-    base = 500 + avgStat * 20;                               // 500 → 1 100
-  } else if (avgStat < 50) {
-    base = 1100 + (avgStat - 30) * 80;                      // 1 100 → 2 700
-  } else if (avgStat < 65) {
-    base = 2700 + (avgStat - 50) * 500;                     // 2 700 → 10 200
-  } else if (avgStat < 80) {
-    base = 10200 + (avgStat - 65) * 2500;                   // 10 200 → 47 700
+  if (avgStat < 25) {
+    base = 100 + avgStat * 12;                          // 100 → 400
+  } else if (avgStat < 40) {
+    base = 400 + (avgStat - 25) * 40;                  // 400 → 1 000
+  } else if (avgStat < 55) {
+    base = 1000 + (avgStat - 40) * 200;                // 1 000 → 4 000
+  } else if (avgStat < 70) {
+    base = 4000 + (avgStat - 55) * 600;                // 4 000 → 13 000
+  } else if (avgStat < 82) {
+    base = 13000 + (avgStat - 70) * 2500;              // 13 000 → 43 000
   } else {
-    base = 47700 + (avgStat - 80) * 6000;                   // 47 700 → 167 700 à stat 100
+    base = 43000 + (avgStat - 82) * 14000;             // 43 000 → 295 000 à stat 100
   }
 
   // Modificateur robe
   base *= getCoatMultiplier(horse.coat_color);
 
-  // Victoires : +5% par victoire, max ×2
-  const winsMultiplier = Math.min(2, 1 + wins * 0.05);
+  // Victoires : +4% par victoire, max ×1.8
+  const winsMultiplier = Math.min(1.8, 1 + wins * 0.04);
   base *= winsMultiplier;
 
   // Maladie génétique : forte décote
-  if (hasDisease) base *= 0.35;
+  if (hasDisease) base *= 0.3;
 
   // Approbation studbook
   const approvalMultiplier = {
-    elite_approved: 1.8,
-    approved_for_sport_breeding: 1.4,
-    approved_for_breeding: 1.15,
+    elite_approved: 1.6,
+    approved_for_sport_breeding: 1.3,
+    approved_for_breeding: 1.1,
     not_evaluated: 1.0,
     rejected: 0.6,
   };
   base *= approvalMultiplier[approvalStatus] || 1.0;
 
   // Âge : les poulains valent moins
-  if (age <= 1) base *= 0.4;
-  else if (age <= 3) base *= 0.65;
+  if (age <= 1) base *= 0.35;
+  else if (age <= 3) base *= 0.6;
 
   // Plafond absolu : 300 000 ₲
   return Math.min(300000, Math.round(base / 100) * 100);

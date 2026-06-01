@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BREEDS, determineCoatColor } from '../genetics/GeneticsEngine';
+import { BREEDS, determineCoatColor, generateFoalTraits } from '../genetics/GeneticsEngine';
 import { buildHorseImagePrompt, extractMarkingsDescription } from '../../lib/horseImagePrompt';
 import { toast } from 'sonner';
 
@@ -114,6 +114,7 @@ export default function OnboardingWizard({ onComplete }) {
         // image non bloquante
       }
 
+      const foalTraits = generateFoalTraits(null, null, breed);
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
@@ -129,6 +130,10 @@ export default function OnboardingWizard({ onComplete }) {
         competition_wins: 0,
         is_for_sale: false,
         price: 0,
+        character: foalTraits.character,
+        mental_traits: foalTraits.mental_traits,
+        morphology: foalTraits.morphology,
+        genetic_potential: foalTraits.genetic_potential,
         ...(image_url && { image_url }),
       });
     },

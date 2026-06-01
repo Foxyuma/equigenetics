@@ -1,5 +1,13 @@
 // Horse Genetics Engine - handles inheritance, coat color determination, disease transmission
 import { BREED_PROFILES, getBreedDisciplineBonus } from '@/lib/breedProfiles';
+import {
+  generateMentalTraits,
+  generateMorphology,
+  generateStarterPotential,
+  generateGeneticPotential,
+  applyTraitsToScore,
+  getCompetitiveVariance,
+} from '@/lib/horseTraits';
 
 // Toutes les races jouables
 const BREEDS = [
@@ -381,16 +389,39 @@ export function generateRandomStats(fatherStats, motherStats) {
   const stats = {};
   
   statNames.forEach(stat => {
-    // Base aléatoire débutant : 15–35
     const fatherVal = fatherStats?.[stat] ?? (15 + Math.random() * 20);
     const motherVal = motherStats?.[stat] ?? (15 + Math.random() * 20);
     const avg = (fatherVal + motherVal) / 2;
-    // Variation ±10 pour les poulains (hérédité imparfaite)
     const variation = (Math.random() - 0.5) * 20;
     stats[stat] = Math.max(5, Math.min(100, Math.round(avg + variation)));
   });
   
   return stats;
+}
+
+// Génère les traits d'un poulain (héritage mental, morphologie, potentiel)
+export function generateFoalTraits(father, mother, breed) {
+  // Caractère
+  const parentChars = [father?.character, mother?.character].filter(Boolean);
+  const characters = ["energique", "anxieux", "intelligent", "paresseux", "courageux", "docile"];
+  const character = Math.random() < 0.4 && parentChars.length > 0
+    ? parentChars[Math.floor(Math.random() * parentChars.length)]
+    : characters[Math.floor(Math.random() * characters.length)];
+
+  // Traits mentaux (héritage partiel)
+  const mental_traits = generateMentalTraits(character);
+
+  // Morphologie (légèrement biaisée par les parents)
+  const morphology = generateMorphology(breed);
+
+  // Potentiel génétique hérité
+  const genetic_potential = generateGeneticPotential(
+    father?.genetic_potential,
+    mother?.genetic_potential,
+    breed
+  );
+
+  return { character, mental_traits, morphology, genetic_potential };
 }
 
 export function checkFoalViability(fatherHealth, motherHealth, breed) {
@@ -479,11 +510,9 @@ export function inheritDiseases(fatherHealth, motherHealth, breed) {
 
 export function generateStarterHorse(breed) {
   const genotype = generateRandomGenotype(breed);
-  // Stats de départ bas : 15-35 par défaut, puis bonus race
   const statNames = ["speed", "endurance", "agility", "strength", "temperament", "jumping", "dressage"];
   const stats = {};
   statNames.forEach(s => { stats[s] = Math.round(15 + Math.random() * 20); });
-  // Appliquer les bonus/malus de race
   const profile = BREED_PROFILES[breed];
   if (profile) {
     Object.entries(profile.statBonuses || {}).forEach(([s, b]) => { stats[s] = Math.min(100, (stats[s] || 0) + Math.round(b * 0.5)); });
@@ -495,11 +524,19 @@ export function generateStarterHorse(breed) {
   relevantDiseases.forEach(disease => {
     const rate = disease.base_carrier_rate ?? 0.05;
     if (Math.random() < rate) {
-      // Pour les dominants, porteur = atteint
       const status = disease.dominance === "dominant" ? "affected" : "carrier";
       healthGenes.push({ disease: disease.name, status });
     }
   });
+
+  // Caractère aléatoire pour le starter
+  const characters = ["energique", "anxieux", "intelligent", "paresseux", "courageux", "docile"];
+  const character = characters[Math.floor(Math.random() * characters.length)];
+
+  // Nouveaux traits
+  const mental_traits = generateMentalTraits(character);
+  const morphology = generateMorphology(breed);
+  const genetic_potential = generateStarterPotential(breed);
   
   return {
     genotype,
@@ -509,7 +546,11 @@ export function generateStarterHorse(breed) {
     energy: 100,
     competition_wins: 0,
     is_for_sale: false,
-    price: 0
+    price: 0,
+    character,
+    mental_traits,
+    morphology,
+    genetic_potential,
   };
 }
 
@@ -539,14 +580,18 @@ export function getCompetitionScore(horse, discipline) {
 
   // Bonus de race par discipline (prédispositions génétiques)
   const breedBonus = getBreedDisciplineBonus(horse.breed, discipline);
-  score += breedBonus * 0.3; // Converti en points de score (plafonné plus bas)
+  score += breedBonus * 0.3;
 
   // Malus maladies génétiques
   const affected = horse.health_genes?.filter(h => h.status === "affected") || [];
   score -= affected.length * 8;
-  
-  // Aléatoire journalier ±7 pts
-  score += (Math.random() - 0.5) * 14;
+
+  // Intégration des traits (affinité raciale %, mental, morphologie, potentiel)
+  score = applyTraitsToScore(score, horse, discipline);
+
+  // Aléatoire journalier — modulé par le mental
+  const variancePts = getCompetitiveVariance(horse);
+  score += (Math.random() - 0.5) * variancePts;
   
   return Math.max(0, Math.min(100, Math.round(score * 10) / 10));
 }

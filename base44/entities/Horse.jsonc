@@ -109,6 +109,49 @@
         }
       }
     },
+    "genetic_potential": {
+      "type": "object",
+      "description": "Plafond g\u00e9n\u00e9tique individuel par stat (0-100) \u2014 h\u00e9rit\u00e9 et non-modifiable",
+      "properties": {
+        "speed": {
+          "type": "number"
+        },
+        "endurance": {
+          "type": "number"
+        },
+        "agility": {
+          "type": "number"
+        },
+        "strength": {
+          "type": "number"
+        },
+        "temperament": {
+          "type": "number"
+        },
+        "jumping": {
+          "type": "number"
+        },
+        "dressage": {
+          "type": "number"
+        }
+      }
+    },
+    "mental_traits": {
+      "type": "array",
+      "description": "Traits mentaux du cheval (courage, concentration, nerveux\u2026)",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "morphology": {
+      "type": "array",
+      "description": "Traits morphologiques cach\u00e9s (\u00e9paules inclin\u00e9es, jarrets puissants\u2026)",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
     "health_genes": {
       "type": "array",
       "description": "Carried disease genes",
@@ -187,7 +230,7 @@
     },
     "foal_training_completed": {
       "type": "object",
-      "description": "Suivi des comp\u00e9tences poulain (manipulation, d\u00e9sensibilisation, embarquement)",
+      "description": "Suivi des comp\u00e9tences poulain",
       "properties": {
         "manipulation": {
           "type": "number",

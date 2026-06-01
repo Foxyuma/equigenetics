@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
-import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge, determineBreedFromParents } from '../genetics/GeneticsEngine';
+import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge, determineBreedFromParents, generateFoalTraits } from '../genetics/GeneticsEngine';
 
 function calcDynamicPrice(stallion) {
   if (!stallion || stallion.is_own) return 0;
@@ -80,8 +80,8 @@ export default function ReproductionPanel({ mare }) {
     const viability = checkFoalViability(selectedStallion.health_genes, mare.health_genes, mare.breed);
     const deathAge = !viability.viable ? null : determineFoalDeathAge(childHealth);
     const breedResult = determineBreedFromParents(selectedStallion.breed, mare.breed, selectedStallion.breeding_approval_status);
+    const foalTraits = generateFoalTraits(selectedStallion, mare, breedResult.breed);
     
-    // On stocke les données réelles mais on ne les affiche pas (surprise)
     setFoalPreview({
       genotype: childGenotype,
       stats: childStats,
@@ -94,6 +94,7 @@ export default function ReproductionPanel({ mare }) {
       viable: viability.viable,
       viability_cause: viability.cause,
       death_age: deathAge,
+      ...foalTraits,
     });
     // Note: sex, stats et couleur sont des surprises — non révélés avant la naissance
   };
@@ -149,6 +150,11 @@ export default function ReproductionPanel({ mare }) {
   const birthFoalMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser || !birthingFoal || !foalName) throw new Error('Données manquantes');
+      const foalTraits = generateFoalTraits(
+        birthingFoal.father_id ? { id: birthingFoal.father_id } : null,
+        mare,
+        birthingFoal.foal_breed
+      );
       const foalData = {
         name: foalName,
         genotype: birthingFoal.foal_genotype,
@@ -163,6 +169,10 @@ export default function ReproductionPanel({ mare }) {
         energy: 100,
         competition_wins: 0,
         is_for_sale: false,
+        character: foalTraits.character,
+        mental_traits: foalTraits.mental_traits,
+        morphology: foalTraits.morphology,
+        genetic_potential: foalTraits.genetic_potential,
       };
       foalData.estimated_value = estimateHorseValue(foalData);
       const foal = await base44.entities.Horse.create(foalData);

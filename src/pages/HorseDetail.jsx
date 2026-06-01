@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
+import TraitsPanel from '../components/horse/TraitsPanel';
 import { estimateHorseValue } from '../components/genetics/GeneticsEngine';
 import { buildHorseImagePrompt, extractMarkingsDescription } from '../lib/horseImagePrompt';
 import GeneticPanel from '../components/horse/GeneticPanel';
@@ -316,8 +317,9 @@ export default function HorseDetail() {
       </div>
 
       <Tabs defaultValue="stats" className="w-full">
-        <TabsList className="bg-stone-100/80">
+        <TabsList className="bg-stone-100/80 flex-wrap">
           <TabsTrigger value="stats">Compétences</TabsTrigger>
+          <TabsTrigger value="traits">🧬 Traits</TabsTrigger>
           <TabsTrigger value="genetics">Génétique</TabsTrigger>
           <TabsTrigger value="health">Santé</TabsTrigger>
           <TabsTrigger value="career">Carrière</TabsTrigger>
@@ -332,6 +334,12 @@ export default function HorseDetail() {
               ))}
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="traits" className="mt-4">
+          <TraitsPanel
+            horse={horse}
+            isOwner={!!(currentUser && horse.created_by === currentUser.email)}
+          />
         </TabsContent>
         <TabsContent value="genetics" className="mt-4">
           <Card className="border-0 bg-white/60">

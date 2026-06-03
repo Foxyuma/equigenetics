@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trophy, Dna } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GeneticPanel from '../components/horse/GeneticPanel';
+import { getDisplayBreed } from '@/lib/horseImagePrompt';
 
 export default function PublicHorseProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -74,7 +75,7 @@ export default function PublicHorseProfile() {
                 <Badge className={`border-0 ${horse.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
                   {horse.sex === 'male' ? '♂ Mâle' : '♀ Femelle'}
                 </Badge>
-                <Badge variant="outline">{horse.breed}</Badge>
+                <Badge variant="outline">{getDisplayBreed(horse.breed)}</Badge>
                 <Badge variant="outline">{horse.age || 0} ans</Badge>
                 {horse.coat_color && <Badge className="bg-stone-100 text-stone-600 border-0">{horse.coat_color}</Badge>}
               </div>

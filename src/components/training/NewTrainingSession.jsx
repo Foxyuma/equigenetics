@@ -67,7 +67,7 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], on
             {charMod && <span className="ml-2 font-normal normal-case text-stone-400">{charMod.label}</span>}
           </p>
           <EnergyBar label="Énergie physique" icon={Zap} value={physEnergy} color="text-amber-500" />
-          <EnergyBar label="Énergie mentale" icon={Brain} value={mentalEnergy} color="text-violet-500" />
+          <EnergyBar label="Moral" icon={Brain} value={mentalEnergy} color="text-violet-500" />
           {isFoal && (
             <div className="mt-3 pt-3 border-t border-stone-100">
               <p className="text-xs font-semibold text-stone-500 mb-2">Compétences poulain</p>
@@ -221,7 +221,7 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], on
             {/* Coûts */}
             <div className="flex gap-3 text-xs text-stone-500 pt-1 border-t border-green-200">
               {result.physCost > 0 && <span><Zap className="w-3 h-3 inline" /> -{result.physCost} énergie physique</span>}
-              {result.mentalCost > 0 && <span><Brain className="w-3 h-3 inline" /> -{result.mentalCost} énergie mentale</span>}
+              {result.mentalCost > 0 && <span><Brain className="w-3 h-3 inline" /> -{result.mentalCost} moral</span>}
             </div>
           </CardContent>
         </Card>

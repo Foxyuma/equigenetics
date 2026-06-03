@@ -13,7 +13,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
 import TraitsPanel from '../components/horse/TraitsPanel';
 import { estimateHorseValue } from '../components/genetics/GeneticsEngine';
-import { buildHorseImagePrompt, extractMarkingsDescription } from '../lib/horseImagePrompt';
+import { buildHorseImagePrompt, extractMarkingsDescription, getDisplayBreed, getAgeStageLabel } from '../lib/horseImagePrompt';
 import GeneticPanel from '../components/horse/GeneticPanel';
 import HealthPanel from '../components/horse/HealthPanel';
 import HorseVisualizer from '../components/horse/HorseVisualizer';
@@ -59,23 +59,29 @@ export default function HorseDetail() {
     queryFn: () => base44.auth.me(),
   });
 
-  const generateAdultImage = async () => {
-    if (!horse || horse.adult_image_url || generatingImage) return;
+  // Génère une image selon le stade d'âge actuel
+  const generateStageImage = async (stage) => {
+    if (!horse || generatingImage) return;
     setGeneratingImage(true);
     const markings = horse.markings_description || extractMarkingsDescription(horse.coat_color, horse.genotype);
+    const age = horse.age || 0;
     const prompt = buildHorseImagePrompt({
       breed: horse.breed,
       coat_color: horse.coat_color,
       sex: horse.sex,
-      isFoal: false,
+      age,
       markings,
+      morphology: horse.morphology,
     });
     const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({ prompt });
     const response = await fetch(generatedUrl);
     const blob = await response.blob();
-    const file = new File([blob], `horse_adult_${horse.id}.jpg`, { type: 'image/jpeg' });
+    const file = new File([blob], `horse_${stage}_${horse.id}.jpg`, { type: 'image/jpeg' });
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.entities.Horse.update(horse.id, { adult_image_url: file_url, image_url: file_url });
+    const update = { image_url: file_url };
+    if (stage === 'adult') update.adult_image_url = file_url;
+    if (stage === 'foal') update.foal_image_url = file_url;
+    await base44.entities.Horse.update(horse.id, update);
     queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
     setGeneratingImage(false);
   };
@@ -83,9 +89,9 @@ export default function HorseDetail() {
   // Auto-génère l'image adulte une seule fois quand l'âge atteint ≥ 3 ans
   useEffect(() => {
     if (!horse || generatingImage) return;
-    const isAdult = (horse.age || 0) >= 3;
-    if (isAdult && !horse.adult_image_url) {
-      generateAdultImage();
+    const age = horse.age || 0;
+    if (age >= 3 && !horse.adult_image_url) {
+      generateStageImage('adult');
     }
   }, [horse?.id, horse?.age]);
 
@@ -157,16 +163,9 @@ export default function HorseDetail() {
                   <p className="text-sm text-stone-400">Génération de la photo...</p>
                 </div>
               )}
-              {horse.foal_image_url && horse.image_url === horse.adult_image_url && (
-                <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">
-                  📸 Photo adulte
-                </div>
-              )}
-              {horse.foal_image_url && horse.image_url === horse.foal_image_url && (
-                <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">
-                  🐴 Photo poulain
-                </div>
-              )}
+              <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">
+                {getAgeStageLabel(horse.age || 0)}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -179,7 +178,7 @@ export default function HorseDetail() {
                 <Badge className={`border-0 ${horse.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
                   {horse.sex === 'male' ? '♂ Mâle' : '♀ Femelle'}
                 </Badge>
-                <Badge variant="outline">{horse.breed}</Badge>
+                <Badge variant="outline">{getDisplayBreed(horse.breed)}</Badge>
                 <Badge variant="outline">{horse.age || 0} ans</Badge>
                 <Badge className="bg-stone-100 text-stone-600 border-0">{horse.coat_color}</Badge>
               </div>

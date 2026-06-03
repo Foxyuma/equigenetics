@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Trophy, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getDisplayBreed } from '@/lib/horseImagePrompt';
 
 const sexColors = { male: "bg-blue-100 text-blue-700", female: "bg-pink-100 text-pink-700" };
 const sexLabels = { male: "♂ Mâle", female: "♀ Femelle" };
@@ -50,7 +51,7 @@ export default function HorseCard({ horse }) {
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-stone-800 text-lg leading-tight">{horse.name}</h3>
-          <p className="text-sm text-stone-500 mt-0.5">{horse.breed}</p>
+          <p className="text-sm text-stone-500 mt-0.5">{getDisplayBreed(horse.breed)}</p>
           <div className="flex items-center justify-between mt-3">
             <span className="text-xs font-medium px-2 py-1 rounded-full bg-stone-100 text-stone-600">
               {horse.coat_color || "Inconnu"}

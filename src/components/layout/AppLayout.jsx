@@ -4,6 +4,7 @@ import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBra
 import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
 import GameClockDisplay from './GameClockDisplay';
+import SocialFooter from './SocialFooter';
 import { base44 } from '@/api/base44Client';
 import { useGameNotifications } from '@/hooks/useGameNotifications';
 
@@ -221,6 +222,7 @@ export default function AppLayout() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Outlet />
       </main>
+      <SocialFooter />
     </div>
   );
 }

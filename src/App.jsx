@@ -32,6 +32,7 @@ import GeneticTest from './pages/GeneticTest';
 import PublicHorseProfile from './pages/PublicHorseProfile';
 import BreedingBook from './pages/BreedingBook';
 import PlayerProfile from './pages/PlayerProfile';
+import Landing from './pages/Landing';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -58,7 +59,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/Stable" replace />} />
+      <Route path="/" element={<Landing />} />
       <Route element={<AppLayout />}>
         <Route path="/Stable" element={<Stable />} />
         <Route path="/HorseDetail" element={<HorseDetail />} />

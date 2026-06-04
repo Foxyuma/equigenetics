@@ -13,6 +13,7 @@ import { BREEDS } from '../components/genetics/GeneticsEngine';
 import StatBar from '../components/horse/StatBar';
 import AuctionCard from '../components/auction/AuctionCard';
 import CreateAuctionDialog from '../components/auction/CreateAuctionDialog';
+import DailyMarketRefresh from '../components/market/DailyMarketRefresh';
 import { toast } from 'sonner';
 
 export default function Market() {
@@ -173,6 +174,7 @@ export default function Market() {
 
   return (
     <div className="space-y-6">
+      <DailyMarketRefresh />
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Marché & Enchères</h1>

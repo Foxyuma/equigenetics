@@ -15,26 +15,13 @@ function getSeasonForMonth(month) {
   return 'winter';
 }
 
-// Retourne le timestamp UTC du dernier 02h00 UTC
-function getLast2AMUTC() {
-  const now = new Date();
-  // Construire 02:00 UTC d'aujourd'hui
-  const today2AM = new Date(Date.UTC(
-    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 2, 0, 0, 0
-  ));
-  // Si maintenant < 02:00 UTC → le dernier tick est hier à 02:00 UTC
-  if (now < today2AM) {
-    today2AM.setUTCDate(today2AM.getUTCDate() - 1);
-  }
-  return today2AM;
-}
+// Un jour de jeu = 1h réelle (pour que le temps avance perceptiblement)
+const TICK_INTERVAL_MS = 60 * 60 * 1000; // 1h
 
-// Est-ce que le dernier tick a eu lieu avant le dernier 02h00 UTC ?
 function needsTick(lastTickReal) {
   if (!lastTickReal) return true;
   const last = new Date(lastTickReal);
-  const last2AM = getLast2AMUTC();
-  return last < last2AM;
+  return (Date.now() - last.getTime()) >= TICK_INTERVAL_MS;
 }
 
 export function useGameClock() {
@@ -88,10 +75,9 @@ export function useGameClock() {
   useEffect(() => {
     if (clocks === undefined) return;
     if (!clock) {
-      // Initialiser l'horloge
       base44.entities.GameClock.create({
         day: 1, month: 1, year: 1, total_days: 0,
-        last_tick_real: new Date().toISOString(),
+        last_tick_real: new Date(Date.now() - TICK_INTERVAL_MS - 1).toISOString(), // force tick immédiat
         season: 'spring',
       }).then(() => queryClient.invalidateQueries({ queryKey: ['game-clock'] }));
       return;
@@ -100,6 +86,14 @@ export function useGameClock() {
       advanceDay();
     }
   }, [clock?.id, clocks.length]);
+
+  // Re-vérifier toutes les 10 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['game-clock'] });
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return {
     clock,

@@ -24,6 +24,31 @@
       "type": "number",
       "default": 0,
       "description": "Points de r\u00e9putation d'\u00e9levage cumul\u00e9s"
+    },
+    "affixes": {
+      "type": "array",
+      "description": "Affixes d'\u00e9levage du joueur",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "enum": [
+              "prefix",
+              "suffix"
+            ],
+            "description": "Avant ou apr\u00e8s le nom du cheval"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "default": []
     }
   },
   "required": []

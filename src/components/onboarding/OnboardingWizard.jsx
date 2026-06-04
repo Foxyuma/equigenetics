@@ -70,7 +70,7 @@ function generateBaseStats() {
   return stats;
 }
 
-const STEPS = ['Identité', 'Génétique', 'Confirmation'];
+const STEPS = ['Identité', 'Affixe', 'Génétique', 'Confirmation'];
 
 export default function OnboardingWizard({ onComplete }) {
   const queryClient = useQueryClient();
@@ -79,6 +79,8 @@ export default function OnboardingWizard({ onComplete }) {
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [sex, setSex] = useState('');
+  const [affixeName, setAffixeName] = useState('');
+  const [affixePosition, setAffixePosition] = useState('prefix');
   const [visibleGenes, setVisibleGenes] = useState({
     extension: 'Ee',
     agouti: 'Aa',
@@ -115,6 +117,16 @@ export default function OnboardingWizard({ onComplete }) {
       }
 
       const foalTraits = generateFoalTraits(null, null, breed);
+      // Sauvegarder l'affixe si renseigné
+      if (affixeName.trim().length >= 2) {
+        await base44.auth.updateMe({
+          affixes: [{
+            name: affixeName.trim(),
+            position: affixePosition,
+            created_at: new Date().toISOString(),
+          }]
+        });
+      }
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
@@ -145,6 +157,7 @@ export default function OnboardingWizard({ onComplete }) {
   });
 
   const canNextStep0 = name.trim().length >= 2 && breed && sex;
+  // step 1 = affixe (optionnel, toujours valide)
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
@@ -208,8 +221,57 @@ export default function OnboardingWizard({ onComplete }) {
             </div>
           )}
 
-          {/* STEP 1 — Génétique */}
+          {/* STEP 1 — Affixe */}
           {step === 1 && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-lg font-bold text-stone-800 mb-1">Votre affixe d'élevage</h3>
+                <p className="text-sm text-stone-500 mb-4">
+                  L'affixe est le nom de votre élevage. Il sera ajouté automatiquement en préfixe ou suffixe au nom des poulains nés dans votre haras. C'est <strong>facultatif</strong> mais recommandé !
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-stone-700 block mb-1.5">Nom de l'affixe</label>
+                <Input
+                  value={affixeName}
+                  onChange={e => setAffixeName(e.target.value)}
+                  placeholder="Ex: Du Val des Brumes, De la Plaine Dorée…"
+                  className="bg-stone-50"
+                  maxLength={30}
+                />
+                <p className="text-xs text-stone-400 mt-1">2 à 30 caractères. Laisser vide pour ignorer.</p>
+              </div>
+              {affixeName.trim().length >= 2 && (
+                <div>
+                  <label className="text-sm font-semibold text-stone-700 block mb-2">Position</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setAffixePosition('prefix')}
+                      className={`p-3 rounded-xl border-2 text-sm transition-all ${affixePosition === 'prefix' ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:border-stone-300'}`}
+                    >
+                      <p className="font-bold text-stone-800">{affixeName} {name || 'Sultan'}</p>
+                      <p className="text-xs text-stone-400 mt-0.5">Affixe en préfixe</p>
+                    </button>
+                    <button
+                      onClick={() => setAffixePosition('suffix')}
+                      className={`p-3 rounded-xl border-2 text-sm transition-all ${affixePosition === 'suffix' ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:border-stone-300'}`}
+                    >
+                      <p className="font-bold text-stone-800">{name || 'Sultan'} {affixeName}</p>
+                      <p className="text-xs text-stone-400 mt-0.5">Affixe en suffixe</p>
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                <p className="text-xs text-amber-800">
+                  💡 <strong>Nouveaux affixes :</strong> vous en recevrez un supplémentaire tous les 5 niveaux de réputation (niveau 6, 11…). Choisissez bien votre premier !
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2 — Génétique */}
+          {step === 2 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
@@ -248,8 +310,8 @@ export default function OnboardingWizard({ onComplete }) {
             </div>
           )}
 
-          {/* STEP 2 — Confirmation */}
-          {step === 2 && (
+          {/* STEP 3 — Confirmation */}
+          {step === 3 && (
             <div className="space-y-5">
               <div className="bg-stone-50 rounded-2xl p-5 space-y-3">
                 <div className="flex items-center gap-3">
@@ -264,6 +326,12 @@ export default function OnboardingWizard({ onComplete }) {
                     <span className="text-stone-400">Robe</span>
                     <p className="font-semibold text-stone-800">{previewColor}</p>
                   </div>
+                  {affixeName.trim().length >= 2 && (
+                    <div>
+                      <span className="text-stone-400">Affixe</span>
+                      <p className="font-semibold text-amber-700">{affixePosition === 'prefix' ? `${affixeName.trim()} …` : `… ${affixeName.trim()}`}</p>
+                    </div>
+                  )}
                   <div>
                     <span className="text-stone-400">Gènes visibles</span>
                     <div className="flex flex-wrap gap-1 mt-1">
@@ -293,13 +361,13 @@ export default function OnboardingWizard({ onComplete }) {
             {step > 0 ? (
               <Button variant="outline" onClick={() => setStep(s => s - 1)}>Retour</Button>
             ) : <div />}
-            {step < 2 ? (
+            {step < 3 ? (
               <Button
                 onClick={() => setStep(s => s + 1)}
                 disabled={step === 0 && !canNextStep0}
                 className="bg-amber-500 hover:bg-amber-600 text-white ml-auto"
               >
-                Suivant →
+                {step === 1 && !affixeName.trim() ? 'Passer →' : 'Suivant →'}
               </Button>
             ) : (
               <Button

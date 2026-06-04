@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift } from 'lucide-react';
+import { AlertTriangle, Baby, FlaskConical, Info, TrendingUp, Calendar, Clock, Gift, Sparkles, ChevronDown } from 'lucide-react';
+import { calcFoalBirthRepGain, getTier } from '@/lib/breedingReputation';
 import { breedGenotype, determineCoatColor, generateRandomStats, inheritDiseases, estimateHorseValue, checkFoalViability, determineFoalDeathAge, determineBreedFromParents, generateFoalTraits } from '../genetics/GeneticsEngine';
 
 function calcDynamicPrice(stallion) {
@@ -41,6 +42,9 @@ export default function ReproductionPanel({ mare }) {
   const [breedingDateChoice, setBreedingDateChoice] = useState('immediate');
   const [birthingFoal, setBirthingFoal] = useState(null);
   const [foalName, setFoalName] = useState('');
+  const [selectedAffixe, setSelectedAffixe] = useState(null);
+  const [isGeneratingName, setIsGeneratingName] = useState(false);
+  const [nameSuggestions, setNameSuggestions] = useState([]);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
@@ -147,6 +151,38 @@ export default function ReproductionPanel({ mare }) {
     onError: (err) => toast.error(err.message),
   });
 
+  const generateFoalName = async () => {
+    if (!birthingFoal) return;
+    setIsGeneratingName(true);
+    try {
+      const affixes = currentUser?.affixes ?? [];
+      const affixInfo = selectedAffixe
+        ? `L'affixe d'élevage est "${selectedAffixe.name}" (placé en ${selectedAffixe.position === 'prefix' ? 'préfixe' : 'suffixe'}).`
+        : affixes.length > 0
+          ? `L'éleveur a l'affixe "${affixes[0].name}" mais ne l'a pas sélectionné.`
+          : 'Pas d\'affixe d\'élevage.';
+      const prompt = `Tu es expert en noms de chevaux de race. Propose 5 noms courts et élégants pour un poulain de race ${birthingFoal.foal_breed}, de robe ${birthingFoal.foal_coat_color}, né d'un père ${birthingFoal.father_name} et d'une mère ${mare.name}. ${affixInfo} Les noms doivent sonner noble, poétique, et adapté à la tradition équestre française. Retourne uniquement les 5 noms, un par ligne, sans numérotation ni explication.`;
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      const names = result.split('\n').map(n => n.trim()).filter(Boolean).slice(0, 5);
+      if (names.length > 0) {
+        // Appliquer l'affixe automatiquement si sélectionné
+        const baseName = names[0];
+        let finalName = baseName;
+        if (selectedAffixe) {
+          finalName = selectedAffixe.position === 'prefix'
+            ? `${selectedAffixe.name} ${baseName}`
+            : `${baseName} ${selectedAffixe.name}`;
+        }
+        setFoalName(finalName);
+        // Stocker les suggestions pour pouvoir en choisir une autre
+        setNameSuggestions(names);
+      }
+    } catch (e) {
+      // silence
+    }
+    setIsGeneratingName(false);
+  };
+
   const birthFoalMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser || !birthingFoal || !foalName) throw new Error('Données manquantes');
@@ -181,16 +217,7 @@ export default function ReproductionPanel({ mare }) {
         foal_id: foal.id,
         foal_name: foalName,
       });
-      const avgStat = Math.round(Object.values(foalData.stats || {}).reduce((a, b) => a + b, 0) / 7);
-      const isPure = birthingFoal.foal_breed && !birthingFoal.foal_breed.includes(' x ');
-      const affectedCount = foalData.health_genes?.filter(g => g.status === 'affected').length || 0;
-      const carrierCount = foalData.health_genes?.filter(g => g.status === 'carrier').length || 0;
-      const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
-      const rareCount = rareGenes.filter(g => foalData.genotype?.[g] && foalData.genotype[g] !== 'nn').length;
-      const rareBonus = rareCount >= 2 ? 5 : 0;
-      const studbookBonus = isPure ? 8 : 0;
-      const repGain = 50 + studbookBonus + rareBonus + (affectedCount === 0 ? 15 : 0)
-        + Math.round((avgStat - 50) * 0.5) - (affectedCount * 40) - (carrierCount * 10);
+      const { gain: repGain } = calcFoalBirthRepGain(foalData.stats);
       await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
     },
     onSuccess: () => {
@@ -200,6 +227,8 @@ export default function ReproductionPanel({ mare }) {
       toast.success(`${foalName} est né(e) ! 🐴`);
       setBirthingFoal(null);
       setFoalName('');
+      setSelectedAffixe(null);
+      setNameSuggestions([]);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -231,22 +260,88 @@ export default function ReproductionPanel({ mare }) {
                   <Baby className="w-6 h-6 text-pink-400" />
                 </div>
                 {birthingFoal?.id === b.id ? (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Nom du poulain..."
-                      value={foalName}
-                      onChange={e => setFoalName(e.target.value)}
-                      className="flex-1"
-                      autoFocus
-                    />
-                    <Button
-                      onClick={() => birthFoalMutation.mutate()}
-                      disabled={!foalName || birthFoalMutation.isPending}
-                      className="bg-stone-800 hover:bg-stone-900"
-                    >
-                      Nommer & faire naître
-                    </Button>
-                    <Button variant="outline" onClick={() => { setBirthingFoal(null); setFoalName(''); }}>Annuler</Button>
+                  <div className="space-y-3">
+                    {/* Sélection affixe */}
+                    {(currentUser?.affixes ?? []).length > 0 && (
+                      <div>
+                        <p className="text-xs text-stone-500 font-medium mb-1.5">Affixe d'élevage</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            onClick={() => setSelectedAffixe(null)}
+                            className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!selectedAffixe ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-300 hover:border-stone-400'}`}
+                          >
+                            Sans affixe
+                          </button>
+                          {(currentUser.affixes ?? []).map((a, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setSelectedAffixe(a)}
+                              className={`text-xs px-2.5 py-1 rounded-full border transition-all font-semibold ${selectedAffixe?.name === a.name ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 text-amber-700 border-amber-300 hover:border-amber-500'}`}
+                            >
+                              {a.position === 'prefix' ? `${a.name} …` : `… ${a.name}`}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Nom */}
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Nom du poulain..."
+                        value={foalName}
+                        onChange={e => setFoalName(e.target.value)}
+                        className="flex-1"
+                        autoFocus
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={generateFoalName}
+                        disabled={isGeneratingName}
+                        className="shrink-0 border-amber-300 text-amber-700 hover:bg-amber-50"
+                        title="Suggérer un nom via l'IA"
+                      >
+                        {isGeneratingName ? (
+                          <div className="w-4 h-4 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
+                        ) : (
+                          <Sparkles className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Suggestions IA */}
+                    {nameSuggestions.length > 0 && (
+                      <div>
+                        <p className="text-xs text-stone-400 mb-1">Autres suggestions :</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {nameSuggestions.map((n, i) => {
+                            const displayName = selectedAffixe
+                              ? selectedAffixe.position === 'prefix' ? `${selectedAffixe.name} ${n}` : `${n} ${selectedAffixe.name}`
+                              : n;
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => setFoalName(displayName)}
+                                className="text-xs px-2.5 py-1 rounded-full bg-stone-100 text-stone-600 hover:bg-amber-100 hover:text-amber-700 border border-stone-200 transition-all"
+                              >
+                                {displayName}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => birthFoalMutation.mutate()}
+                        disabled={!foalName || birthFoalMutation.isPending}
+                        className="flex-1 bg-stone-800 hover:bg-stone-900"
+                      >
+                        {birthFoalMutation.isPending ? 'Naissance en cours…' : 'Nommer & faire naître'}
+                      </Button>
+                      <Button variant="outline" onClick={() => { setBirthingFoal(null); setFoalName(''); setNameSuggestions([]); }}>Annuler</Button>
+                    </div>
                   </div>
                 ) : (
                   <Button

@@ -1,12 +1,14 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Dna, Zap, Star, Calendar } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Trophy, Dna, Zap, Star, Calendar, Plus, Tag } from 'lucide-react';
 import BreedingReputation from '../components/profile/BreedingReputation';
+import { getTier, maxAffixesForLevel } from '@/lib/breedingReputation';
 
 export default function Profile() {
   const { data: user } = useQuery({
@@ -41,6 +43,29 @@ export default function Profile() {
   const breedCounts = horses.reduce((acc, h) => { acc[h.breed] = (acc[h.breed] || 0) + 1; return acc; }, {});
   const topBreed = Object.entries(breedCounts).sort((a, b) => b[1] - a[1])[0];
 
+  const queryClient = useQueryClient();
+  const [newAffixeName, setNewAffixeName] = useState('');
+  const [newAffixePos, setNewAffixePos] = useState('prefix');
+  const [showAffixeForm, setShowAffixeForm] = useState(false);
+
+  const tier = getTier(user?.breeding_reputation ?? 0);
+  const maxAffixes = maxAffixesForLevel(tier.level);
+  const currentAffixes = user?.affixes ?? [];
+  const canAddAffixe = currentAffixes.length < maxAffixes;
+
+  const addAffixeMutation = useMutation({
+    mutationFn: async () => {
+      if (!newAffixeName.trim() || newAffixeName.trim().length < 2) throw new Error('Nom trop court');
+      const updated = [...currentAffixes, { name: newAffixeName.trim(), position: newAffixePos, created_at: new Date().toISOString() }];
+      await base44.auth.updateMe({ affixes: updated });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      setNewAffixeName('');
+      setShowAffixeForm(false);
+    },
+  });
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -59,7 +84,68 @@ export default function Profile() {
       </div>
 
       {/* Réputation d'élevage */}
-      <BreedingReputation reputation={user?.breeding_reputation ?? 0} />
+      <BreedingReputation reputation={user?.breeding_reputation ?? 0} affixes={user?.affixes ?? []} />
+
+      {/* Gestion affixes */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Tag className="w-4 h-4 text-amber-600" />
+              <h3 className="font-semibold text-stone-800">Affixes d'élevage</h3>
+              <Badge variant="outline" className="text-xs">{currentAffixes.length} / {maxAffixes}</Badge>
+            </div>
+            {canAddAffixe && !showAffixeForm && (
+              <Button size="sm" variant="outline" onClick={() => setShowAffixeForm(true)} className="text-amber-700 border-amber-300 hover:bg-amber-50">
+                <Plus className="w-3.5 h-3.5 mr-1" /> Ajouter
+              </Button>
+            )}
+          </div>
+
+          {currentAffixes.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {currentAffixes.map((a, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200">
+                  <span className="text-sm font-semibold text-amber-800">{a.position === 'prefix' ? `${a.name} …` : `… ${a.name}`}</span>
+                  <span className="text-xs text-amber-500">{a.position === 'prefix' ? 'préfixe' : 'suffixe'}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-stone-400 italic">Aucun affixe. Ajoutez-en un pour personnaliser les noms de vos poulains !</p>
+          )}
+
+          {!canAddAffixe && (
+            <p className="text-xs text-stone-400">Prochain affixe disponible au niveau {Math.ceil(tier.level / 5) * 5 + 1}</p>
+          )}
+
+          {showAffixeForm && (
+            <div className="space-y-3 pt-2 border-t border-stone-100">
+              <Input
+                value={newAffixeName}
+                onChange={e => setNewAffixeName(e.target.value)}
+                placeholder="Nom de l'affixe…"
+                maxLength={30}
+                className="bg-stone-50"
+              />
+              <div className="flex gap-2">
+                <button onClick={() => setNewAffixePos('prefix')} className={`flex-1 text-sm py-2 rounded-lg border-2 transition-all ${newAffixePos === 'prefix' ? 'border-amber-400 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 text-stone-500'}`}>
+                  {newAffixeName || 'Affixe'} … (préfixe)
+                </button>
+                <button onClick={() => setNewAffixePos('suffix')} className={`flex-1 text-sm py-2 rounded-lg border-2 transition-all ${newAffixePos === 'suffix' ? 'border-amber-400 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 text-stone-500'}`}>
+                  … {newAffixeName || 'Affixe'} (suffixe)
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => addAffixeMutation.mutate()} disabled={newAffixeName.trim().length < 2 || addAffixeMutation.isPending} className="bg-amber-600 hover:bg-amber-700">
+                  Enregistrer l'affixe
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setShowAffixeForm(false)}>Annuler</Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Monnaies */}
       <div className="grid grid-cols-2 gap-4">

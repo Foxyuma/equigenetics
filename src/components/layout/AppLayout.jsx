@@ -123,7 +123,8 @@ export default function AppLayout() {
                     </button>
                     
                     {openDropdown === group.label && (
-                      <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-stone-200 py-2 z-50">
+                      <div className="absolute top-full left-0 pt-1 w-48 z-50">
+                      <div className="bg-white rounded-xl shadow-xl border border-stone-200 py-2">
                         {group.items.map(item => {
                           const ItemIcon = item.icon;
                           const isActive = location.pathname === item.path;
@@ -148,6 +149,7 @@ export default function AppLayout() {
                             </Link>
                           );
                         })}
+                      </div>
                       </div>
                     )}
                   </div>

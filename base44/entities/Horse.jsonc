@@ -49,6 +49,10 @@
       "type": "string",
       "description": "Visible coat color"
     },
+    "owner_email": {
+      "type": "string",
+      "description": "Email du propri\u00e9taire actuel (peut diff\u00e9rer du cr\u00e9ateur apr\u00e8s un achat)"
+    },
     "genotype": {
       "type": "object",
       "description": "Full genetic profile",
@@ -138,7 +142,7 @@
     },
     "mental_traits": {
       "type": "array",
-      "description": "Traits mentaux du cheval (courage, concentration, nerveux\u2026)",
+      "description": "Traits mentaux du cheval",
       "items": {
         "type": "string"
       },
@@ -146,7 +150,7 @@
     },
     "morphology": {
       "type": "array",
-      "description": "Traits morphologiques cach\u00e9s (\u00e9paules inclin\u00e9es, jarrets puissants\u2026)",
+      "description": "Traits morphologiques cach\u00e9s",
       "items": {
         "type": "string"
       },
@@ -192,7 +196,7 @@
         "courageux",
         "docile"
       ],
-      "description": "Caract\u00e8re du cheval \u2014 influence les entra\u00eenements"
+      "description": "Caract\u00e8re du cheval"
     },
     "competition_wins": {
       "type": "number",

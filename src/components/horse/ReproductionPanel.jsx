@@ -236,6 +236,19 @@ export default function ReproductionPanel({ mare }) {
   const readyToBeborn = pendingBreedings.filter(b => isPast(parseISO(b.foal_due_date)));
   const waitingBreedings = pendingBreedings.filter(b => !isPast(parseISO(b.foal_due_date)));
 
+  // Vérification âge minimum pour la reproduction
+  if ((mare.age ?? 0) < 3) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+        <span className="text-5xl">🌱</span>
+        <h3 className="text-lg font-semibold text-stone-700">Trop jeune pour se reproduire</h3>
+        <p className="text-stone-500 text-sm max-w-sm">
+          <strong>{mare.name}</strong> a {mare.age} an{mare.age > 1 ? 's' : ''}. Les juments doivent avoir au moins <strong>3 ans</strong> pour être mises à la reproduction.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {readyToBeborn.length > 0 && (

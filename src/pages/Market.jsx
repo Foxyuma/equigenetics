@@ -55,24 +55,40 @@ export default function Market() {
 
   const buyMutation = useMutation({
     mutationFn: async (horse) => {
-      await base44.entities.Horse.update(horse.id, { is_for_sale: false, price: 0 });
-      // Réputation vendeur : +3 vente locale, +6 vente internationale
-      if (currentUser && horse.created_by === currentUser.email) {
-        const buyerEmail = horse.owner_email || '';
-        const sellerDomain = currentUser.email.split('@')[1] || '';
-        const buyerDomain = buyerEmail.split('@')[1] || '';
-        const isInternational = buyerDomain && buyerDomain !== sellerDomain;
-        const saleBonus = isInternational ? 6 : 3;
-        const currentRep = currentUser.breeding_reputation ?? 0;
-        await base44.auth.updateMe({ breeding_reputation: currentRep + saleBonus });
+      if (!currentUser) throw new Error('Non connecté');
+      const price = horse.price || 0;
+      const balance = currentUser.genesis_balance ?? 0;
+      if (price > 0 && balance < price) throw new Error('Fonds insuffisants');
+
+      // Débiter l'acheteur
+      if (price > 0) {
+        await base44.auth.updateMe({ genesis_balance: balance - price });
+        await base44.entities.Transaction.create({
+          user_email: currentUser.email,
+          currency: 'genesis',
+          amount: -price,
+          balance_after: balance - price,
+          reason: `Achat cheval — ${horse.name}`,
+          reference_id: horse.id,
+        });
       }
+
+      // Transférer le cheval : retirer de la vente (on ne peut pas changer created_by, mais on marque propriétaire)
+      await base44.entities.Horse.update(horse.id, {
+        is_for_sale: false,
+        price: 0,
+        new_owner_email: currentUser.email,
+      });
     },
-    onSuccess: () => {
+    onSuccess: (_, horse) => {
       queryClient.invalidateQueries({ queryKey: ['market-horses'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
+      queryClient.invalidateQueries({ queryKey: ['my-horses-market'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast.success('Cheval acheté !');
-    }
+      toast.success(`${horse.name} rejoint votre écurie !`);
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const createAuctionMutation = useMutation({

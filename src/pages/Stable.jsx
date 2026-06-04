@@ -21,11 +21,22 @@ export default function Stable() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: horses = [], isLoading } = useQuery({
-    queryKey: ['horses', currentUser?.email],
+  // Chevaux créés par l'utilisateur + chevaux achetés (owner_email)
+  const { data: createdHorses = [], isLoading: loadingCreated } = useQuery({
+    queryKey: ['horses-created', currentUser?.email],
     queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
     enabled: !!currentUser?.email,
   });
+  const { data: ownedHorses = [], isLoading: loadingOwned } = useQuery({
+    queryKey: ['horses-owned', currentUser?.email],
+    queryFn: () => base44.entities.Horse.filter({ owner_email: currentUser.email }, '-created_date', 200),
+    enabled: !!currentUser?.email,
+  });
+  const isLoading = loadingCreated || loadingOwned;
+  // Fusionner sans doublons
+  const horseMap = new Map();
+  [...createdHorses, ...ownedHorses].forEach(h => horseMap.set(h.id, h));
+  const horses = Array.from(horseMap.values());
 
   const filtered = horses.filter(h => {
     if (search && !h.name?.toLowerCase().includes(search.toLowerCase())) return false;

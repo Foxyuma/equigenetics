@@ -1,11 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SeasonManager from '../components/season/SeasonManager';
-import { Calendar, Leaf, Sun, CloudRain, Snowflake } from 'lucide-react';
+import { Calendar, Flower, Sun, CloudRain, Snowflake } from 'lucide-react';
 
 const SEASON_DETAILS = {
   spring: {
-    icon: Leaf,
+    icon: Flower,
     benefits: [
       "Fertilité augmentée de 20%",
       "Risque de maladie faible (12%)",

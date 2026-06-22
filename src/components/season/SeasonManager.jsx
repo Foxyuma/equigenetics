@@ -4,13 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Leaf, Sun, CloudRain, Snowflake, Calendar, TrendingUp, Activity, Trophy } from 'lucide-react';
+import { Flower, Sun, CloudRain, Snowflake, Calendar, TrendingUp, Activity, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SEASON_CONFIG = {
   spring: {
     label: "Printemps",
-    icon: Leaf,
+    icon: Flower,
     color: "from-green-400 to-emerald-500",
     bgColor: "bg-green-50",
     textColor: "text-green-700",

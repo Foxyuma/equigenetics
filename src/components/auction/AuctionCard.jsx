@@ -95,7 +95,7 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
 
         {auction.horse_stats && (
           <div className="space-y-1">
-            {Object.entries(auction.horse_stats).slice(0, 3).map(([s, v]) => (
+            {Object.entries(auction.horse_stats).filter(([s]) => !['strength', 'jumping', 'temperament'].includes(s)).map(([s, v]) => (
               <StatBar key={s} stat={s} value={v} />
             ))}
           </div>

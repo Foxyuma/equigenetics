@@ -58,6 +58,11 @@
       "default": false,
       "description": "Inscrit au studbook (true) ou OC (false)"
     },
+    "studbook_registration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de demande/inscription au studbook"
+    },
     "genotype": {
       "type": "object",
       "description": "Full genetic profile",

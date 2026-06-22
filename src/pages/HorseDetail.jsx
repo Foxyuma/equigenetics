@@ -21,6 +21,7 @@ import CareerPanel from '../components/horse/CareerPanel';
 import ReproductionPanel from '../components/horse/ReproductionPanel';
 import ApprovalBenefits from '../components/breeding/ApprovalBenefits';
 import StallionOfferPanel from '../components/horse/StallionOfferPanel';
+import StudbookRegistration from '../components/horse/StudbookRegistration';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -312,6 +313,8 @@ export default function HorseDetail() {
               )}
             </div>
           )}
+
+          <StudbookRegistration horse={horse} parents={parents} currentUser={currentUser} />
         </div>
       </div>
 

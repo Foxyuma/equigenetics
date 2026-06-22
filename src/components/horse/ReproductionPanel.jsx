@@ -206,7 +206,7 @@ export default function ReproductionPanel({ mare }) {
         energy: 100,
         competition_wins: 0,
         is_for_sale: false,
-        studbook_registered: !birthingFoal.is_oc,
+        studbook_registered: false,
         character: foalTraits.character,
         mental_traits: foalTraits.mental_traits,
         morphology: foalTraits.morphology,

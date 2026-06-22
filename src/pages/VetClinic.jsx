@@ -701,7 +701,7 @@ export default function VetClinic() {
                     {bulkCheckupMutation.isPending
                       ? 'En cours...'
                       : currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
-                        ? '✓ Fait aujourd'hui'
+                        ? "✓ Fait aujourd'hui"
                         : `Contrôler (${horses.length} chevaux)`}
                   </Button>
                 </div>

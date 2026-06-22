@@ -49,6 +49,11 @@
         }
       },
       "default": []
+    },
+    "last_bulk_checkup_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date du dernier contr\u00f4le v\u00e9t\u00e9rinaire group\u00e9 (1x/jour)"
     }
   },
   "required": []

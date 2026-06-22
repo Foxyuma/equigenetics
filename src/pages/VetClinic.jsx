@@ -296,6 +296,51 @@ export default function VetClinic() {
     onError: (err) => toast.error(err.message),
   });
 
+  const bulkCheckupMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser || horses.length === 0) throw new Error('Aucun cheval à contrôler');
+
+      const today = new Date().toISOString().split('T')[0];
+      if (currentUser.last_bulk_checkup_date === today) {
+        throw new Error('Contrôle groupé déjà effectué aujourd\'hui');
+      }
+
+      for (const horse of horses) {
+        const existingRecord = healthRecords.find(r => r.horse_id === horse.id);
+        const hasIllness = !existingRecord?.current_illness && Math.random() < illnessProbability;
+        const illness = hasIllness ? ILLNESSES[Math.floor(Math.random() * ILLNESSES.length)] : null;
+
+        const data = {
+          horse_id: horse.id,
+          horse_name: horse.name,
+          condition: illness ? "poor" : "good",
+          current_illness: illness?.name || null,
+          illness_severity: illness?.severity || null,
+          illness_started: illness ? new Date().toISOString() : null,
+          symptoms: illness?.symptoms || [],
+          energy_penalty: illness?.energyPenalty || 0,
+          performance_penalty: illness?.performancePenalty || 0,
+          last_checkup: new Date().toISOString(),
+        };
+
+        if (existingRecord) {
+          await base44.entities.HealthRecord.update(existingRecord.id, data);
+        } else {
+          await base44.entities.HealthRecord.create(data);
+        }
+      }
+
+      await base44.auth.updateMe({ last_bulk_checkup_date: today });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['health-records'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast.success(`Contrôle vétérinaire effectué pour ${horses.length} chevaux !`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const vaccinateMutation = useMutation({
     mutationFn: async ({ horse, vaccine }) => {
       const existingRecord = healthRecords.find(r => r.horse_id === horse.id);
@@ -631,6 +676,38 @@ export default function VetClinic() {
         </TabsContent>
 
         <TabsContent value="health" className="mt-6">
+          {horses.length > 0 && (
+            <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-teal-50/60 mb-6">
+              <CardContent className="p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <Activity className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-stone-800">Contrôle de toute l'écurie</h3>
+                      <p className="text-sm text-stone-500">
+                        {currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
+                          ? "✓ Contrôle groupé déjà effectué aujourd'hui — revenez demain"
+                          : `Vérifiez la santé de vos ${horses.length} chevaux en un clic (1x/jour)`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => bulkCheckupMutation.mutate()}
+                    disabled={bulkCheckupMutation.isPending || currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white whitespace-nowrap"
+                  >
+                    {bulkCheckupMutation.isPending
+                      ? 'En cours...'
+                      : currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
+                        ? '✓ Fait aujourd'hui'
+                        : `Contrôler (${horses.length} chevaux)`}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {horses.length === 0 ? (
               <Card className="border-0 bg-stone-50 col-span-2">

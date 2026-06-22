@@ -105,13 +105,25 @@ export default function GeneticTest() {
         reason: `Test ADN ${testConfig.label} - ${selectedHorse.name}`,
       });
 
+      // Notifier le joueur du résultat
+      await base44.entities.Message.create({
+        sender_email: 'system@equigenesis.fr',
+        sender_name: 'EquiGenesis',
+        recipient_email: currentUser.email,
+        recipient_name: currentUser.full_name || 'Joueur',
+        subject: `🧬 Résultat test ADN — ${selectedHorse.name}`,
+        content: `Le test **${testConfig.label}** pour **${selectedHorse.name}** est terminé.\n\nConsultez les résultats dans le Laboratoire Génétique → Historique des tests.`,
+        is_read: false,
+      });
+
       return test;
     },
     onSuccess: (test) => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['genetic-tests', selectedHorse.id] });
+      queryClient.invalidateQueries({ queryKey: ['messages-nav'] });
       setShowResults(test);
-      toast.success(`Test ${TEST_TYPES[selectedTest].label} en cours ! Résultats dans ${TEST_TYPES[selectedTest].time}`);
+      toast.success(`Test ${TEST_TYPES[selectedTest].label} terminé ! Résultats disponibles.`);
     },
     onError: (err) => toast.error(err.message),
   });

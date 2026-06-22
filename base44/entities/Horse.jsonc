@@ -53,6 +53,11 @@
       "type": "string",
       "description": "Email du propri\u00e9taire actuel (peut diff\u00e9rer du cr\u00e9ateur apr\u00e8s un achat)"
     },
+    "studbook_registered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Inscrit au studbook (true) ou OC (false)"
+    },
     "genotype": {
       "type": "object",
       "description": "Full genetic profile",

@@ -64,6 +64,11 @@
     },
     "foal_breed": {
       "type": "string"
+    },
+    "is_oc": {
+      "type": "boolean",
+      "default": false,
+      "description": "Poulain OC (Origines Constat\u00e9es) si le p\u00e8re n'est pas approuv\u00e9"
     }
   },
   "required": [

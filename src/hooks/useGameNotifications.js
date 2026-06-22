@@ -4,6 +4,62 @@ import { base44 } from '@/api/base44Client';
 import { isPast, parseISO } from 'date-fns';
 
 /**
+ * Traite les enchères terminées : notifie le vendeur et le gagnant,
+ * et marque l'enchère comme "ended" pour éviter les doublons.
+ */
+async function processEndedAuctions(auctions, currentUser, recentMessages, queryClient) {
+  if (!currentUser?.email || !auctions.length) return;
+  const now = new Date();
+
+  for (const auction of auctions) {
+    // Ignorer les enchères déjà terminées/annulées ou non expirées
+    if (auction.status !== 'active') continue;
+    if (new Date(auction.ends_at) > now) continue;
+
+    const isSeller = auction.seller_email === currentUser.email;
+    const isWinner = auction.current_bidder_email === currentUser.email && auction.current_bid > 0;
+
+    if (!isSeller && !isWinner) {
+      // Marquer comme terminée même si on n'est pas concerné pour éviter re-traitement
+      await base44.entities.Auction.update(auction.id, { status: 'ended' });
+      continue;
+    }
+
+    const subject = isWinner
+      ? `🏆 Enchère remportée : ${auction.horse_name}`
+      : `📢 Enchère terminée : ${auction.horse_name}`;
+
+    // Éviter les doublons
+    if (recentMessages.some(m => m.subject === subject)) {
+      continue;
+    }
+
+    const content = isWinner
+      ? `Félicitations ! Vous avez remporté l'enchère pour **${auction.horse_name}** avec une mise de **${auction.current_bid} ₲**.\n\nRendez-vous sur le Marché pour récupérer votre nouveau cheval !`
+      : `Votre enchère pour **${auction.horse_name}** est terminée.\n\n` +
+        (auction.current_bid > 0
+          ? `Meilleure offre : **${auction.current_bid} ₲** par **${auction.current_bidder_name || 'un joueur'}**.`
+          : `Aucune offre n'a été placée.`);
+
+    await base44.entities.Message.create({
+      sender_email: 'system@equigenesis.fr',
+      sender_name: 'EquiGenesis',
+      recipient_email: currentUser.email,
+      recipient_name: currentUser.full_name || 'Joueur',
+      subject,
+      content,
+      is_read: false,
+    });
+
+    // Marquer l'enchère comme terminée
+    await base44.entities.Auction.update(auction.id, { status: 'ended' });
+    queryClient.invalidateQueries({ queryKey: ['auctions'] });
+    queryClient.invalidateQueries({ queryKey: ['messages'] });
+    queryClient.invalidateQueries({ queryKey: ['messages-nav'] });
+  }
+}
+
+/**
  * Vérifie les événements du jeu et envoie des messages automatiques :
  * - Naissance d'un poulain (gestation terminée mais statut "pending")
  * - Décès d'un cheval (âge entre 21 et 24 ans)
@@ -44,8 +100,17 @@ export function useGameNotifications() {
     staleTime: 60_000,
   });
 
+  // Récupère les enchères pour détecter les ventes terminées
+  const { data: auctions = [] } = useQuery({
+    queryKey: ['auctions-notifications'],
+    queryFn: () => base44.entities.Auction.list('-created_date', 100),
+    enabled: !!currentUser?.email,
+    staleTime: 60_000,
+  });
+
   useEffect(() => {
-    if (!currentUser?.email || !pendingBreedings.length && !myHorses.length) return;
+    if (!currentUser?.email) return;
+    if (!pendingBreedings.length && !myHorses.length && !auctions.length) return;
 
     const sendNotification = async (subject, content, referenceKey) => {
       // Évite les doublons : si un message avec ce sujet existe déjà, on ne renvoie pas
@@ -93,5 +158,8 @@ export function useGameNotifications() {
 
       sendNotification(subject, content, `death-${horse.id}-${age}`);
     }
-  }, [currentUser?.email, pendingBreedings.length, myHorses.length, recentMessages.length]);
+
+    // ─── Notifications d'enchères terminées ────────────────────────────────────
+    processEndedAuctions(auctions, currentUser, recentMessages, queryClient);
+  }, [currentUser?.email, pendingBreedings.length, myHorses.length, recentMessages.length, auctions.length]);
 }

@@ -80,6 +80,20 @@ export default function Market() {
         price: 0,
         new_owner_email: currentUser.email,
       });
+
+      // Notifier le vendeur
+      const sellerEmail = horse.owner_email || horse.created_by;
+      if (sellerEmail && sellerEmail !== currentUser.email) {
+        await base44.entities.Message.create({
+          sender_email: 'system@equigenesis.fr',
+          sender_name: 'EquiGenesis',
+          recipient_email: sellerEmail,
+          recipient_name: '',
+          subject: `💰 ${horse.name} vendu !`,
+          content: `Votre cheval **${horse.name}** a été acheté par **${currentUser.full_name || currentUser.email}** pour **${horse.price || 0} ₲**.\n\nLe montant a été crédité à votre compte.`,
+          is_read: false,
+        });
+      }
     },
     onSuccess: (_, horse) => {
       queryClient.invalidateQueries({ queryKey: ['market-horses'] });
@@ -87,6 +101,7 @@ export default function Market() {
       queryClient.invalidateQueries({ queryKey: ['my-horses-market'] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['messages-nav'] });
       toast.success(`${horse.name} rejoint votre écurie !`);
     },
     onError: (err) => toast.error(err.message),

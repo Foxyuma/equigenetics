@@ -28,7 +28,7 @@ import { getBreedingImpact } from '../breeding/InspectionScoring';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
-import { addWeeks, format, isPast, parseISO } from 'date-fns';
+import { addWeeks, format, isPast, parseISO, differenceInWeeks } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 // 3 semaines réelles = 1 saison = ~11 mois jeu
@@ -136,6 +136,7 @@ export default function ReproductionPanel({ mare }) {
         foal_coat_color: foalPreview.coat_color,
         foal_sex: foalPreview.sex,
         foal_breed: foalPreview.breed,
+        is_oc: foalPreview.isOC,
       });
     },
     onSuccess: () => {
@@ -205,6 +206,7 @@ export default function ReproductionPanel({ mare }) {
         energy: 100,
         competition_wins: 0,
         is_for_sale: false,
+        studbook_registered: !birthingFoal.is_oc,
         character: foalTraits.character,
         mental_traits: foalTraits.mental_traits,
         morphology: foalTraits.morphology,
@@ -375,7 +377,10 @@ export default function ReproductionPanel({ mare }) {
           <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
             <Calendar className="w-4 h-4 text-amber-500" /> Gestations en cours
           </h3>
-          {waitingBreedings.map(b => (
+          {waitingBreedings.map(b => {
+            const weeksLeft = differenceInWeeks(parseISO(b.foal_due_date), new Date());
+            const monthsLeft = Math.max(0, Math.ceil(weeksLeft / 3));
+            return (
             <Card key={b.id} className="border border-amber-200 bg-amber-50/40">
               <CardContent className="p-3 flex items-center justify-between">
                 <div>
@@ -383,12 +388,15 @@ export default function ReproductionPanel({ mare }) {
                   <p className="text-xs text-stone-400">{b.foal_breed} · {b.foal_coat_color}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-amber-700 font-semibold">Naissance prévue</p>
-                  <p className="text-xs text-stone-500">{format(parseISO(b.foal_due_date), 'd MMM yyyy', { locale: fr })}</p>
+                  <p className="text-xs text-amber-700 font-semibold">
+                    {monthsLeft > 0 ? `${monthsLeft} mois restant${monthsLeft > 1 ? 's' : ''}` : 'Prêt à naître'}
+                  </p>
+                  {b.is_oc && <p className="text-xs text-orange-600">OC</p>}
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 

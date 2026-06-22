@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History, Zap, BookOpen } from 'lucide-react';
+import { Home, Heart, Trophy, ShoppingCart, Menu, X, Dna, Store, Package, GitBranch, TrendingUp, ChevronDown, Award, MapPin, Mail, ArrowRightLeft, Activity, Calendar, LayoutGrid, Users, UserCircle, History, Zap, BookOpen, Bell } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
 import GameClockDisplay from './GameClockDisplay';
@@ -160,6 +160,14 @@ export default function AppLayout() {
             {/* Currencies */}
             <div className="hidden sm:flex items-center gap-3">
               <GameClockDisplay />
+              <Link to="/Messages" className="relative p-2 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors" title="Notifications">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
               <CurrencyDisplay />
               <button
                 onClick={() => base44.auth.logout()}
@@ -170,10 +178,20 @@ export default function AppLayout() {
               </button>
             </div>
 
-            {/* Mobile toggle */}
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-stone-100">
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {/* Mobile bell + toggle */}
+            <div className="flex md:hidden items-center gap-1">
+              <Link to="/Messages" className="relative p-2 rounded-lg text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+              <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-lg hover:bg-stone-100">
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
 

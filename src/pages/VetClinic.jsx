@@ -110,6 +110,16 @@ export default function VetClinic() {
     enabled: !!selectedTestHorse,
   });
 
+  const { data: allGeneticTests = [] } = useQuery({
+    queryKey: ['all-genetic-tests'],
+    queryFn: () => base44.entities.GeneticTest.filter({ created_by: currentUser?.email }, '-created_date', 500),
+    enabled: !!currentUser,
+  });
+
+  const untestedHorses = horses.filter(horse =>
+    !allGeneticTests.some(t => t.horse_id === horse.id && t.test_type === bulkTestType)
+  );
+
   const currentSeason = seasons[0];
   const illnessProbability = (currentSeason?.illness_probability || 15) / 100;
 
@@ -232,17 +242,17 @@ export default function VetClinic() {
 
   const testAllHorsesMutation = useMutation({
     mutationFn: async () => {
-      if (!currentUser || horses.length === 0) throw new Error('Aucun cheval à tester');
+      if (!currentUser || untestedHorses.length === 0) throw new Error('Aucun cheval non testé à ce type');
 
       const testConfig = TEST_TYPES[bulkTestType];
-      const totalCost = testConfig.price * horses.length;
+      const totalCost = testConfig.price * untestedHorses.length;
       const balance = currentUser.genesis_balance || 0;
 
       if (balance < totalCost) {
         throw new Error(`Fonds insuffisants. Coût total : ${totalCost} ₲ (solde : ${balance} ₲)`);
       }
 
-      for (const horse of horses) {
+      for (const horse of untestedHorses) {
         let results = {};
         if (bulkTestType === 'health_panel') {
           results.health_genes = horse.health_genes || [];
@@ -274,13 +284,14 @@ export default function VetClinic() {
         currency: 'genesis',
         amount: -totalCost,
         balance_after: balance - totalCost,
-        reason: `Test ADN ${testConfig.label} - ${horses.length} chevaux`,
+        reason: `Test ADN ${testConfig.label} - ${untestedHorses.length} chevaux`,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['genetic-tests-vet'] });
-      toast.success(`Tests ${TEST_TYPES[bulkTestType].label} commandés pour ${horses.length} chevaux !`);
+      queryClient.invalidateQueries({ queryKey: ['all-genetic-tests'] });
+      toast.success(`Tests ${TEST_TYPES[bulkTestType].label} commandés pour ${untestedHorses.length} chevaux !`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -473,8 +484,12 @@ export default function VetClinic() {
                           <Beaker className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-stone-800">Tester tous mes chevaux</h3>
-                          <p className="text-sm text-stone-500">Lancez un test ADN sur toute votre écurie d'un seul clic</p>
+                          <h3 className="font-bold text-stone-800">Tester mes chevaux non testés</h3>
+                          <p className="text-sm text-stone-500">
+                            {untestedHorses.length > 0
+                              ? `${untestedHorses.length} cheval(aux) restant(s) à tester pour ce type`
+                              : 'Tous vos chevaux ont déjà été testés pour ce type'}
+                          </p>
                         </div>
                       </div>
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -489,12 +504,14 @@ export default function VetClinic() {
                         </select>
                         <Button
                           onClick={() => testAllHorsesMutation.mutate()}
-                          disabled={testAllHorsesMutation.isPending}
+                          disabled={testAllHorsesMutation.isPending || untestedHorses.length === 0}
                           className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
                         >
                           {testAllHorsesMutation.isPending
                             ? 'En cours...'
-                            : `Tester (${horses.length} chevaux — ${TEST_TYPES[bulkTestType].price * horses.length} ₲)`}
+                            : untestedHorses.length === 0
+                              ? '✓ Tous testés'
+                              : `Tester (${untestedHorses.length} — ${TEST_TYPES[bulkTestType].price * untestedHorses.length} ₲)`}
                         </Button>
                       </div>
                     </div>

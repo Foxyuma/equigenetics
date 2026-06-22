@@ -79,6 +79,7 @@ export default function VetClinic() {
   const [selectedTestHorse, setSelectedTestHorse] = useState(null);
   const [selectedTest, setSelectedTest] = useState(null);
   const [showTestResults, setShowTestResults] = useState(null);
+  const [bulkTestType, setBulkTestType] = useState('full_test');
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -225,6 +226,61 @@ export default function VetClinic() {
       setShowTestResults(test);
       setSelectedTest(null);
       toast.success(`Test ${TEST_TYPES[selectedTest].label} en cours !`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const testAllHorsesMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser || horses.length === 0) throw new Error('Aucun cheval à tester');
+
+      const testConfig = TEST_TYPES[bulkTestType];
+      const totalCost = testConfig.price * horses.length;
+      const balance = currentUser.genesis_balance || 0;
+
+      if (balance < totalCost) {
+        throw new Error(`Fonds insuffisants. Coût total : ${totalCost} ₲ (solde : ${balance} ₲)`);
+      }
+
+      for (const horse of horses) {
+        let results = {};
+        if (bulkTestType === 'health_panel') {
+          results.health_genes = horse.health_genes || [];
+        } else if (bulkTestType === 'coat_test') {
+          results.genotype = horse.genotype || {};
+          results.coat_color = horse.coat_color;
+        } else if (bulkTestType === 'full_test') {
+          results.genotype = horse.genotype || {};
+          results.coat_color = horse.coat_color;
+          results.health_genes = horse.health_genes || [];
+        }
+
+        await base44.entities.GeneticTest.create({
+          horse_id: horse.id,
+          horse_name: horse.name,
+          test_type: bulkTestType,
+          cost: testConfig.price,
+          results,
+          tested_at: new Date().toISOString(),
+        });
+      }
+
+      await base44.auth.updateMe({
+        genesis_balance: balance - totalCost,
+      });
+
+      await base44.entities.Transaction.create({
+        user_email: currentUser.email,
+        currency: 'genesis',
+        amount: -totalCost,
+        balance_after: balance - totalCost,
+        reason: `Test ADN ${testConfig.label} - ${horses.length} chevaux`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['genetic-tests-vet'] });
+      toast.success(`Tests ${TEST_TYPES[bulkTestType].label} commandés pour ${horses.length} chevaux !`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -407,7 +463,45 @@ export default function VetClinic() {
 
         <TabsContent value="genetic-tests" className="mt-6">
           {!selectedTestHorse ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-6">
+              {horses.length > 0 && (
+                <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50/60 to-indigo-50/60">
+                  <CardContent className="p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                          <Beaker className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-stone-800">Tester tous mes chevaux</h3>
+                          <p className="text-sm text-stone-500">Lancez un test ADN sur toute votre écurie d'un seul clic</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <select
+                          value={bulkTestType}
+                          onChange={(e) => setBulkTestType(e.target.value)}
+                          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          {Object.entries(TEST_TYPES).map(([key, cfg]) => (
+                            <option key={key} value={key}>{cfg.label} — {cfg.price} ₲</option>
+                          ))}
+                        </select>
+                        <Button
+                          onClick={() => testAllHorsesMutation.mutate()}
+                          disabled={testAllHorsesMutation.isPending}
+                          className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
+                        >
+                          {testAllHorsesMutation.isPending
+                            ? 'En cours...'
+                            : `Tester (${horses.length} chevaux — ${TEST_TYPES[bulkTestType].price * horses.length} ₲)`}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {horses.length === 0 ? (
                 <Card className="border-0 bg-stone-50 col-span-3">
                   <CardContent className="p-12 text-center">
@@ -432,6 +526,7 @@ export default function VetClinic() {
                   </button>
                 ))
               )}
+              </div>
             </div>
           ) : (
             <div className="space-y-6">

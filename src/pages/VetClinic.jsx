@@ -377,6 +377,40 @@ export default function VetClinic() {
     onError: (err) => toast.error(err.message),
   });
 
+  const bulkVaccinateMutation = useMutation({
+    mutationFn: async (vaccine) => {
+      const today = new Date().toISOString().split('T')[0];
+      for (const horse of horses) {
+        const existingRecord = healthRecords.find(r => r.horse_id === horse.id);
+        const lastVaccine = existingRecord?.vaccination_status?.[vaccine.key];
+        const isValid = lastVaccine &&
+          new Date(lastVaccine) > new Date(Date.now() - vaccine.validityMonths * 30 * 24 * 60 * 60 * 1000);
+        if (isValid) continue; // skip already up-to-date
+
+        const vaccinations = { ...(existingRecord?.vaccination_status || {}), [vaccine.key]: today };
+        if (existingRecord) {
+          await base44.entities.HealthRecord.update(existingRecord.id, {
+            vaccination_status: vaccinations,
+            last_checkup: new Date().toISOString(),
+          });
+        } else {
+          await base44.entities.HealthRecord.create({
+            horse_id: horse.id,
+            horse_name: horse.name,
+            condition: 'good',
+            vaccination_status: vaccinations,
+            last_checkup: new Date().toISOString(),
+          });
+        }
+      }
+    },
+    onSuccess: (_, vaccine) => {
+      queryClient.invalidateQueries({ queryKey: ['health-records'] });
+      toast.success(`Vaccination ${vaccine.name} effectuée pour toute l'écurie !`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const vaccinateMutation = useMutation({
     mutationFn: async ({ horse, vaccine }) => {
       const existingRecord = healthRecords.find(r => r.horse_id === horse.id);
@@ -807,6 +841,45 @@ export default function VetClinic() {
         </TabsContent>
 
         <TabsContent value="vaccinations" className="mt-6">
+          {horses.length > 0 && (
+            <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50/60 to-violet-50/60 mb-6">
+              <CardContent className="p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                      <Syringe className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-stone-800">Vacciner toute l'écurie</h3>
+                      <p className="text-sm text-stone-500">Applique le vaccin choisi à tous les chevaux non à jour</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {VACCINATIONS.map(vac => {
+                      const needVaccCount = horses.filter(h => {
+                        const r = getHealthRecord(h.id);
+                        const last = r?.vaccination_status?.[vac.key];
+                        return !last || new Date(last) <= new Date(Date.now() - vac.validityMonths * 30 * 24 * 60 * 60 * 1000);
+                      }).length;
+                      return (
+                        <Button
+                          key={vac.key}
+                          onClick={() => bulkVaccinateMutation.mutate(vac)}
+                          disabled={bulkVaccinateMutation.isPending || needVaccCount === 0}
+                          size="sm"
+                          variant={needVaccCount === 0 ? 'outline' : 'default'}
+                          className={needVaccCount > 0 ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''}
+                        >
+                          <Syringe className="w-3 h-3 mr-1" />
+                          {vac.name} {needVaccCount > 0 ? `(${needVaccCount})` : '✓'}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <div className="grid gap-4">
             {horses.map(horse => {
               const record = getHealthRecord(horse.id);

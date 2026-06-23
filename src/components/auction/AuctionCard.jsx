@@ -93,13 +93,7 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
           </p>
         )}
 
-        {auction.horse_stats && (
-          <div className="space-y-1">
-            {Object.entries(auction.horse_stats).filter(([s]) => !['strength', 'jumping', 'temperament'].includes(s)).map(([s, v]) => (
-              <StatBar key={s} stat={s} value={v} />
-            ))}
-          </div>
-        )}
+
 
         <div className="flex gap-2 pt-2">
           <Link to={`/HorseDetail?id=${auction.horse_id}`} className="flex-1">

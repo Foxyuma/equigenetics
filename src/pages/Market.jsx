@@ -285,13 +285,7 @@ export default function Market() {
                         <span className="flex items-center gap-1"><Trophy className="w-3 h-3" />{horse.competition_wins || 0}</span>
                         <span className="flex items-center gap-1"><Dna className="w-3 h-3" />Moy: {avgStat}</span>
                       </div>
-                      {horse.stats && (
-                        <div className="space-y-1">
-                          {Object.entries(horse.stats).filter(([s]) => !['strength', 'jumping', 'temperament'].includes(s)).map(([s, v]) => (
-                            <StatBar key={s} stat={s} value={v} />
-                          ))}
-                        </div>
-                      )}
+
                       <div className="flex gap-2 pt-2">
                         <Link to={`/HorseDetail?id=${horse.id}`} className="flex-1">
                           <Button variant="outline" className="w-full text-sm">Voir</Button>

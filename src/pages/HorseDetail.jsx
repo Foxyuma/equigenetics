@@ -22,6 +22,7 @@ import ReproductionPanel from '../components/horse/ReproductionPanel';
 import ApprovalBenefits from '../components/breeding/ApprovalBenefits';
 import StallionOfferPanel from '../components/horse/StallionOfferPanel';
 import StudbookRegistration from '../components/horse/StudbookRegistration';
+import VetHistoryPanel from '../components/horse/VetHistoryPanel';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -351,13 +352,14 @@ export default function HorseDetail() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="health" className="mt-4">
+        <TabsContent value="health" className="mt-4 space-y-4">
           <Card className="border-0 bg-white/60">
             <CardHeader><CardTitle className="text-lg">Maladies Génétiques</CardTitle></CardHeader>
             <CardContent>
               <HealthPanel healthGenes={horse.health_genes} breed={horse.breed} />
             </CardContent>
           </Card>
+          <VetHistoryPanel horseId={horseId} />
         </TabsContent>
         <TabsContent value="career" className="mt-4">
           <CareerPanel competitions={competitions} />

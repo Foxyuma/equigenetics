@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Medal, Zap, Star } from 'lucide-react';
+import { Trophy, Medal, Zap, Star, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { getCompetitionScore } from '../components/genetics/GeneticsEngine';
 import { getBreedDisciplineBonus } from '../lib/breedProfiles';
 import SeasonManager from '../components/season/SeasonManager';
@@ -78,10 +78,37 @@ export default function Competitions() {
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
 
+  // Doping control: weekly random checks, stronger at higher levels
+  const DOPING_CHECK_PROBABILITY = { novice: 0.05, intermediate: 0.10, advanced: 0.20, elite: 0.35, olympic: 0.60 };
+
+  const runDopingControl = (horse, level) => {
+    const prob = DOPING_CHECK_PROBABILITY[level] || 0.10;
+    if (Math.random() > prob) return null; // no check this week
+    const isDopingRisk = horse.doping_risk_until && new Date(horse.doping_risk_until) > new Date();
+    return { checked: true, positive: isDopingRisk };
+  };
+
   const resolveMutation = useMutation({
     mutationFn: async (comp) => {
       const horse = await base44.entities.Horse.filter({ id: comp.horse_id }).then(r => r[0]);
       if (!horse) return;
+
+      // Antidoping check
+      const dopingResult = runDopingControl(horse, comp.level);
+      if (dopingResult?.positive) {
+        // Disqualify: mark competition, penalize reputation
+        await base44.entities.Competition.update(comp.id, {
+          score: 0, rank: null, status: 'completed',
+          disqualified: true, disqualification_reason: 'Contrôle antidopage positif',
+        });
+        const repPenalty = comp.level === 'olympic' ? 100 : comp.level === 'elite' ? 60 : comp.level === 'advanced' ? 40 : 20;
+        if (currentUser) {
+          await base44.auth.updateMe({ breeding_reputation: Math.max(0, (currentUser.breeding_reputation ?? 0) - repPenalty) });
+        }
+        await base44.entities.Horse.update(horse.id, { energy: Math.max(0, (horse.energy || 100) - 10) });
+        return { disqualified: true, horseName: horse.name, level: comp.level };
+      }
+
       const score = getCompetitionScore(horse, comp.discipline);
       const isOlympic = DISCIPLINES.find(d => d.id === comp.discipline)?.olympic || false;
       const levelIdx = LEVELS.findIndex(l => l.id === comp.level);
@@ -90,7 +117,7 @@ export default function Competitions() {
       );
       const allScores = [score, ...npcScores].sort((a, b) => b - a);
       const rank = allScores.indexOf(score) + 1;
-      await base44.entities.Competition.update(comp.id, { score, rank, status: 'completed', npc_scores: allScores });
+      await base44.entities.Competition.update(comp.id, { score, rank, status: 'completed', npc_scores: allScores, disqualified: false });
       if (rank <= 3) {
         await base44.entities.Horse.update(horse.id, {
           competition_wins: (horse.competition_wins || 0) + (rank === 1 ? 1 : 0),
@@ -103,8 +130,12 @@ export default function Competitions() {
       if (repGain > 0 && currentUser) {
         await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
       }
+      return { disqualified: false };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (result?.disqualified) {
+        toast.error(`🚨 ${result.horseName} disqualifié(e) ! Contrôle antidopage positif — pénalité de réputation appliquée.`);
+      }
       queryClient.invalidateQueries({ queryKey: ['horses', currentUser?.email] });
       queryClient.invalidateQueries({ queryKey: ['all-competitions', currentUser?.email] });
       queryClient.invalidateQueries({ queryKey: ['pending-competitions', currentUser?.email] });
@@ -273,6 +304,15 @@ export default function Competitions() {
                     ⚠️ Ce cheval est atteint d'une maladie génétique — performances réduites
                   </div>
                 )}
+                {selectedHorse.doping_risk_until && new Date(selectedHorse.doping_risk_until) > new Date() && (
+                  <div className="mt-2 p-3 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 text-xs">
+                    <div className="flex items-center gap-2 font-semibold mb-1">
+                      <AlertTriangle className="w-4 h-4" />
+                      Risque antidopage jusqu'au {new Date(selectedHorse.doping_risk_until).toLocaleDateString('fr-FR')}
+                    </div>
+                    <p>Ce cheval est sous substances détectables. Probabilité de contrôle positif : <strong>{Math.round((DOPING_CHECK_PROBABILITY[selectedLevel] || 0.1) * 100)}%</strong> ({level?.name}). En cas de contrôle positif : disqualification + perte de réputation.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -323,17 +363,29 @@ export default function Competitions() {
               ) : (
                 <div className="space-y-2">
                   {allCompetitions.map(c => (
-                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+                    <div key={c.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${c.disqualified ? 'bg-red-50 hover:bg-red-100' : 'bg-stone-50 hover:bg-stone-100'}`}>
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">{rankMedal(c.rank)}</span>
+                        <span className="text-xl">{c.disqualified ? '🚫' : rankMedal(c.rank)}</span>
                         <div>
                           <p className="font-medium text-stone-700 text-sm">{c.name}</p>
                           <p className="text-xs text-stone-400">{c.horse_name}</p>
+                          {c.disqualified && (
+                            <p className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
+                              <ShieldAlert className="w-3 h-3" />
+                              {c.disqualification_reason}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-stone-800">{c.score?.toFixed(1)} pts</p>
-                        {c.is_olympic && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Olympique</Badge>}
+                        {c.disqualified ? (
+                          <Badge className="bg-red-100 text-red-700 border-0 text-xs">Disqualifié</Badge>
+                        ) : (
+                          <>
+                            <p className="font-bold text-stone-800">{c.score?.toFixed(1)} pts</p>
+                            {c.is_olympic && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Olympique</Badge>}
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

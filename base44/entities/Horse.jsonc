@@ -260,6 +260,11 @@
         }
       },
       "default": {}
+    },
+    "doping_risk_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date jusqu'\u00e0 laquelle le cheval est sous substances d\u00e9tectables (risque de contr\u00f4le positif)"
     }
   },
   "required": [

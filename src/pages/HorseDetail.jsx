@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart, Sparkles } from 'lucide-react';
+import { ArrowLeft, Heart, Dna, Activity, Trophy, ShoppingCart, Sparkles, AlertTriangle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import StatBar from '../components/horse/StatBar';
 import TraitsPanel from '../components/horse/TraitsPanel';
@@ -142,6 +142,7 @@ export default function HorseDetail() {
   );
 
   const avgStat = horse.stats ? Math.round(Object.values(horse.stats).reduce((a, b) => a + b, 0) / 7) : 0;
+  const isDopingRisk = horse.doping_risk_until && new Date(horse.doping_risk_until) > new Date();
 
   return (
     <div className="space-y-6">
@@ -239,6 +240,18 @@ export default function HorseDetail() {
               </DialogContent>
             </Dialog>
           </div>
+
+          {isDopingRisk && (
+            <Card className="border border-orange-300 bg-orange-50">
+              <CardContent className="p-4 flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-orange-800">⚠️ Substance détectable — Risque antidopage</p>
+                  <p className="text-xs text-orange-600 mt-0.5">Ce cheval a reçu un traitement contenant des substances sous surveillance jusqu'au <strong>{new Date(horse.doping_risk_until).toLocaleDateString('fr-FR')}</strong>. Participer à une compétition avant cette date expose à un contrôle positif.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {currentUser && horse.created_by === currentUser.email && (
             <Card className="border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">

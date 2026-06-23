@@ -22,14 +22,14 @@ const ILLNESSES = [
 ];
 
 const MEDICATIONS = [
-  { name: "Anti-douleur", price: 150, icon: "💊" },
-  { name: "Antibiotique", price: 200, icon: "💉" },
-  { name: "Anti-inflammatoire", price: 120, icon: "🩹" },
-  { name: "Antispasmodique", price: 180, icon: "💊" },
-  { name: "Antihistaminique", price: 100, icon: "💊" },
-  { name: "Bronchodilatateur", price: 250, icon: "🫁" },
-  { name: "Cataplasme", price: 80, icon: "🧴" },
-  { name: "Crème apaisante", price: 60, icon: "🧴" },
+  { name: "Anti-douleur", price: 150, icon: "💊", doping_risk: true },
+  { name: "Antibiotique", price: 200, icon: "💉", doping_risk: false },
+  { name: "Anti-inflammatoire", price: 120, icon: "🩹", doping_risk: true },
+  { name: "Antispasmodique", price: 180, icon: "💊", doping_risk: false },
+  { name: "Antihistaminique", price: 100, icon: "💊", doping_risk: false },
+  { name: "Bronchodilatateur", price: 250, icon: "🫁", doping_risk: true },
+  { name: "Cataplasme", price: 80, icon: "🧴", doping_risk: false },
+  { name: "Crème apaisante", price: 60, icon: "🧴", doping_risk: false },
 ];
 
 const VACCINATIONS = [
@@ -159,8 +159,8 @@ export default function VetClinic() {
   const treatMutation = useMutation({
     mutationFn: async ({ record, horse }) => {
       const illness = ILLNESSES.find(i => i.name === record.current_illness);
-      
-      // Update health record
+      const hasDopingRisk = illness?.treatment.some(t => MEDICATIONS.find(m => m.name === t)?.doping_risk);
+
       await base44.entities.HealthRecord.update(record.id, {
         current_illness: null,
         illness_severity: null,
@@ -171,9 +171,12 @@ export default function VetClinic() {
         treatment_plan: illness?.treatment.map(t => ({ medication: t, duration_days: illness.duration, administered: true })) || [],
       });
 
-      // Restore horse energy
       const newEnergy = Math.min(100, (horse.energy || 0) + record.energy_penalty);
-      await base44.entities.Horse.update(horse.id, { energy: newEnergy });
+      // Mark horse with doping risk flag and treatment date
+      await base44.entities.Horse.update(horse.id, {
+        energy: newEnergy,
+        ...(hasDopingRisk ? { doping_risk_until: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() } : {}),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
@@ -181,6 +184,39 @@ export default function VetClinic() {
       setTreatmentDialog(false);
       toast.success('Traitement appliqué avec succès !');
     },
+  });
+
+  const bulkTreatMutation = useMutation({
+    mutationFn: async () => {
+      for (const horse of sickHorses) {
+        const record = getHealthRecord(horse.id);
+        if (!record) continue;
+        const illness = ILLNESSES.find(i => i.name === record.current_illness);
+        const hasDopingRisk = illness?.treatment.some(t => MEDICATIONS.find(m => m.name === t)?.doping_risk);
+
+        await base44.entities.HealthRecord.update(record.id, {
+          current_illness: null,
+          illness_severity: null,
+          symptoms: [],
+          energy_penalty: 0,
+          performance_penalty: 0,
+          condition: "good",
+          treatment_plan: illness?.treatment.map(t => ({ medication: t, duration_days: illness.duration, administered: true })) || [],
+        });
+
+        const newEnergy = Math.min(100, (horse.energy || 0) + (record.energy_penalty || 0));
+        await base44.entities.Horse.update(horse.id, {
+          energy: newEnergy,
+          ...(hasDopingRisk ? { doping_risk_until: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() } : {}),
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['health-records'] });
+      queryClient.invalidateQueries({ queryKey: ['horses'] });
+      toast.success(`${sickHorses.length} cheval(aux) traité(s) !`);
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const performTestMutation = useMutation({
@@ -677,36 +713,69 @@ export default function VetClinic() {
 
         <TabsContent value="health" className="mt-6">
           {horses.length > 0 && (
-            <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-teal-50/60 mb-6">
-              <CardContent className="p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                      <Activity className="w-6 h-6 text-emerald-600" />
+            <div className="space-y-3 mb-6">
+              <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-teal-50/60">
+                <CardContent className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <Activity className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-stone-800">Contrôle de toute l'écurie</h3>
+                        <p className="text-sm text-stone-500">
+                          {currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
+                            ? "✓ Contrôle groupé déjà effectué aujourd'hui — revenez demain"
+                            : `Vérifiez la santé de vos ${horses.length} chevaux en un clic (1x/jour)`}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-stone-800">Contrôle de toute l'écurie</h3>
-                      <p className="text-sm text-stone-500">
-                        {currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
-                          ? "✓ Contrôle groupé déjà effectué aujourd'hui — revenez demain"
-                          : `Vérifiez la santé de vos ${horses.length} chevaux en un clic (1x/jour)`}
-                      </p>
-                    </div>
+                    <Button
+                      onClick={() => bulkCheckupMutation.mutate()}
+                      disabled={bulkCheckupMutation.isPending || currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white whitespace-nowrap"
+                    >
+                      {bulkCheckupMutation.isPending ? 'En cours...' : currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0] ? "✓ Fait aujourd'hui" : `Contrôler (${horses.length} chevaux)`}
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => bulkCheckupMutation.mutate()}
-                    disabled={bulkCheckupMutation.isPending || currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white whitespace-nowrap"
-                  >
-                    {bulkCheckupMutation.isPending
-                      ? 'En cours...'
-                      : currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
-                        ? "✓ Fait aujourd'hui"
-                        : `Contrôler (${horses.length} chevaux)`}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {sickHorses.length > 0 && (
+                <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50/60 to-orange-50/60">
+                  <CardContent className="p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                          <Pill className="w-6 h-6 text-red-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-stone-800">Soigner tous les chevaux malades</h3>
+                          <p className="text-sm text-stone-500">{sickHorses.length} cheval(aux) nécessite(nt) un traitement</p>
+                          {sickHorses.some(h => {
+                            const r = getHealthRecord(h.id);
+                            const ill = ILLNESSES.find(i => i.name === r?.current_illness);
+                            return ill?.treatment.some(t => MEDICATIONS.find(m => m.name === t)?.doping_risk);
+                          }) && (
+                            <p className="text-xs text-orange-600 flex items-center gap-1 mt-1">
+                              <AlertTriangle className="w-3 h-3" />
+                              Certains traitements contiennent des substances à risque de dopage (14 jours de restriction)
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => bulkTreatMutation.mutate()}
+                        disabled={bulkTreatMutation.isPending}
+                        className="bg-red-600 hover:bg-red-700 text-white whitespace-nowrap"
+                      >
+                        {bulkTreatMutation.isPending ? 'En cours...' : `Soigner (${sickHorses.length} malades)`}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {horses.length === 0 ? (
@@ -821,12 +890,24 @@ export default function VetClinic() {
                       const medication = MEDICATIONS.find(m => m.name === med);
                       return (
                         <div key={med} className="flex items-center justify-between p-2 bg-stone-50 rounded">
-                          <span className="text-sm">{medication?.icon} {med}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{medication?.icon} {med}</span>
+                            {medication?.doping_risk && (
+                              <Badge className="bg-orange-100 text-orange-700 border-0 text-xs flex items-center gap-1">
+                                <AlertTriangle className="w-3 h-3" />Dopage
+                              </Badge>
+                            )}
+                          </div>
                           <span className="font-semibold text-stone-700">{medication?.price} €</span>
                         </div>
                       );
                     })}
                   </div>
+                  {illness?.treatment.some(t => MEDICATIONS.find(m => m.name === t)?.doping_risk) && (
+                    <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700">
+                      ⚠️ Ce traitement contient des substances détectables lors d'un contrôle antidopage. Votre cheval sera soumis à une restriction de compétition de 14 jours.
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t border-stone-200">

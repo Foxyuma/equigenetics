@@ -58,6 +58,19 @@
         "completed"
       ],
       "default": "registered"
+    },
+    "competition_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "disqualified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vrai si le cheval a \u00e9t\u00e9 disqualifi\u00e9 (contr\u00f4le antidopage positif)"
+    },
+    "disqualification_reason": {
+      "type": "string",
+      "description": "Motif de la disqualification"
     }
   },
   "required": [

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import CurrencyDisplay from './CurrencyDisplay';
 import GameClockDisplay from './GameClockDisplay';
 import SocialFooter from './SocialFooter';
+import WeeklyDopingControl from '../competition/WeeklyDopingControl';
 import { base44 } from '@/api/base44Client';
 import { useGameNotifications } from '@/hooks/useGameNotifications';
 
@@ -243,6 +244,7 @@ export default function AppLayout() {
         <Outlet />
       </main>
       <SocialFooter />
+      <WeeklyDopingControl />
     </div>
   );
 }

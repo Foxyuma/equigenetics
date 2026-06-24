@@ -99,6 +99,39 @@
       "type": "string",
       "format": "date-time",
       "description": "Dernier contr\u00f4le v\u00e9t\u00e9rinaire"
+    },
+    "doping_controls": {
+      "type": "array",
+      "description": "Historique des contr\u00f4les antidopage",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "competition_name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "positive",
+              "negative"
+            ]
+          },
+          "substance": {
+            "type": "string"
+          },
+          "fine_amount": {
+            "type": "number"
+          }
+        }
+      },
+      "default": []
     }
   },
   "required": [

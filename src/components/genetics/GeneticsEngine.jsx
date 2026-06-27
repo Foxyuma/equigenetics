@@ -323,45 +323,71 @@ function determineBaseColor(genotype) {
   return 'black';
 }
 
-// Étape B : Appliquer les dilutions (cream, dun, champagne, silver)
+// Étape B : Appliquer les dilutions (cream/MATP, dun, champagne, silver, mushroom)
 function applyDilutions(baseColor, genotype) {
   if (!genotype) return baseColor;
   
   let color = baseColor;
-  const hasCream = genotype.cream === 'Crn';
-  const doubleCream = genotype.cream === 'CrCr';
+  const cream = genotype.cream;
   const hasDun = genotype.dun !== 'dd';
   const hasChampagne = genotype.champagne !== 'nn';
   const hasSilver = genotype.silver !== 'zz';
+  const isDoubleMushroom = genotype.mushroom === 'mumu';
   
-  // Cream (dominante incomplète)
-  if (doubleCream) {
-    if (baseColor === 'chestnut') color = 'Cremello';
-    else if (baseColor === 'bay') color = 'Perlino';
-    else if (baseColor === 'black') color = 'Smoky Cream';
-  } else if (hasCream) {
-    if (baseColor === 'chestnut') color = 'Palomino';
-    else if (baseColor === 'bay') color = 'Buckskin';
-    else if (baseColor === 'black') color = 'Smoky Black';
+  // ── Perle (allèle prl du gène MATP, récessif) ──
+  // Même gène que Crème : prlprl = dilution homozygote, Crprl = Crème-Perle (double dilution)
+  if (cream === 'prlprl') {
+    if (baseColor === 'chestnut') color = 'Double Perle Alezan';
+    else if (baseColor === 'bay') color = 'Double Perle Bai';
+    else if (baseColor === 'black') color = 'Double Perle Noir';
+  } else if (cream === 'Crprl') {
+    if (baseColor === 'chestnut') color = 'Palomino Perle';
+    else if (baseColor === 'bay') color = 'Isabelle Perle';
+    else if (baseColor === 'black') color = 'Smoky Black Perle';
   }
   
-  // Dun (affecte la base)
-  if (hasDun && !doubleCream && !hasCream) {
-    if (baseColor === 'chestnut') color = 'Red Dun';
-    else if (baseColor === 'bay') color = 'Bay Dun';
-    else if (baseColor === 'black') color = 'Grullo';
-  } else if (hasDun && (doubleCream || hasCream)) {
-    color += ' Dun';
+  // ── Crème (dominante incomplète — pas si déjà parlée) ──
+  if (cream !== 'prlprl' && cream !== 'Crprl') {
+    const doubleCream = cream === 'CrCr';
+    const hasCream = cream === 'Crn';
+    if (doubleCream) {
+      if (baseColor === 'chestnut') color = 'Cremello';
+      else if (baseColor === 'bay') color = 'Perlino';
+      else if (baseColor === 'black') color = 'Smoky Cream';
+    } else if (hasCream) {
+      if (baseColor === 'chestnut') color = 'Palomino';
+      else if (baseColor === 'bay') color = 'Buckskin';
+      else if (baseColor === 'black') color = 'Smoky Black';
+    }
   }
   
-  // Champagne (gold, amber, classic)
-  if (hasChampagne) {
+  // ── Mushroom (dilution récessive de la phéomélanine) ──
+  // Agit seulement sur alezan et bai (pas sur base noire)
+  if (isDoubleMushroom && baseColor !== 'black') {
+    color = (baseColor === 'chestnut' ? 'Ale' : 'B') + 'zan Mushroom';
+  }
+  
+  // ── Dun (masqué par les doubles dilutions fortes) ──
+  const isStrongDilution = ['prlprl', 'Crprl'].includes(cream);
+  const baseNotModified = !isStrongDilution && cream === 'nn' && !isDoubleMushroom;
+  if (hasDun) {
+    if (baseNotModified) {
+      if (baseColor === 'chestnut') color = 'Red Dun';
+      else if (baseColor === 'bay') color = 'Bay Dun';
+      else if (baseColor === 'black') color = 'Grullo';
+    } else {
+      color += ' Dun';
+    }
+  }
+  
+  // ── Champagne ──
+  if (hasChampagne && !color.toLowerCase().includes('champagne')) {
     if (baseColor === 'chestnut') color = 'Gold Champagne';
     else if (baseColor === 'bay') color = 'Amber Champagne';
     else if (baseColor === 'black') color = 'Classic Champagne';
   }
   
-  // Silver (sur noir seulement)
+  // ── Silver (sur noir seulement) ──
   if (hasSilver && (baseColor === 'black' || baseColor === 'bay')) {
     if (baseColor === 'black') color = 'Silver Black';
     else if (baseColor === 'bay') color = 'Silver Bay';
@@ -668,7 +694,9 @@ const COAT_MULTIPLIERS = [
   { keywords: ['roan'], multiplier: 1.40 },
   { keywords: ['silver', 'tobiano'], multiplier: 1.70 },
   { keywords: ['champagne'], multiplier: 1.85 },
-  { keywords: ['perle', 'pearl', 'blanc', 'white'], multiplier: 2.50 },
+  { keywords: ['mushroom'], multiplier: 2.00 },
+  { keywords: ['perle', 'isabelle perle', 'smoky black perle', 'blanc', 'white'], multiplier: 2.50 },
+  { keywords: ['double perle'], multiplier: 3.00 },
 ];
 
 function getCoatMultiplier(coatColor) {

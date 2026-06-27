@@ -53,11 +53,14 @@ function getBaseCategory(genotype) {
   if (!genotype) return "bay";
   const isBlack = genotype.extension !== "ee";
   const hasAgouti = genotype.agouti !== "aa";
-  const hasCream = genotype.cream === "Crn";
-  const doubleCream = genotype.cream === "CrCr";
+  const cream = genotype.cream;
   const hasSilver = genotype.silver === "Zz" || genotype.silver === "ZZ";
 
-  if (doubleCream) return "perlino";
+  // Pearl: double dilutions (même gamme visuelle que double crème)
+  if (cream === "prlprl" || cream === "Crprl") return "perlino";
+  if (cream === "CrCr") return "perlino";
+  // Single cream
+  const hasCream = cream === "Crn";
   if (!isBlack) {
     return hasCream ? "palomino" : "chestnut";
   }
@@ -86,13 +89,22 @@ export function getCoatInfo(genotype) {
   const hasSplash = genotype.splash && genotype.splash !== "nn";
   const hasOvero = genotype.overo && genotype.overo !== "nn";
   const hasRoan = genotype.roan === "RNn" || genotype.roan === "RNRN";
+  const hasMushroom = genotype.mushroom === "mumu";
   const isBlack = genotype.extension !== "ee";
   const hasAgouti = genotype.agouti !== "aa";
-  const hasCream = genotype.cream === "Crn";
-  const doubleCream = genotype.cream === "CrCr";
+  const cream = genotype.cream;
   let base = isBlack ? (hasAgouti ? "bai" : "noir") : "alezan";
-  if (doubleCream) base = isBlack ? (hasAgouti ? "perlino" : "cremello") : "cremello";
-  else if (hasCream) base = isBlack ? (hasAgouti ? "isabelle" : "smoky") : "palomino";
+  // Double dilutions : crème ou perle
+  if (cream === "prlprl") {
+    base = isBlack ? (hasAgouti ? "double perle bai" : "double perle noir") : "double perle alezan";
+  } else if (cream === "Crprl") {
+    base = isBlack ? (hasAgouti ? "isabelle perle" : "smoky black perle") : "palomino perle";
+  } else if (cream === "CrCr") {
+    base = isBlack ? (hasAgouti ? "perlino" : "cremello") : "cremello";
+  } else if (cream === "Crn") {
+    base = isBlack ? (hasAgouti ? "isabelle" : "smoky") : "palomino";
+  }
+  if (hasMushroom && (base === "alezan" || base === "bai")) base = (base === "alezan" ? "ale" : "b") + "zan mushroom";
   const parts = [base];
   if (hasRoan) parts.push(isBlack ? "gris fer" : "granité");
   if (hasTobiano) parts.push("tobiano");
@@ -111,7 +123,7 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
   const isFoal = typeof age === "number" && age < 3;
 
   const isGrey = genotype.grey === "GG" || genotype.grey === "Gg";
-  const doubleCream = genotype.cream === "CrCr";
+  const doubleCream = genotype.cream === "CrCr" || genotype.cream === "Crprl" || genotype.cream === "prlprl";
   const hasRoan = genotype.roan === "RNn" || genotype.roan === "RNRN";
   const hasTobiano = genotype.tobiano && genotype.tobiano !== "nn";
   const hasSabino = genotype.sabino && genotype.sabino !== "nn";

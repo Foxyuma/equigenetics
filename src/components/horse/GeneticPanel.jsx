@@ -11,15 +11,19 @@ const locusNames = {
   dun: { name: "Dun (D)", desc: "Dilution dun" },
   champagne: { name: "Champagne (CH)", desc: "Dilution champagne" },
   silver: { name: "Silver (Z)", desc: "Dilution silver" },
+  sabino: { name: "Sabino (Sb)", desc: "Marquage blanc diffus" },
+  splash: { name: "Splash (Spl)", desc: "Marquage blanc« éclaboussure »" },
+  overo: { name: "Overo (Fr)", desc: "Marquage pie gauche" },
+  mushroom: { name: "Mushroom (mu)", desc: "Dilution phéomélanine" },
 };
 
 function isHomozygousDominant(locus, value) {
-  const dominant = { extension: "EE", agouti: "AA", cream: "CrCr", grey: "GG", tobiano: "TOTO", roan: "RNRN", dun: "DD", champagne: "CHCH", silver: "ZZ" };
+  const dominant = { extension: "EE", agouti: "AA", cream: "CrCr", grey: "GG", tobiano: "TOTO", roan: "RNRN", dun: "DD", champagne: "CHCH",     silver: "ZZ", mushroom: "MuMu" };
   return value === dominant[locus];
 }
 
 function isHeterozygous(locus, value) {
-  const hetero = { extension: "Ee", agouti: "Aa", cream: "Crn", grey: "Gg", tobiano: "TOn", roan: "RNn", dun: "Dd", champagne: "CHn", silver: "Zz" };
+  const hetero = { extension: "Ee", agouti: "Aa", cream: "Crn", grey: "Gg", tobiano: "TOn", roan: "RNn", dun: "Dd", champagne: "CHn", silver: "Zz", mushroom: "Mumu" };
   return value === hetero[locus];
 }
 

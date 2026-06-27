@@ -31,9 +31,11 @@ function calculateStallionPrice(stallion) {
   let base = 1000 + statBonus;
 
   // Bonus gènes rares
-  const rareGenes = ['champagne', 'silver', 'dun', 'roan'];
+  const rareGenes = ['champagne', 'silver', 'dun', 'roan', 'mushroom'];
   const geno = stallion.genotype || {};
-  const rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'dd' && geno[g] !== 'zz').length;
+  let rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'dd' && geno[g] !== 'zz').length;
+  // Perle : présent dans `cream` comme Crprl, nprl ou prlprl
+  if (geno.cream && (geno.cream.includes('prl') && geno.cream !== 'nprl')) rareCount++;
   base += rareCount * 1500;
 
   // Bonus victoires

@@ -14,12 +14,13 @@ const GENE_LABELS = {
   dun:        { label: "Dun (D)",        visible: true  },
   champagne:  { label: "Champagne (CH)", visible: true  },
   silver:     { label: "Silver (Z)",     visible: true  },
+  mushroom:   { label: "Mushroom (mu)",  visible: true  },
 };
 
 const NEUTRAL = {
   extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg',
   tobiano: 'nn', sabino: 'nn', splash: 'nn', overo: 'nn',
-  roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
+  roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz', mushroom: 'MuMu',
 };
 
 // Pasture background: sky → grass gradient

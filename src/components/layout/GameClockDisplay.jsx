@@ -16,24 +16,23 @@ const SEASON_LABELS = {
 };
 
 const MONTHS_PER_SEASON = 2;
+const DAYS_PER_MONTH = 14;
 
 export default function GameClockDisplay({ variant = 'default' }) {
-  const { day, month, year, season, daysPerMonth } = useGameClock();
-  const daysLeftMonth = daysPerMonth - day;
+  const { day, month, year, season } = useGameClock();
 
   // Saison = 2 mois consécutifs (8 mois/an, 4 saisons)
   const seasonMonthIndex = (month - 1) % MONTHS_PER_SEASON;
-  const daysIntoSeason = seasonMonthIndex * daysPerMonth + day;
-  const totalSeasonDays = MONTHS_PER_SEASON * daysPerMonth;
+  const daysIntoSeason = seasonMonthIndex * DAYS_PER_MONTH + day;
+  const totalSeasonDays = MONTHS_PER_SEASON * DAYS_PER_MONTH;
   const daysLeftSeason = totalSeasonDays - daysIntoSeason;
 
   if (variant === 'compact') {
     return (
       <div className="flex items-center gap-1.5 bg-stone-100 border border-stone-200 rounded-full px-2.5 py-1">
         <span className="text-xs">{SEASON_ICONS[season]}</span>
-        <span className="text-stone-700 font-semibold text-xs tabular-nums">A{year}</span>
-        <span className="text-[10px] text-stone-500 tabular-nums leading-tight">
-          {daysLeftMonth}j/mois<br />{daysLeftSeason}j/saison
+        <span className="text-[10px] text-stone-600 tabular-nums leading-tight font-medium">
+          {SEASON_LABELS[season]} · {daysLeftSeason}j restants
         </span>
       </div>
     );
@@ -46,7 +45,7 @@ export default function GameClockDisplay({ variant = 'default' }) {
         {SEASON_LABELS[season]} A{year}
       </span>
       <span className="text-[10px] text-stone-400 tabular-nums hidden xl:inline">
-        J{day} · {daysLeftMonth}j mois · {daysLeftSeason}j saison
+        {daysLeftSeason}j restants dans la saison
       </span>
     </div>
   );

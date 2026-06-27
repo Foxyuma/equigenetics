@@ -53,9 +53,10 @@ const NEUTRAL = {
   roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
 };
 
-export default function HorseVisualizer({ genotype, coatColor, horseId, breed, size = 320, showGenotype = true }) {
+export default function HorseVisualizer({ genotype, coatColor, horseId, breed, age, size = 320, showGenotype = true }) {
   const [imgError, setImgError] = useState(false);
-  const photoUrl = getHorsePhotoUrl(genotype, horseId, breed);
+  const photoUrl = getHorsePhotoUrl(genotype, horseId, breed, age);
+  const isFoal = typeof age === "number" && age < 3;
   const bg = getCoatBg(genotype);
 
   return (
@@ -80,6 +81,13 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, s
         {showGenotype && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap backdrop-blur-sm">
             {coatColor || 'Couleur inconnue'}
+          </div>
+        )}
+
+        {/* Foal badge */}
+        {isFoal && (
+          <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow">
+            🍼 Poulain
           </div>
         )}
       </div>

@@ -28,6 +28,12 @@ const PHENO_IMAGES = {
   baySplash:     "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/6f553736f_generated_image.png",
   // === Overo ===
   chestnutOvero: "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/c08398296_generated_image.png",
+  // === Foals (0-3 ans) ===
+  foalBay:       "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/fefb187c9_generated_image.png",
+  foalChestnut:  "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/020485ebd_generated_image.png",
+  foalBlack:     "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/c3f85e151_generated_image.png",
+  foalGrey:      "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/4e0aacdcc_generated_image.png",
+  foalPie:       "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/a1313c24d_generated_image.png",
 };
 
 // Determine base color category from genotype
@@ -52,8 +58,11 @@ function getBaseCategory(genotype) {
 }
 
 // Map full genotype + breed → matching phenotype image
-export function getHorsePhotoUrl(genotype, horseId = "", breed) {
+// age < 3 → foal image, age >= 3 → adult image
+export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
   if (!genotype) return PHENO_IMAGES.bay;
+
+  const isFoal = typeof age === "number" && age < 3;
 
   const isGrey = genotype.grey === "GG" || genotype.grey === "Gg";
   const doubleCream = genotype.cream === "CrCr";
@@ -65,14 +74,23 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed) {
 
   // === Breed-specific overrides (highest priority) ===
   // Friesian: purebred is ALWAYS black — no silver, no pie, no cream
-  if (breed === "Friesian") return PHENO_IMAGES.black;
+  if (breed === "Friesian") return isFoal ? PHENO_IMAGES.foalBlack : PHENO_IMAGES.black;
   // Appaloosa: leopard spots are the defining visual trait
-  if (breed === "Appaloosa" && !isGrey) return PHENO_IMAGES.appaloosa;
+  if (breed === "Appaloosa" && !isGrey) return isFoal ? PHENO_IMAGES.foalPie : PHENO_IMAGES.appaloosa;
   // Haflinger: chestnut with flaxen mane — unique look
-  if (breed === "Haflinger" && !isGrey) return PHENO_IMAGES.haflinger;
+  if (breed === "Haflinger" && !isGrey) return isFoal ? PHENO_IMAGES.foalChestnut : PHENO_IMAGES.haflinger;
 
   // === Grey masks everything ===
-  if (isGrey) return PHENO_IMAGES.grey;
+  if (isGrey) return isFoal ? PHENO_IMAGES.foalGrey : PHENO_IMAGES.grey;
+
+  // === Foals: simplified color mapping (no cream/perlino/roan variants) ===
+  if (isFoal) {
+    const base = getBaseCategory(genotype);
+    if (hasTobiano || hasOvero || hasSplash || hasSabino) return PHENO_IMAGES.foalPie;
+    if (base === "chestnut" || base === "palomino") return PHENO_IMAGES.foalChestnut;
+    if (base === "black" || base === "silverBlack") return PHENO_IMAGES.foalBlack;
+    return PHENO_IMAGES.foalBay;
+  }
 
   // === Double cream → perlino/cremello ===
   if (doubleCream) return PHENO_IMAGES.perlino;

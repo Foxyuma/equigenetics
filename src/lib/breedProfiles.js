@@ -9,10 +9,7 @@ export const BREED_PROFILES = {
     heightRange: [145, 160],
     type: "oriental",
     morphology: "tête fine et concave (profil camus), grands yeux, petites oreilles, encolure arquée, queue portée haute, silhouette élégante et sèche",
-    coatWeights: { grey: 0.40, bay: 0.30, chestnut: 0.20, black: 0.05, other: 0.05 },
-    forcedGenotype: { tobiano: "nn" }, // Pas de pie
-    forbiddenCoats: ["Tobiano", "Overo", "Appaloosa", "Leopard"],
-    greyFrequency: 0.40,
+    greyFrequency: 0.20,
     statBonuses: { endurance: 12, temperament: 8, speed: 6 },
     statPenalties: { strength: -5, jumping: -3 },
     disciplines: ["endurance", "racing", "eventing"],
@@ -23,8 +20,7 @@ export const BREED_PROFILES = {
     heightRange: [160, 175],
     type: "racing",
     morphology: "grand cheval athlétique, corps long et fin, membres longs, poitrine profonde, musculature sèche, tête expressive",
-    coatWeights: { bay: 0.50, chestnut: 0.25, black: 0.12, grey: 0.10, other: 0.03 },
-    forbiddenCoats: ["Tobiano", "Overo", "Appaloosa"],
+    // Robes via coatValidation (bay fréquent, chestnut, black, grey rare)
     greyFrequency: 0.10,
     statBonuses: { speed: 15, endurance: 8 },
     statPenalties: { strength: -8, temperament: -5 },
@@ -37,8 +33,7 @@ export const BREED_PROFILES = {
     type: "baroque",
     morphology: "robe noire, longue crinière et queue abondantes, fanons aux membres, encolure puissante et arquée, allures relevées",
     forcedGenotype: { extension: "EE", agouti: "aa", grey: "gg", cream: "nn", champagne: "nn", dun: "dd", silver: "zz", tobiano: "nn", roan: "nn", sabino: "nn", splash: "nn", overo: "nn" },
-    forbiddenCoats: ["chestnut", "Palomino", "Buckskin", "Grey", "Roan", "Tobiano", "Overo", "Cremello", "Perlino", "Silver Black"],
-    // Le Frison est quasi-exclusivement noir
+    // Robe via coatValidation (noir uniquement)
     greyFrequency: 0,
     statBonuses: { dressage: 14, temperament: 10, strength: 8 },
     statPenalties: { speed: -8, endurance: -4 },
@@ -50,9 +45,7 @@ export const BREED_PROFILES = {
     heightRange: [138, 155],
     type: "mountain_pony",
     morphology: "petite taille, robe alezane avec crins lavés (blonds), corps compact, poitrine large, membres solides, expression douce",
-    // Haflinger = alezan crins lavés UNIQUEMENT
-    forcedGenotype: { extension: "ee", cream: "nn", grey: "gg", tobiano: "nn", roan: "nn", champagne: "nn" },
-    forbiddenCoats: ["bay", "black", "Grey", "Tobiano", "Overo", "Roan", "Buckskin", "Palomino", "Dun"],
+    // Robe via coatValidation (alezan crins lavés)
     greyFrequency: 0,
     statBonuses: { strength: 10, endurance: 8, temperament: 8 },
     statPenalties: { speed: -6, jumping: -4 },
@@ -64,7 +57,7 @@ export const BREED_PROFILES = {
     heightRange: [145, 165],
     type: "western",
     morphology: "corps compact et très musclé, arrière-main extrêmement développée, poitrine large, tête courte, membres solides",
-    coatWeights: { bay: 0.28, chestnut: 0.20, black: 0.08, palomino: 0.12, buckskin: 0.10, dun: 0.08, grey: 0.05, other: 0.09 },
+    // Robes via coatValidation (très varié : bai, alezan, palomino, isabelle, dun, souris, etc.)
     greyFrequency: 0.05,
     statBonuses: { speed: 8, agility: 12, strength: 10 },
     statPenalties: { dressage: -5, endurance: -4 },
@@ -179,7 +172,7 @@ export const BREED_PROFILES = {
     heightRange: [130, 150],
     type: "pony_sport",
     morphology: "poney robuste et harmonieux, tête expressive, grands yeux, encolure musclée, poitrine profonde, membres solides avec articulations marquées, pieds très résistants",
-    coatWeights: { grey: 0.40, bay: 0.25, black: 0.15, chestnut: 0.12, other: 0.08 },
+    // Robes via coatValidation (gris, bai, isabelle, dun, souris, rouan)
     greyFrequency: 0.40,
     statBonuses: { jumping: 10, agility: 8, temperament: 10 },
     statPenalties: { speed: -4, strength: -6 },
@@ -191,7 +184,7 @@ export const BREED_PROFILES = {
     heightRange: [170, 195],
     type: "draft",
     morphology: "très grande taille, corps massif, fanons abondants aux jambes, encolure puissante, poitrine très large, membres imposants",
-    coatWeights: { black: 0.35, bay: 0.35, grey: 0.20, other: 0.10 },
+    // Robes via coatValidation (noir majoritaire, bai, gris rare)
     greyFrequency: 0.20,
     statBonuses: { strength: 20, endurance: 8 },
     statPenalties: { speed: -15, agility: -10, jumping: -12 },

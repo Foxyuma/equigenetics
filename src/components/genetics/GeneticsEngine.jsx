@@ -1,5 +1,6 @@
 // Horse Genetics Engine - handles inheritance, coat color determination, disease transmission
 import { BREED_PROFILES, getBreedDisciplineBonus } from '@/lib/breedProfiles';
+import { rollCoatCategory, BREED_COAT_FREQUENCIES } from '@/lib/coatValidation';
 import {
   generateMentalTraits,
   generateMorphology,
@@ -277,98 +278,229 @@ function combineAlleles(locus, a1, a2) {
 }
 
 export function generateRandomGenotype(breed) {
-  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "frame", "rabicano", "leopard", "pattern1", "sooty", "flaxen", "pangare", "bringe", "mushroom"];
-  const genotype = {};
-  
-  loci.forEach(locus => {
-    const a1 = randomAllele(locus);
-    const a2 = randomAllele(locus);
-    genotype[locus] = combineAlleles(locus, a1, a2);
-  });
-
-  // Locus à 3 allèles : générer puis trier par dominance (Cr>n>prl, D>nd1>nd2)
-  genotype.cream = sortThreeAlleles("cream",
-    THREE_ALLELE_ORDER.cream[Math.floor(Math.random() * THREE_ALLELE_ORDER.cream.length)],
-    THREE_ALLELE_ORDER.cream[Math.floor(Math.random() * THREE_ALLELE_ORDER.cream.length)]
-  );
-  genotype.dun = sortThreeAlleles("dun",
-    THREE_ALLELE_ORDER.dun[Math.floor(Math.random() * THREE_ALLELE_ORDER.dun.length)],
-    THREE_ALLELE_ORDER.dun[Math.floor(Math.random() * THREE_ALLELE_ORDER.dun.length)]
-  );
-
-  // Appliquer les gènes forcés depuis le profil de race
+  // Étape 1 : tirer une catégorie de robe dans les fréquences de la race
+  const roll = rollCoatCategory(breed);
   const profile = BREED_PROFILES[breed];
+
+  // Étape 2 : générer le génotype de base depuis la catégorie tirée
+  const genotype = generateGenotypeFromCoatCategory(roll, breed);
+
+  // Étape 3 : override de forcedGenotype si présent
   if (profile?.forcedGenotype) {
     Object.assign(genotype, profile.forcedGenotype);
   }
 
-  // Mushroom : récessif, principalement chez les Shetland
-  if (breed === "Shetland") {
-    if (Math.random() < 0.08) genotype.mushroom = "mumu";
-  }
+  // Étape 4 : patterns pie/ponctuels selon les fréquences de race
+  applyBreedPatterns(genotype, breed, roll);
 
-  // Gris fréquent selon la race
-  const greyFreq = profile?.greyFrequency ?? 0.10;
-  if (Math.random() < greyFreq && !profile?.forcedGenotype?.grey) {
-    genotype.grey = Math.random() < 0.3 ? "GG" : "Gg";
-  }
+  // Étape 5 : modificateurs rares
+  applyBreedModifiers(genotype, breed);
 
-  // Patterns pie par race (locus KIT unifié) + patterns ponctuels
-  if (breed === "Paint Horse") {
-    // Paint = pie obligatoire : tobiano, DW OU frame dans le gène KIT
-    if (Math.random() < 0.50) genotype.kit = Math.random() < 0.5 ? "Toto" : "ToTo";
-    else if (Math.random() < 0.65) genotype.kit = Math.random() < 0.5 ? "dwdw" : "dwnw";
-    else { genotype.kit = "toto"; genotype.overo = "Frn"; }
-    if (Math.random() < 0.25) genotype.splash = "Spln";
-    if (Math.random() < 0.15) genotype.frame = "Frn";
-    if (Math.random() < 0.20) genotype.rabicano = "Rbrb";
-  } else if (breed === "Appaloosa") {
-    genotype.kit = Math.random() < 0.4 ? (Math.random() < 0.5 ? "Rnrn" : "RnRn") : "toto";
-    if (Math.random() < 0.30) genotype.rabicano = "Rbrb";
-    // Complexe Léopard (LP + Pattern1) — caractéristique de la race Appaloosa
-    if (Math.random() < 0.55) genotype.leopard = Math.random() < 0.3 ? "LpLp" : "Lplp";
-    if (genotype.leopard !== "lplp" && Math.random() < 0.65) {
-      genotype.pattern1 = Math.random() < 0.3 ? "PATN1PATN1" : "PATN1patn1";
-    }
-  } else {
-    // Autres races : tobiano/dw/sabino/roan modérés via kit
-    const r = Math.random();
-    if (r < 0.08) genotype.kit = "Toto";
-    else if (r < 0.12) genotype.kit = Math.random() < 0.5 ? "dwnw" : "dwdw";
-    else if (r < 0.20) genotype.kit = Math.random() < 0.5 ? "Sb1sb1" : "Sb1Sb1";
-    else if (r < 0.27) genotype.kit = Math.random() < 0.5 ? "Rnrn" : "RnRn";
-    if (Math.random() < 0.04) genotype.splash = "Spln";
-    if (Math.random() < 0.03) genotype.overo = "Frn";
-    if (Math.random() < 0.04) genotype.frame = "Frn";
-    if (Math.random() < 0.05) genotype.rabicano = "Rbrb";
-    // Léopard rare chez les autres races
-    if (Math.random() < 0.02) genotype.leopard = "Lplp";
-    if (Math.random() < 0.005) genotype.pattern1 = "PATN1patn1";
-  }
-
-  // Modificateurs (hypothétiques / rares, sauf races spécifiques)
-  // Sooty (poils noirs disséminés) → ~5% général
-  if (Math.random() < 0.05) genotype.sooty = Math.random() < 0.3 ? "SoSo" : "Soso";
-  // Flaxé (crins lavés) → fréquent chez Haflinger, Connemara
-  if (breed === "Haflinger") { genotype.flaxen = "ff"; }
-  else if (Math.random() < 0.03) genotype.flaxen = "ff";
-  // Pangaré → quasi-omniprésent chez Shetland ✓, Haflinger ✓, assez fréquent ailleurs
-  if (["Shetland", "Haflinger", "Connemara"].includes(breed)) { genotype.pangare = Math.random() < 0.70 ? "PP" : "Pp"; }
-  else if (Math.random() < 0.12) genotype.pangare = Math.random() < 0.4 ? "PP" : "Pp";
-  // Bringé (stries) → très rare
-  if (Math.random() < 0.005) genotype.bringe = "BR1br1";
-
-  // Races sans pie (purs/semi-purs)
+  // Étape 6 : races sans pie (override final)
   if (["Haflinger","Lipizzaner","Friesian","Arabian","Thoroughbred"].includes(breed)) {
     genotype.kit = "toto";
     genotype.splash = "nn";
     genotype.overo = "nn";
     genotype.frame = "nn";
   }
-  if (breed === "Haflinger") { genotype.extension = "ee"; genotype.cream = "nn"; genotype.grey = "gg"; }
-  if (breed === "Lipizzaner") { genotype.grey = Math.random() < 0.85 ? "Gg" : "gg"; }
 
   return genotype;
+}
+
+// Génère un génotype qui correspond à une catégorie de robe donnée
+function generateGenotypeFromCoatCategory(category, breed) {
+  const loci = ["extension", "agouti", "cream", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "frame", "rabicano", "leopard", "pattern1", "sooty", "flaxen", "pangare", "bringe", "mushroom"];
+  const g = {};
+
+  // Initialiser tous les locus aléatoirement
+  loci.forEach(locus => {
+    const a1 = randomAllele(locus);
+    const a2 = randomAllele(locus);
+    g[locus] = combineAlleles(locus, a1, a2);
+  });
+
+  // Locus à 3 allèles
+  g.cream = sortThreeAlleles("cream",
+    THREE_ALLELE_ORDER.cream[Math.floor(Math.random() * THREE_ALLELE_ORDER.cream.length)],
+    THREE_ALLELE_ORDER.cream[Math.floor(Math.random() * THREE_ALLELE_ORDER.cream.length)]
+  );
+  g.dun = sortThreeAlleles("dun",
+    THREE_ALLELE_ORDER.dun[Math.floor(Math.random() * THREE_ALLELE_ORDER.dun.length)],
+    THREE_ALLELE_ORDER.dun[Math.floor(Math.random() * THREE_ALLELE_ORDER.dun.length)]
+  );
+
+  if (!category || !BREED_COAT_FREQUENCIES[breed]) return g;
+
+  // Forcer le génotype pour correspondre à la catégorie tirée
+  switch (category) {
+    case 'bay':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = Math.random() < 0.5 ? 'AA' : 'Aa';
+      g.cream = 'nn';
+      g.grey = 'gg';
+      break;
+    case 'chestnut':
+      g.extension = 'ee';
+      g.agouti = Math.random() < 0.5 ? 'Aa' : 'aa';
+      g.cream = 'nn';
+      g.grey = 'gg';
+      break;
+    case 'black':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = 'aa';
+      g.cream = 'nn';
+      g.grey = 'gg';
+      break;
+    case 'grey':
+      g.grey = Math.random() < 0.3 ? 'GG' : 'Gg';
+      // Base sous-jacente aléatoire
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = Math.random() < 0.5 ? 'Aa' : 'aa';
+      g.cream = 'nn';
+      break;
+    case 'palomino':
+      g.extension = 'ee';
+      g.cream = 'Crn';
+      g.grey = 'gg';
+      break;
+    case 'buckskin':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = Math.random() < 0.5 ? 'AA' : 'Aa';
+      g.cream = 'Crn';
+      g.grey = 'gg';
+      break;
+    case 'smoky_black':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = 'aa';
+      g.cream = 'Crn';
+      g.grey = 'gg';
+      break;
+    case 'cremello':
+      g.extension = 'ee';
+      g.cream = 'CrCr';
+      g.grey = 'gg';
+      break;
+    case 'perlino':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = Math.random() < 0.5 ? 'AA' : 'Aa';
+      g.cream = 'CrCr';
+      g.grey = 'gg';
+      break;
+    case 'dun':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = Math.random() < 0.5 ? 'AA' : 'Aa';
+      g.dun = Math.random() < 0.7 ? 'DD' : 'Dnd1';
+      g.cream = 'nn';
+      g.grey = 'gg';
+      break;
+    case 'grullo':
+      g.extension = Math.random() < 0.5 ? 'EE' : 'Ee';
+      g.agouti = 'aa';
+      g.dun = Math.random() < 0.7 ? 'DD' : 'Dnd1';
+      g.cream = 'nn';
+      g.grey = 'gg';
+      break;
+    case 'dun_chestnut':
+      g.extension = 'ee';
+      g.dun = Math.random() < 0.7 ? 'DD' : 'Dnd1';
+      g.cream = 'nn';
+      g.grey = 'gg';
+      break;
+    case 'roan':
+      // Roan via locus KIT
+      g.kit = Math.random() < 0.3 ? 'RnRn' : 'Rnrn';
+      break;
+    case 'tobiano':
+      g.kit = Math.random() < 0.3 ? 'ToTo' : 'Toto';
+      break;
+    case 'overo':
+      g.overo = 'Frn';
+      break;
+    case 'appaloosa':
+      g.leopard = Math.random() < 0.3 ? 'LpLp' : 'Lplp';
+      g.pattern1 = Math.random() < 0.6 ? 'PATN1patn1' : 'patn1patn1';
+      break;
+  }
+
+  return g;
+}
+
+function applyBreedPatterns(genotype, breed, roll) {
+  // Si on a déjà forcé un KIT via la catégorie, ne pas écraser
+  const kitActive = genotype.kit && genotype.kit !== 'toto';
+
+  if (breed === "Paint Horse") {
+    // Paint = pie obligatoire
+    if (!kitActive) {
+      if (Math.random() < 0.50) genotype.kit = Math.random() < 0.5 ? "Toto" : "ToTo";
+      else if (Math.random() < 0.65) genotype.kit = Math.random() < 0.5 ? "dwdw" : "dwnw";
+      else { genotype.kit = "toto"; genotype.overo = "Frn"; }
+    }
+    if (Math.random() < 0.25) genotype.splash = "Spln";
+    if (Math.random() < 0.15) genotype.frame = "Frn";
+    if (Math.random() < 0.20) genotype.rabicano = "Rbrb";
+  } else if (breed === "Appaloosa") {
+    if (!kitActive) genotype.kit = Math.random() < 0.4 ? (Math.random() < 0.5 ? "Rnrn" : "RnRn") : "toto";
+    if (Math.random() < 0.30) genotype.rabicano = "Rbrb";
+    // Léopard — déjà forcé si catégorie 'appaloosa', sinon chance
+    const lpActive = genotype.leopard && genotype.leopard !== 'lplp';
+    if (!lpActive && Math.random() < 0.55) genotype.leopard = Math.random() < 0.3 ? "LpLp" : "Lplp";
+    if (genotype.leopard !== "lplp" && Math.random() < 0.65) {
+      genotype.pattern1 = Math.random() < 0.3 ? "PATN1PATN1" : "PATN1patn1";
+    }
+    // Patterns pie interdits
+    genotype.kit = "toto";
+    genotype.splash = "nn";
+    genotype.overo = "nn";
+    genotype.frame = "nn";
+  } else if (roll === 'roan') {
+    // Déjà géré par la catégorie roan
+  } else if (roll === 'tobiano') {
+    // Déjà géré par la catégorie tobiano
+  } else if (roll === 'overo') {
+    // Déjà géré par la catégorie overo
+  } else if (roll === 'appaloosa') {
+    // Déjà géré par la catégorie appaloosa
+  } else if (!kitActive) {
+    // Autres races : patterns rares via KIT (sizes réduites car moins pertinentes)
+    const r = Math.random();
+    if (r < 0.05) genotype.kit = "Toto";
+    else if (r < 0.08) genotype.kit = Math.random() < 0.5 ? "dwnw" : "dwdw";
+    else if (r < 0.14) genotype.kit = Math.random() < 0.5 ? "Sb1sb1" : "Sb1Sb1";
+    else if (r < 0.20) genotype.kit = Math.random() < 0.5 ? "Rnrn" : "RnRn";
+    if (Math.random() < 0.03) genotype.splash = "Spln";
+    if (Math.random() < 0.02) genotype.overo = "Frn";
+    if (Math.random() < 0.03) genotype.frame = "Frn";
+    if (Math.random() < 0.05) genotype.rabicano = "Rbrb";
+    // Léopard très rare
+    if (Math.random() < 0.01) genotype.leopard = "Lplp";
+    if (Math.random() < 0.003) genotype.pattern1 = "PATN1patn1";
+  }
+}
+
+function applyBreedModifiers(genotype, breed) {
+  // Mushroom → Shetland uniquement
+  if (breed === "Shetland" && Math.random() < 0.08) {
+    genotype.mushroom = "mumu";
+  }
+  // Flaxen → Haflinger obligatoire, fréquent Shetland/Connemara, rare ailleurs
+  if (breed === "Haflinger") {
+    genotype.flaxen = "ff";
+  } else if (["Shetland", "Connemara"].includes(breed)) {
+    if (Math.random() < 0.30) genotype.flaxen = "ff";
+  } else if (Math.random() < 0.02) {
+    genotype.flaxen = "ff";
+  }
+  // Sooty → ~5% général
+  if (Math.random() < 0.05) genotype.sooty = Math.random() < 0.3 ? "SoSo" : "Soso";
+  // Pangaré → fréquent Shetland/Haflinger/Connemara, rare ailleurs
+  if (["Shetland", "Haflinger", "Connemara"].includes(breed)) {
+    if (Math.random() < 0.70) genotype.pangare = Math.random() < 0.4 ? "PP" : "Pp";
+  } else if (Math.random() < 0.08) {
+    genotype.pangare = Math.random() < 0.4 ? "PP" : "Pp";
+  }
+  // Bringé → très rare (<1%)
+  if (Math.random() < 0.003) genotype.bringe = "BR1br1";
 }
 
 export function breedGenotype(fatherGenotype, motherGenotype) {

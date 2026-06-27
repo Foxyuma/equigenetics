@@ -76,6 +76,33 @@ function pickByBase(base, map) {
   return map.bay;
 }
 
+// Renvoie les infos de robe : couleur affichée + couleur de naissance sous-jacente si gris + isGrey
+// Utile pour que les chevaux gris montrent aussi leurs patterns cachés dans le visuel
+export function getCoatInfo(genotype) {
+  if (!genotype) return { display: "Inconnu", birth: "Inconnu", isGrey: false };
+  const isGrey = genotype.grey === "GG" || genotype.grey === "Gg";
+  const hasTobiano = genotype.tobiano && genotype.tobiano !== "nn";
+  const hasSabino = genotype.sabino && genotype.sabino !== "nn";
+  const hasSplash = genotype.splash && genotype.splash !== "nn";
+  const hasOvero = genotype.overo && genotype.overo !== "nn";
+  const hasRoan = genotype.roan === "RNn" || genotype.roan === "RNRN";
+  const isBlack = genotype.extension !== "ee";
+  const hasAgouti = genotype.agouti !== "aa";
+  const hasCream = genotype.cream === "Crn";
+  const doubleCream = genotype.cream === "CrCr";
+  let base = isBlack ? (hasAgouti ? "bai" : "noir") : "alezan";
+  if (doubleCream) base = isBlack ? (hasAgouti ? "perlino" : "cremello") : "cremello";
+  else if (hasCream) base = isBlack ? (hasAgouti ? "isabelle" : "smoky") : "palomino";
+  const parts = [base];
+  if (hasRoan) parts.push(isBlack ? "gris fer" : "granité");
+  if (hasTobiano) parts.push("tobiano");
+  else if (hasOvero) parts.push("overo");
+  if (hasSplash) parts.push("splash");
+  if (hasSabino) parts.push("sabino");
+  const birth = [...new Set(parts)].join(" ");
+  return { display: isGrey ? "Gris" : birth, birth: isGrey ? birth : birth, isGrey };
+}
+
 // Map full genotype + breed + age → matching phenotype image
 // age < 3 → foal image, age >= 3 → adult image
 export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {

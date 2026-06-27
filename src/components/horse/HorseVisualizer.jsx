@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getHorsePhotoUrl } from '@/lib/horsePhotos';
+import { getHorsePhotoUrl, getCoatInfo } from '@/lib/horsePhotos';
 
 const GENE_LABELS = {
   extension:  { label: "Extension (E)",  visible: true  },
@@ -29,6 +29,8 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
   const [imgError, setImgError] = useState(false);
   const photoUrl = getHorsePhotoUrl(genotype, horseId, breed, age);
   const isFoal = typeof age === "number" && age < 3;
+  const coatInfo = genotype ? getCoatInfo(genotype) : null;
+  const showBirth = coatInfo && coatInfo.isGrey && coatInfo.birth !== "Gris" && coatInfo.birth !== coatInfo.display;
 
   // Collect expressed visible genes for on-image overlay
   const expressedGenes = genotype
@@ -78,8 +80,13 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
 
         {/* Coat label */}
         {showGenotype && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap backdrop-blur-sm">
-            {coatColor || 'Couleur inconnue'}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold text-center backdrop-blur-sm">
+            <div className="whitespace-nowrap">{coatInfo?.display || coatColor || 'Couleur inconnue'}</div>
+            {showBirth && (
+              <div className="whitespace-nowrap text-[9px] text-stone-300/80 font-normal mt-0.5">
+                Sous : {coatInfo.birth}
+              </div>
+            )}
           </div>
         )}
 

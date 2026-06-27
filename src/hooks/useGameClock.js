@@ -14,10 +14,16 @@ function getSeasonForMonth(month) {
   return 'winter';
 }
 
-// Le jour change à 3h30 UTC
+// Le jour change à 3h30 UTC.
+// Si on n'a pas encore atteint 3h30 UTC aujourd'hui, le dernier seuil
+// applicable était celui d'hier — on ne doit pas ticker avant 3h30.
 function getTodayTickThreshold() {
   const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 3, 30, 0));
+  const todayThreshold = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 3, 30, 0));
+  if (now.getTime() < todayThreshold.getTime()) {
+    todayThreshold.setUTCDate(todayThreshold.getUTCDate() - 1);
+  }
+  return todayThreshold;
 }
 
 // Nombre de jours à avancer (rattrapage si l'utilisateur était hors ligne)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -84,79 +84,12 @@ export default function Competitions() {
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
 
-  // Doping control: weekly random checks, stronger at higher levels
+  // Probabilités de contrôle antidopage par niveau (affichage du risque)
   const DOPING_CHECK_PROBABILITY = { novice: 0.05, intermediate: 0.10, advanced: 0.20, elite: 0.35, olympic: 0.60 };
 
-  const runDopingControl = (horse, level) => {
-    const prob = DOPING_CHECK_PROBABILITY[level] || 0.10;
-    if (Math.random() > prob) return null; // no check this week
-    const isDopingRisk = horse.doping_risk_until && new Date(horse.doping_risk_until) > new Date();
-    return { checked: true, positive: isDopingRisk };
-  };
-
-  const resolveMutation = useMutation({
-    mutationFn: async (comp) => {
-      const horse = await base44.entities.Horse.filter({ id: comp.horse_id }).then(r => r[0]);
-      if (!horse) return;
-
-      // Antidoping check
-      const dopingResult = runDopingControl(horse, comp.level);
-      if (dopingResult?.positive) {
-        // Disqualify: mark competition, penalize reputation
-        await base44.entities.Competition.update(comp.id, {
-          score: 0, rank: null, status: 'completed',
-          disqualified: true, disqualification_reason: 'Contrôle antidopage positif',
-        });
-        const repPenalty = comp.level === 'olympic' ? 100 : comp.level === 'elite' ? 60 : comp.level === 'advanced' ? 40 : 20;
-        if (currentUser) {
-          await base44.auth.updateMe({ breeding_reputation: Math.max(0, (currentUser.breeding_reputation ?? 0) - repPenalty) });
-        }
-        await base44.entities.Horse.update(horse.id, { energy: Math.max(0, (horse.energy || 100) - 10) });
-        return { disqualified: true, horseName: horse.name, level: comp.level };
-      }
-
-      const score = getCompetitionScore(horse, comp.discipline);
-      const isOlympic = DISCIPLINES.find(d => d.id === comp.discipline)?.olympic || false;
-      const levelIdx = LEVELS.findIndex(l => l.id === comp.level);
-      const npcScores = Array.from({ length: 7 }, () =>
-        Math.round((30 + Math.random() * 60 + levelIdx * 8) * 10) / 10
-      );
-      const allScores = [score, ...npcScores].sort((a, b) => b - a);
-      const rank = allScores.indexOf(score) + 1;
-      await base44.entities.Competition.update(comp.id, { score, rank, status: 'completed', npc_scores: allScores, disqualified: false });
-      if (rank <= 3) {
-        await base44.entities.Horse.update(horse.id, {
-          competition_wins: (horse.competition_wins || 0) + (rank === 1 ? 1 : 0),
-          energy: Math.max(0, (horse.energy || 100) - 15),
-        });
-      } else {
-        await base44.entities.Horse.update(horse.id, { energy: Math.max(0, (horse.energy || 100) - 10) });
-      }
-      let repGain = rank === 1 ? (isOlympic ? 30 : 10) : 0;
-      if (repGain > 0 && currentUser) {
-        await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + repGain });
-      }
-      return { disqualified: false };
-    },
-    onSuccess: (result) => {
-      if (result?.disqualified) {
-        toast.error(`🚨 ${result.horseName} disqualifié(e) ! Contrôle antidopage positif — pénalité de réputation appliquée.`);
-      }
-      queryClient.invalidateQueries({ queryKey: ['horses', currentUser?.email] });
-      queryClient.invalidateQueries({ queryKey: ['all-competitions', currentUser?.email] });
-      queryClient.invalidateQueries({ queryKey: ['pending-competitions', currentUser?.email] });
-      queryClient.invalidateQueries({ queryKey: ['me'] });
-    },
-  });
-
-  // Resolve any pending competitions whose competition_date has passed midnight
-  useEffect(() => {
-    if (!pendingCompetitions.length || !currentUser) return;
-    const today = new Date().toISOString().split('T')[0];
-    const toResolve = pendingCompetitions.filter(c => c.competition_date && c.competition_date <= today);
-    if (toResolve.length === 0) return;
-    toResolve.forEach(c => resolveMutation.mutate(c));
-  }, [pendingCompetitions, currentUser]);
+  // Les compétitions de la veille sont résolues automatiquement par le tick
+  // quotidien à 3h30 UTC (cf. useGameClock → runDailyTick).
+  // On NE résout PAS ici au chargement de la page pour respecter le timing.
 
   const competeMutation = useMutation({
     mutationFn: async () => {

@@ -76,55 +76,88 @@ const NPC_STALLION_NAMES = {
   "Shetland": ["Mini Thunder", "Tiny King", "Little Prince", "Pixie"],
 };
 
+// Tiers de qualité pour les étalons NPC
+const QUALITY_TIERS = {
+  medium: {
+    label: 'Moyen',
+    statBoostRange: [0, 8],
+    approvalStatus: 'approved_for_breeding',
+    badgeClass: 'bg-blue-100 text-blue-700',
+    badgeLabel: '✅ Approuvé',
+    diseaseProb: 0.4,
+    ageRange: [5, 15],
+  },
+  good: {
+    label: 'Bon',
+    statBoostRange: [10, 20],
+    approvalStatus: 'approved_for_sport_breeding',
+    badgeClass: 'bg-green-100 text-green-700',
+    badgeLabel: '🏆 Sport',
+    diseaseProb: 0.25,
+    ageRange: [6, 14],
+  },
+  excellent: {
+    label: 'Très bon',
+    statBoostRange: [22, 35],
+    approvalStatus: 'elite_approved',
+    badgeClass: 'bg-yellow-100 text-yellow-700',
+    badgeLabel: '⭐ Élite',
+    diseaseProb: 0.12,
+    ageRange: [5, 12],
+  },
+};
+
+function generateSingleStallion(breed, name, tier) {
+  const starter = generateStarterHorse(breed);
+  const [minBoost, maxBoost] = tier.statBoostRange;
+  const boostedStats = {};
+  Object.entries(starter.stats || {}).forEach(([k, v]) => {
+    boostedStats[k] = Math.min(100, v + minBoost + Math.floor(Math.random() * (maxBoost - minBoost + 1)));
+  });
+
+  // Maladie : les étalons approuvés sont généralement sains, mais un portage silencieux possible
+  let health_genes = starter.health_genes || [];
+  if (Math.random() > tier.diseaseProb) {
+    health_genes = health_genes.map(g => {
+      if (Math.random() > 0.8) return { ...g, status: 'carrier' };
+      return g;
+    });
+  }
+
+  const [ageMin, ageMax] = tier.ageRange;
+  const stats = boostedStats;
+
+  const stallionObj = {
+    stallion_name: name,
+    breed,
+    coat_color: starter.coat_color,
+    age: ageMin + Math.floor(Math.random() * (ageMax - ageMin + 1)),
+    genotype: starter.genotype,
+    stats,
+    health_genes,
+    owner_name: "Haras Nationaux",
+    owner_email: "haras@national.equigenesis",
+    is_npc: true,
+    breeding_approval_status: tier.approvalStatus,
+    description: `Étalon ${tier.label.toLowerCase()} de race ${breed} approuvé par les Haras Nationaux pour la production en studbook.`,
+  };
+  stallionObj.price = calculateStallionPrice(stallionObj);
+  return stallionObj;
+}
+
 function generateNPCStallions() {
   const stallions = [];
-  const usedBreeds = [...BREEDS];
-  // 2-3 per breed
-  usedBreeds.forEach(breed => {
-    const count = 2 + Math.floor(Math.random() * 2);
-    const names = NPC_STALLION_NAMES[breed] || [`${breed} Champion`, `${breed} Elite`, `${breed} Noble`];
-    for (let i = 0; i < count && i < names.length; i++) {
-      const starter = generateStarterHorse(breed);
-      // Boost NPC stats a bit (they're supposed to be good stallions)
-      const boostedStats = {};
-      Object.entries(starter.stats || {}).forEach(([k, v]) => {
-        boostedStats[k] = Math.min(100, v + 5 + Math.floor(Math.random() * 15));
-      });
-      const diseaseChance = Math.random();
-      let health_genes = starter.health_genes || [];
-      // ~30% chance of having a disease gene
-      if (diseaseChance > 0.7) {
-        health_genes = health_genes.map(g => {
-          if (Math.random() > 0.7) return { ...g, status: 'carrier' };
-          return g;
-        });
-      }
-      // Statut d'approbation aléatoire pour les NPC (majorité approuvés car sélectionnés)
-      const approvalRoll = Math.random();
-      let breeding_approval_status;
-      if (approvalRoll < 0.15) breeding_approval_status = 'elite_approved';
-      else if (approvalRoll < 0.45) breeding_approval_status = 'approved_for_sport_breeding';
-      else if (approvalRoll < 0.80) breeding_approval_status = 'approved_for_breeding';
-      else breeding_approval_status = 'not_evaluated';
-
-      const stallionObj = {
-        stallion_name: names[i],
-        breed,
-        coat_color: starter.coat_color,
-        age: 5 + Math.floor(Math.random() * 10),
-        genotype: starter.genotype,
-        stats: boostedStats,
-        health_genes,
-        owner_name: "Haras Nationaux",
-        owner_email: "haras@national.equigenesis",
-        is_npc: true,
-        breeding_approval_status,
-        description: `Étalon de race ${breed} sélectionné par les Haras Nationaux pour ses qualités génétiques.`,
-      };
-      // Prix calculé dynamiquement
-      stallionObj.price = calculateStallionPrice(stallionObj);
-      stallions.push(stallionObj);
-    }
+  const tiers = [QUALITY_TIERS.medium, QUALITY_TIERS.good, QUALITY_TIERS.excellent];
+  // Par race : 1 étalon de chaque tier si assez de noms, sinon répartir
+  BREEDS.forEach(breed => {
+    const names = NPC_STALLION_NAMES[breed] || [`${breed} Elite`, `${breed} Star`, `${breed} Stud`];
+    const useNames = names.slice(0, 3);
+    // Mélanger les noms et assigner un tier à chacun
+    const shuffledNames = [...useNames].sort(() => Math.random() - 0.5);
+    shuffledNames.forEach((name, i) => {
+      const tier = tiers[i % tiers.length];
+      stallions.push(generateSingleStallion(breed, name, tier));
+    });
   });
   return stallions;
 }
@@ -145,11 +178,22 @@ export default function StallionMarket() {
     queryFn: () => base44.entities.StallionOffer.list('-created_date', 200),
   });
 
-  // Auto-generate NPC stallions if none
+  // Génération automatique d'étalons NPC aux 3 tiers de qualité, tous approuvés
   useEffect(() => {
     if (!isLoading && stallions.length === 0) {
       const npcs = generateNPCStallions();
       Promise.all(npcs.map(s => base44.entities.StallionOffer.create(s)))
+        .then(() => queryClient.invalidateQueries({ queryKey: ['stallion-offers'] }));
+    }
+  }, [isLoading, stallions.length]);
+
+  // Recharge partielle quand les offres restantes sont faibles
+  useEffect(() => {
+    if (!isLoading && stallions.length > 0 && stallions.length < 18) {
+      const npcs = generateNPCStallions();
+      // On ne crée qu'une partie des nouveaux pour ne pas surcharger
+      const subset = npcs.sort(() => Math.random() - 0.5).slice(0, 12);
+      Promise.all(subset.map(s => base44.entities.StallionOffer.create(s)))
         .then(() => queryClient.invalidateQueries({ queryKey: ['stallion-offers'] }));
     }
   }, [isLoading, stallions.length]);
@@ -167,9 +211,16 @@ export default function StallionMarket() {
   }
 
   // Le prix stocké est déjà dynamique ; on l'expose tel quel
+  const TIER_CONFIG = {
+    elite_approved: { label: 'Très bon', color: 'bg-yellow-100 text-yellow-700', star: true },
+    approved_for_sport_breeding: { label: 'Bon', color: 'bg-green-100 text-green-700', star: false },
+    approved_for_breeding: { label: 'Moyen', color: 'bg-blue-100 text-blue-700', star: false },
+  };
+
   const stallionsWithDynamicPrices = filteredStallions.map(s => ({
     ...s,
     dynamicPrice: s.price || calculateStallionPrice(s),
+    tierConfig: TIER_CONFIG[s.breeding_approval_status] || null,
   }));
 
   const simulateBreeding = () => {
@@ -243,6 +294,12 @@ export default function StallionMarket() {
         <p className="text-stone-500 mt-1">Choisissez un étalon pour reproduire avec votre jument</p>
       </div>
 
+      {/* Info qualité */}
+      <p className="text-xs text-stone-500 flex items-center gap-1.5">
+        <Info className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+        Les étalons des Haras Nationaux sont classés en 3 niveaux (Moyen, Bon, Très bon) et tous approuvés pour le studbook.
+      </p>
+
       {/* Filter */}
       <div className="flex gap-3 flex-wrap items-center">
         <Select value={filterBreed} onValueChange={setFilterBreed}>
@@ -298,11 +355,11 @@ export default function StallionMarket() {
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
                     <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
-                    {s.breeding_approval_status === 'elite_approved' && <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">⭐ Élite</Badge>}
-                    {s.breeding_approval_status === 'approved_for_sport_breeding' && <Badge className="bg-green-100 text-green-700 border-0 text-xs">🏆 Sport</Badge>}
-                    {s.breeding_approval_status === 'approved_for_breeding' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">✅ Approuvé</Badge>}
-                    {s.breeding_approval_status === 'not_evaluated' && <Badge className="bg-stone-100 text-stone-500 border-0 text-xs">— Non évalué</Badge>}
-                    {s.breeding_approval_status === 'rejected' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">❌ Rejeté</Badge>}
+                    {s.tierConfig && (
+                      <Badge className={`border-0 text-xs ${s.tierConfig.color}`}>
+                        {s.tierConfig.star ? `⭐ ${s.tierConfig.label}` : s.tierConfig.label}
+                      </Badge>
+                    )}
                   </div>
                   {/* Avg stat */}
                   {s.stats && (

@@ -53,6 +53,7 @@ const menuGroups = [
       { path: "/Inventory", label: "Inventaire", icon: Package },
       { path: "/Messages", label: "Messages", icon: Mail },
       { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
+      { path: "/Guide", label: "Guide Débutant", icon: BookOpen },
       { path: "/Profile", label: "Mon Profil", icon: UserCircle },
     ]
   }

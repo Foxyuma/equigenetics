@@ -34,6 +34,7 @@ import PublicHorseProfile from './pages/PublicHorseProfile';
 import BreedingBook from './pages/BreedingBook';
 import PlayerProfile from './pages/PlayerProfile';
 import Landing from './pages/Landing';
+import Guide from './pages/Guide';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
         <Route path="/PublicHorseProfile" element={<PublicHorseProfile />} />
         <Route path="/BreedingBook" element={<BreedingBook />} />
         <Route path="/PlayerProfile" element={<PlayerProfile />} />
+        <Route path="/Guide" element={<Guide />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -145,7 +145,7 @@ function generateSingleStallion(breed, name, tier) {
   return stallionObj;
 }
 
-function generateNPCStallions() {
+export function generateNPCStallions() {
   const stallions = [];
   const tiers = [QUALITY_TIERS.medium, QUALITY_TIERS.good, QUALITY_TIERS.excellent];
   // Par race : 1 étalon de chaque tier si assez de noms, sinon répartir
@@ -187,16 +187,8 @@ export default function StallionMarket() {
     }
   }, [isLoading, stallions.length]);
 
-  // Recharge partielle quand les offres restantes sont faibles
-  useEffect(() => {
-    if (!isLoading && stallions.length > 0 && stallions.length < 18) {
-      const npcs = generateNPCStallions();
-      // On ne crée qu'une partie des nouveaux pour ne pas surcharger
-      const subset = npcs.sort(() => Math.random() - 0.5).slice(0, 12);
-      Promise.all(subset.map(s => base44.entities.StallionOffer.create(s)))
-        .then(() => queryClient.invalidateQueries({ queryKey: ['stallion-offers'] }));
-    }
-  }, [isLoading, stallions.length]);
+  // La régénération quotidienne des étalons NPC est gérée par DailyMarketRefresh
+  // via le tick quotidien (3h30 UTC).
 
   const mares = horses.filter(h => h.sex === 'female' && h.created_by_id === currentUser?.id);
   const selectedMare = mares.find(h => h.id === selectedMareId);

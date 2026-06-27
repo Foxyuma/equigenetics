@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { generateRandomGenotype, determineCoatColor, generateStarterHorse } from '@/components/genetics/GeneticsEngine';
 import { BREEDS } from '@/components/genetics/GeneticsEngine';
+import { generateNPCStallions } from '../../pages/StallionMarket';
 
 // Noms NPC pour les annonces
 const NPC_STABLES = [
@@ -176,6 +177,31 @@ export default function DailyMarketRefresh() {
           return base44.entities.Horse.create(horse);
         });
         await Promise.all(salesPromises);
+
+        // ─── MARCHÉ DES SAILLIES ──────────────────────────────
+        // Nettoyer les anciennes offres NPC
+        const existingStallions = await base44.entities.StallionOffer.filter(
+          { is_npc: true, owner_email: "haras@national.equigenesis" },
+          '-created_date', 200
+        );
+        const oldStallionIds = existingStallions.filter(s => {
+          const createdAt = new Date(s.created_date);
+          const diffDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+          return diffDays > 1;
+        }).map(s => s.id);
+
+        await Promise.all(oldStallionIds.map(id =>
+          base44.entities.StallionOffer.delete(id)
+        ));
+
+        // Vérifier combien d'étalons NPC restent
+        const remaining = existingStallions.filter(s => !oldStallionIds.includes(s.id)).length;
+        if (remaining < 12) {
+          const newStallions = generateNPCStallions();
+          const toCreate = Math.min(newStallions.length, 18 - remaining);
+          const chosen = newStallions.sort(() => Math.random() - 0.5).slice(0, toCreate);
+          await Promise.all(chosen.map(s => base44.entities.StallionOffer.create(s)));
+        }
 
         // Générer 3-5 nouvelles enchères NPC
         const nbAuctions = 3 + Math.floor(Math.random() * 3);

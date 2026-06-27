@@ -6,6 +6,7 @@ import CurrencyDisplay from './CurrencyDisplay';
 import GameClockDisplay from './GameClockDisplay';
 import SocialFooter from './SocialFooter';
 import WeeklyDopingControl from '../competition/WeeklyDopingControl';
+import DailyMarketRefresh from '../market/DailyMarketRefresh';
 import { base44 } from '@/api/base44Client';
 import { useGameNotifications } from '@/hooks/useGameNotifications';
 
@@ -247,6 +248,7 @@ export default function AppLayout() {
       </main>
       <SocialFooter />
       <WeeklyDopingControl />
+      <DailyMarketRefresh />
     </div>
   );
 }

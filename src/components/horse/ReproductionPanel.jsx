@@ -24,7 +24,7 @@ function calcDynamicPrice(stallion) {
   if (geno.dun && geno.dun !== 'nd2nd2') base += 500;
   base += rareCount * 1500;
   base += (stallion.competition_wins || 0) * 300;
-  const mult = { elite_approved: 2.0, approved_for_sport_breeding: 1.6, approved_for_breeding: 1.3, not_evaluated: 1.0, rejected: 0.7 }[stallion.breeding_approval_status] || 1.0;
+  const mult = { elite_approved: 2.5, approved_for_sport_breeding: 1.8, approved_for_breeding: 1.4, not_evaluated: 1.0, rejected: 0.7 }[stallion.breeding_approval_status] || 1.0;
   return Math.max(800, Math.min(50000, Math.round(base * mult)));
 }
 import { getBreedingImpact } from '../breeding/InspectionScoring';
@@ -435,6 +435,13 @@ export default function ReproductionPanel({ mare }) {
                   const approvalStatus = s.breeding_approval_status || 'not_evaluated';
                   const breedingImpact = getBreedingImpact(approvalStatus);
                   const incestBlocked = isIncestPair(s);
+                  const approvalConfig = {
+                    elite_approved: { label: '⭐ Élite ×2.5', color: 'bg-yellow-100 text-yellow-700', multLabel: '×2.5', mult: 2.5 },
+                    approved_for_sport_breeding: { label: '🏆 Sport ×1.8', color: 'bg-green-100 text-green-700', multLabel: '×1.8', mult: 1.8 },
+                    approved_for_breeding: { label: '✅ Approuvé ×1.4', color: 'bg-blue-100 text-blue-700', multLabel: '×1.4', mult: 1.4 },
+                    not_evaluated: { label: '⏳ En attente ×1.0', color: 'bg-stone-100 text-stone-400', multLabel: '×1.0', mult: 1.0 },
+                    rejected: { label: '❌ Refusé ×0.7', color: 'bg-red-100 text-red-700', multLabel: '×0.7', mult: 0.7 },
+                  }[s.breeding_approval_status] || { label: '⏳ En attente ×1.0', color: 'bg-stone-100 text-stone-400', multLabel: '×1.0', mult: 1.0 };
                   return (
                    <Card
                       key={s.id}
@@ -451,19 +458,14 @@ export default function ReproductionPanel({ mare }) {
                             <Badge className="bg-red-100 text-red-700 border-0 text-xs">🚫 Parent/enfant</Badge>
                           )}
                           {s.is_own
-                             ? <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
-                             : <div className="text-right">
-                                 <p className="text-amber-700 font-bold text-sm">{calcDynamicPrice(s).toLocaleString('fr-FR')} ₲</p>
-                                 {s.breeding_approval_status && s.breeding_approval_status !== 'not_evaluated' && (
-                                   <p className="text-xs text-stone-400">
-                                     {s.breeding_approval_status === 'elite_approved' ? '⭐ Élite ×2' :
-                                      s.breeding_approval_status === 'approved_for_sport_breeding' ? '🏆 Sport ×1.6' :
-                                      s.breeding_approval_status === 'approved_for_breeding' ? '✅ Approuvé ×1.3' :
-                                      s.breeding_approval_status === 'rejected' ? '❌ Rejeté ×0.7' : ''}
-                                   </p>
-                                 )}
-                               </div>
-                           }
+                              ? <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
+                              : <div className="text-right">
+                                  <p className="text-amber-700 font-bold text-sm">{calcDynamicPrice(s).toLocaleString('fr-FR')} ₲</p>
+                                  <Badge className={`border-0 text-[10px] ${approvalConfig.color}`} title={`Multiplicateur de prix : ${approvalConfig.multLabel}`}>
+                                    {approvalConfig.label}
+                                  </Badge>
+                                </div>
+                            }
                         </div>
                         <div className="flex flex-wrap gap-1">
                           <Badge variant="outline" className="text-xs">{s.breed}</Badge>
@@ -488,9 +490,12 @@ export default function ReproductionPanel({ mare }) {
                          )}
                          {/* Statut d'approbation */}
                          <div className="text-xs text-stone-600 mt-1.5 p-2 rounded bg-stone-50">
-                           <p className="font-semibold mb-1 text-stone-700">{breedingImpact.description}</p>
+                           <div className="flex items-center gap-2 mb-1">
+                             <Badge className={`border-0 text-[10px] ${approvalConfig.color}`}>{approvalConfig.label}</Badge>
+                           </div>
+                           <p className="text-stone-500">{breedingImpact.description}</p>
                            {breedingImpact.restrictions.length > 0 && (
-                             <ul className="space-y-0.5">
+                             <ul className="space-y-0.5 mt-1">
                                {breedingImpact.restrictions.map((r, i) => (
                                  <li key={i} className="text-stone-500 flex items-start gap-1">
                                    <span>•</span> {r}

@@ -36,8 +36,8 @@ export const BREED_PROFILES = {
     heightRange: [155, 170],
     type: "baroque",
     morphology: "baroque et puissant, encolure très arquée, fanons épais",
-    forcedGenotype: { extension: "EE", agouti: "aa", grey: "gg", cream: "nn", champagne: "nn", dun: "dd" },
-    forbiddenCoats: ["chestnut", "Palomino", "Buckskin", "Grey", "Roan", "Tobiano", "Overo", "Cremello", "Perlino"],
+    forcedGenotype: { extension: "EE", agouti: "aa", grey: "gg", cream: "nn", champagne: "nn", dun: "dd", silver: "zz", tobiano: "nn", roan: "nn", sabino: "nn", splash: "nn", overo: "nn" },
+    forbiddenCoats: ["chestnut", "Palomino", "Buckskin", "Grey", "Roan", "Tobiano", "Overo", "Cremello", "Perlino", "Silver Black"],
     // Le Frison est quasi-exclusivement noir
     greyFrequency: 0,
     statBonuses: { dressage: 14, temperament: 10, strength: 8 },

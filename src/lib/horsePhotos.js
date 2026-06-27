@@ -64,6 +64,8 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed) {
   const hasOvero = genotype.overo && genotype.overo !== "nn";
 
   // === Breed-specific overrides (highest priority) ===
+  // Friesian: purebred is ALWAYS black — no silver, no pie, no cream
+  if (breed === "Friesian") return PHENO_IMAGES.black;
   // Appaloosa: leopard spots are the defining visual trait
   if (breed === "Appaloosa" && !isGrey) return PHENO_IMAGES.appaloosa;
   // Haflinger: chestnut with flaxen mane — unique look

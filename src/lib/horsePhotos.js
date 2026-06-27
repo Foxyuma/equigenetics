@@ -111,8 +111,9 @@ export function getCoatInfo(genotype) {
   else if (hasOvero) parts.push("overo");
   if (hasSplash) parts.push("splash");
   if (hasSabino) parts.push("sabino");
+  const hasDun = genotype.dun && genotype.dun !== 'nd2nd2';
   const birth = [...new Set(parts)].join(" ");
-  return { display: isGrey ? "Gris" : birth, birth: isGrey ? birth : birth, isGrey };
+  return { display: isGrey ? "Gris" : birth, birth: isGrey ? birth : birth, isGrey, primitiveMarkings: !isGrey && hasDun };
 }
 
 // Map full genotype + breed + age → matching phenotype image

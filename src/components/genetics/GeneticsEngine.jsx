@@ -153,7 +153,7 @@ function randomAllele(locus) {
     grey: ["G", "g"],
     tobiano: ["TO", "n"],
     roan: ["RN", "n"],
-    dun: ["D", "d"],
+    dun: ["D", "nd1", "nd2"],
     champagne: ["CH", "n"],
     silver: ["Z", "z"],
     sabino: ["Sb", "n"],
@@ -180,7 +180,7 @@ function parseGenotype(locus, genotypeStr) {
     grey: { "GG": ["G","G"], "Gg": ["G","g"], "gg": ["g","g"] },
     tobiano: { "TOTO": ["TO","TO"], "TOn": ["TO","n"], "nn": ["n","n"] },
     roan: { "RNn": ["RN","n"], "nn": ["n","n"], "RNRN": ["RN","RN"] },
-    dun: { "DD": ["D","D"], "Dd": ["D","d"], "dd": ["d","d"] },
+    dun: { "DD": ["D","D"], "Dnd1": ["D","nd1"], "Dnd2": ["D","nd2"], "nd1nd1": ["nd1","nd1"], "nd1nd2": ["nd1","nd2"], "nd2nd2": ["nd2","nd2"] },
     champagne: { "CHn": ["CH","n"], "nn": ["n","n"], "CHCH": ["CH","CH"] },
     silver: { "ZZ": ["Z","Z"], "Zz": ["Z","z"], "zz": ["z","z"] },
     sabino: { "SbSb": ["Sb","Sb"], "Sbn": ["Sb","n"], "nn": ["n","n"] },
@@ -191,10 +191,20 @@ function parseGenotype(locus, genotypeStr) {
   return mappings[locus]?.[genotypeStr] || [randomAllele(locus), randomAllele(locus)];
 }
 
+const THREE_ALLELE_ORDER = {
+  cream: ["Cr", "n", "prl"],
+  dun: ["D", "nd1", "nd2"],
+};
+function sortThreeAlleles(locus, a1, a2) {
+  const order = THREE_ALLELE_ORDER[locus];
+  const i1 = order.indexOf(a1), i2 = order.indexOf(a2);
+  return (i1 < i2 ? [a1, a2] : [a2, a1]).join("");
+}
 function combineAlleles(locus, a1, a2) {
-  const dominant = { extension: "E", agouti: "A", grey: "G", tobiano: "TO", roan: "RN", dun: "D", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr", mushroom: "Mu" };
+  const dominant = { extension: "E", agouti: "A", grey: "G", tobiano: "TO", roan: "RN", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr", mushroom: "Mu" };
   const recessive = { extension: "e", agouti: "a", grey: "g", tobiano: "n", roan: "n", dun: "n", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n", mushroom: "mu" };
-  // Remarque : cream (MATP = 3 allèles Cr/n/prl) n'est pas traité par combineAlleles — généré en ligne.
+  // Remarque : cream et dun (3 allèles) sont triés en ligne, pas ici.
+  if (THREE_ALLELE_ORDER[locus]) return sortThreeAlleles(locus, a1, a2);
   const d = dominant[locus], r = recessive[locus];
   
   if (a1 === d && a2 === d) return d + d;
@@ -212,11 +222,15 @@ export function generateRandomGenotype(breed) {
     genotype[locus] = combineAlleles(locus, a1, a2);
   });
 
-  // Générer cream en ligne (locus MATP : 3 allèles Cr/n/prl, ordre canonique Cr>n>prl)
-  const matpPool = ["Cr", "n", "prl"];
-  const a1 = matpPool[Math.floor(Math.random() * matpPool.length)];
-  const a2 = matpPool[Math.floor(Math.random() * matpPool.length)];
-  genotype.cream = (["Cr","n","prl"].indexOf(a1) <= ["Cr","n","prl"].indexOf(a2) ? [a1, a2] : [a2, a1]).join("");
+  // Locus à 3 allèles : générer puis trier par dominance (Cr>n>prl, D>nd1>nd2)
+  genotype.cream = sortThreeAlleles("cream",
+    THREE_ALLELE_ORDER.cream[Math.floor(Math.random() * THREE_ALLELE_ORDER.cream.length)],
+    THREE_ALLELE_ORDER.cream[Math.floor(Math.random() * THREE_ALLELE_ORDER.cream.length)]
+  );
+  genotype.dun = sortThreeAlleles("dun",
+    THREE_ALLELE_ORDER.dun[Math.floor(Math.random() * THREE_ALLELE_ORDER.dun.length)],
+    THREE_ALLELE_ORDER.dun[Math.floor(Math.random() * THREE_ALLELE_ORDER.dun.length)]
+  );
 
   // Appliquer les gènes forcés depuis le profil de race
   const profile = BREED_PROFILES[breed];
@@ -300,12 +314,15 @@ export function breedGenotype(fatherGenotype, motherGenotype) {
     childGenotype[locus] = combineAlleles(locus, a1, a2);
   });
 
-  // Héritage cream en ligne (MATP = 3 allèles)
-  const fa = inheritAllele(fatherGenotype, "cream");
-  const fb = inheritAllele(motherGenotype, "cream");
-  const sorted = ["Cr","n","prl"];
-  childGenotype.cream = (sorted.indexOf(fa) <= sorted.indexOf(fb) ? [fa, fb] : [fb, fa]).join("");
-  
+  // Locus à 3 allèles : héritage puis tri par dominance (Cr>n>prl, D>nd1>nd2)
+  childGenotype.cream = sortThreeAlleles("cream",
+    inheritAllele(fatherGenotype, "cream"),
+    inheritAllele(motherGenotype, "cream")
+  );
+  childGenotype.dun = sortThreeAlleles("dun",
+    inheritAllele(fatherGenotype, "dun"),
+    inheritAllele(motherGenotype, "dun")
+  );
   return childGenotype;
 }
 
@@ -329,7 +346,7 @@ function applyDilutions(baseColor, genotype) {
   
   let color = baseColor;
   const cream = genotype.cream;
-  const hasDun = genotype.dun !== 'dd';
+  const hasDun = genotype.dun !== 'nd2nd2';
   const hasChampagne = genotype.champagne !== 'nn';
   const hasSilver = genotype.silver !== 'zz';
   const isDoubleMushroom = genotype.mushroom === 'mumu';
@@ -473,6 +490,11 @@ export function getCoatColorInfo(genotype) {
     baseColorAtBirth: isGrey ? applyPatterns(dilutedColor, genotype) : finalColor,
     isGrey
   };
+}
+
+export function isPrimitiveMarked(genotype) {
+  if (!genotype || !genotype.dun) return false;
+  return genotype.dun !== 'nd2nd2';
 }
 
 export function generateRandomStats(fatherStats, motherStats) {

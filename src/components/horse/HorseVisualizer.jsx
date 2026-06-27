@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getHorsePhotoUrl, getCoatInfo } from '@/lib/horsePhotos';
+import { isPrimitiveMarked } from '@/components/genetics/GeneticsEngine';
 
 const GENE_LABELS = {
   extension:  { label: "Extension (E)",  visible: true  },
@@ -20,7 +21,7 @@ const GENE_LABELS = {
 const NEUTRAL = {
   extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg',
   tobiano: 'nn', sabino: 'nn', splash: 'nn', overo: 'nn',
-  roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz', mushroom: 'MuMu',
+  roan: 'nn', dun: 'nd2nd2', champagne: 'nn', silver: 'zz', mushroom: 'MuMu',
 };
 
 // Pasture background: sky → grass gradient
@@ -32,6 +33,7 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
   const isFoal = typeof age === "number" && age < 3;
   const coatInfo = genotype ? getCoatInfo(genotype) : null;
   const showBirth = coatInfo && coatInfo.isGrey && coatInfo.birth !== "Gris" && coatInfo.birth !== coatInfo.display;
+  const hasPrimitiveMarkings = genotype ? isPrimitiveMarked(genotype) : false;
 
   // Collect expressed visible genes for on-image overlay
   const expressedGenes = genotype
@@ -79,7 +81,16 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
           </div>
         )}
 
-        {/* Coat label */}
+          {/* Marques primitives (Zébrure/chaperon/morsure de cigogne) */}
+        {hasPrimitiveMarkings && (
+          <div title="Marques primitives (nd1)" className="absolute bottom-4 right-3 flex flex-col gap-0.5 opacity-80">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="w-6 h-1 rounded bg-amber-700/70" style={{ transform: `rotate(${((i / 4) * 60 - 30)}deg)` }} />
+            ))}
+          </div>
+        )}
+
+      {/* Coat label */}
         {showGenotype && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold text-center backdrop-blur-sm">
             <div className="whitespace-nowrap">{coatInfo?.display || coatColor || 'Couleur inconnue'}</div>

@@ -193,7 +193,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
   // 3. Faible type racial (peu de gènes rares)
   const rareGeneCount = horse.genotype
     ? Object.entries(horse.genotype).filter(([k, v]) => {
-        return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v) && v;
+        return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa', 'nd2nd2'].includes(v) && v;
       }).length
     : 0;
   if (rareGeneCount === 0) {
@@ -253,7 +253,7 @@ export function calculateInspectionScore(horse) {
   // C. Type racial - basé sur gènes rares et cohérence
   const rareGeneCount = horse.genotype
     ? Object.entries(horse.genotype).filter(([k, v]) => {
-        return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa'].includes(v) && v;
+        return !['nn', 'gg', 'zz', 'dd', 'ee', 'aa', 'nd2nd2'].includes(v) && v;
       }).length
     : 0;
   const maxBreedTypeScore = Math.min(weights.breedType, 8 + (rareGeneCount * 1.5));

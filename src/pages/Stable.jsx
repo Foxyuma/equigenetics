@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
@@ -23,22 +23,12 @@ export default function Stable() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Chevaux créés par l'utilisateur + chevaux achetés (owner_email)
-  const { data: createdHorses = [], isLoading: loadingCreated } = useQuery({
-    queryKey: ['horses-created', currentUser?.email],
-    queryFn: () => base44.entities.Horse.filter({ created_by: currentUser.email }, '-created_date', 200),
-    enabled: !!currentUser?.email,
-  });
-  const { data: ownedHorses = [], isLoading: loadingOwned } = useQuery({
-    queryKey: ['horses-owned', currentUser?.email],
+  // Tous les chevaux où l'utilisateur est le owner_email (achetés ou créés)
+  const { data: horses = [], isLoading } = useQuery({
+    queryKey: ['horses', currentUser?.email],
     queryFn: () => base44.entities.Horse.filter({ owner_email: currentUser.email }, '-created_date', 200),
     enabled: !!currentUser?.email,
   });
-  const isLoading = loadingCreated || loadingOwned;
-  // Fusionner sans doublons
-  const horseMap = new Map();
-  [...createdHorses, ...ownedHorses].forEach(h => horseMap.set(h.id, h));
-  const horses = Array.from(horseMap.values());
 
   const filtered = horses.filter(h => {
     if (search && !h.name?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -58,9 +48,19 @@ export default function Stable() {
 
   const availableAges = [...new Set(horses.map(h => h.age || 0))].sort((a, b) => a - b);
 
-  // Show onboarding if no horses yet
-  if (!isLoading && horses.length === 0 && currentUser) {
-    return <OnboardingWizard />;
+  // Onboarding seulement si aucun cheval existant avec cet owner_email (première inscription)
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    if (!isLoading && horses.length === 0 && currentUser && !showOnboarding) {
+      // Vérifier si l'utilisateur vient de s'inscrire (aucun historique de jeu)
+      base44.entities.Transaction.filter({ user_email: currentUser.email }, '-created_date', 1).then(txs => {
+        if (txs.length === 0) setShowOnboarding(true);
+      }).catch(() => setShowOnboarding(false));
+    }
+  }, [isLoading, horses.length, currentUser]);
+
+  if (showOnboarding) {
+    return <OnboardingWizard onComplete={() => setShowOnboarding(false)} />;
   }
 
   return (
@@ -139,7 +139,7 @@ export default function Stable() {
         <div className="text-center py-20">
           <span className="text-5xl mb-4 block">🐴</span>
           <h3 className="text-lg font-semibold text-stone-600">{horses.length === 0 ? 'Votre écurie est vide' : 'Aucun résultat'}</h3>
-          <p className="text-stone-400 mt-1">{horses.length === 0 ? 'Votre cheval de départ vous sera attribué lors de votre inscription.' : 'Essayez de modifier vos filtres.'}</p>
+          <p className="text-stone-400 mt-1">{horses.length === 0 ? 'Vous n\'avez pas encore de cheval dans votre écurie.' : 'Essayez de modifier vos filtres.'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

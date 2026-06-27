@@ -126,11 +126,13 @@ export default function OnboardingWizard({ onComplete }) {
           }]
         });
       }
+      const me = await base44.auth.me();
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
         sex,
         age: 0,
+        owner_email: me.email,
         genotype,
         coat_color,
         markings_description: markings,

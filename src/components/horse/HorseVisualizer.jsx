@@ -96,7 +96,7 @@ const NEUTRAL = {
   tobiano: 'nn', roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
 };
 
-export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
+export default function HorseVisualizer({ genotype, coatColor, size = 320, showGenotype = true }) {
   const style = getCoatStyle(genotype);
 
   return (
@@ -159,7 +159,7 @@ export default function HorseVisualizer({ genotype, coatColor, size = 320 }) {
       </div>
 
       {/* Genotype badges */}
-      {genotype && (
+      {genotype && showGenotype && (
         <div className="w-full max-w-xs">
           <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Génotype</p>
           <div className="flex flex-wrap gap-1.5">

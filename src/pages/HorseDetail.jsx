@@ -89,13 +89,14 @@ export default function HorseDetail() {
   };
 
   // Auto-génère l'image adulte une seule fois quand l'âge atteint ≥ 3 ans
-  useEffect(() => {
-    if (!horse || generatingImage) return;
-    const age = horse.age || 0;
-    if (age >= 3 && !horse.adult_image_url) {
-      generateStageImage('adult');
-    }
-  }, [horse?.id, horse?.age]);
+  // (désactivé — le visualiseur génétique instantané remplace la génération IA)
+  // useEffect(() => {
+  //   if (!horse || generatingImage) return;
+  //   const age = horse.age || 0;
+  //   if (age >= 3 && !horse.adult_image_url) {
+  //     generateStageImage('adult');
+  //   }
+  // }, [horse?.id, horse?.age]);
 
   const { data: competitions = [] } = useQuery({
     queryKey: ['horse-competitions', horseId],
@@ -166,9 +167,8 @@ export default function HorseDetail() {
                   <p className="text-sm text-stone-400">Génération de l'image...</p>
                 </div>
               ) : (
-                <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
-                  <span className="text-6xl opacity-30">🐴</span>
-                  <p className="text-sm text-stone-400">Image en attente</p>
+                <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl">
+                  <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} size={280} showGenotype={false} />
                 </div>
               )}
               <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">

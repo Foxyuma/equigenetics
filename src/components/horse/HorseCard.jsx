@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Trophy, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getDisplayBreed } from '@/lib/horseImagePrompt';
+import HorseVisualizer from '@/components/horse/HorseVisualizer';
 
 const sexColors = { male: "bg-blue-100 text-blue-700", female: "bg-pink-100 text-pink-700" };
 const sexLabels = { male: "♂ Mâle", female: "♀ Femelle" };
@@ -16,13 +17,11 @@ export default function HorseCard({ horse }) {
   return (
     <Link to={`/HorseDetail?id=${horse.id}`}>
       <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-amber-50 to-stone-100">
+        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-amber-50 to-stone-100 flex items-center justify-center">
           {horse.image_url && !imgError ? (
             <img src={horse.image_url} alt={horse.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={() => setImgError(true)} />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-6xl opacity-30">🐴</span>
-            </div>
+            <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} size={160} showGenotype={false} />
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className={`${sexColors[horse.sex]} border-0 text-xs font-medium`}>

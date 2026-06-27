@@ -8,7 +8,9 @@ import {
   BREED_AFFINITY,
   POSITIVE_TRAITS,
 } from '@/lib/horseTraits';
-import { Eye, EyeOff, Brain, Dna, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Brain, Dna, Sparkles, Stethoscope, Dumbbell } from 'lucide-react';
 
 const DISCIPLINE_LABELS = {
   dressage: 'Dressage', show_jumping: 'CSO', cross_country: 'Cross',
@@ -98,9 +100,19 @@ function AffinitySection({ breed }) {
 }
 
 // ─── Traits mentaux ──────────────────────────────────────────────────────────
-function MentalTraitsSection({ traits }) {
+function MentalTraitsSection({ traits, isOwner }) {
+  const navigate = useNavigate();
   if (!traits || traits.length === 0) {
-    return <p className="text-xs text-stone-400">Traits mentaux non révélés — effectuez un test comportemental.</p>;
+    return (
+      <div className="space-y-2">
+        <p className="text-xs text-stone-400">Traits mentaux non révélés — effectuez un test comportemental.</p>
+        {isOwner && (
+          <Button size="sm" variant="outline" onClick={() => navigate('/Training')} className="text-xs border-sky-200 text-sky-700 hover:bg-sky-50">
+            <Dumbbell className="w-3.5 h-3.5 mr-1.5" /> S'entraîner pour révéler
+          </Button>
+        )}
+      </div>
+    );
   }
   return (
     <div className="space-y-2">
@@ -125,9 +137,19 @@ function MentalTraitsSection({ traits }) {
 }
 
 // ─── Morphologie cachée ──────────────────────────────────────────────────────
-function MorphologySection({ morphology, revealed }) {
+function MorphologySection({ morphology, revealed, isOwner }) {
+  const navigate = useNavigate();
   if (!morphology || morphology.length === 0) {
-    return <p className="text-xs text-stone-400">Morphologie non évaluée — consultez un vétérinaire.</p>;
+    return (
+      <div className="space-y-2">
+        <p className="text-xs text-stone-400">Morphologie non évaluée — consultez un vétérinaire.</p>
+        {isOwner && (
+          <Button size="sm" variant="outline" onClick={() => navigate('/VetClinic')} className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
+            <Stethoscope className="w-3.5 h-3.5 mr-1.5" /> Consulter le vétérinaire
+          </Button>
+        )}
+      </div>
+    );
   }
 
   if (!revealed) {
@@ -211,7 +233,7 @@ export default function TraitsPanel({ horse, isOwner }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
-          <MentalTraitsSection traits={horse.mental_traits} />
+          <MentalTraitsSection traits={horse.mental_traits} isOwner={isOwner} />
         </CardContent>
       </Card>
 
@@ -232,7 +254,7 @@ export default function TraitsPanel({ horse, isOwner }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
-          <MorphologySection morphology={horse.morphology} revealed={morphRevealed || !isOwner === false} />
+          <MorphologySection morphology={horse.morphology} revealed={morphRevealed || !isOwner === false} isOwner={isOwner} />
         </CardContent>
       </Card>
 

@@ -160,6 +160,14 @@ function randomAllele(locus) {
     frame: ["Fr", "n"],
     mushroom: ["Mu", "mu"],
     rabicano: ["Rb", "rb"],
+    // Patterns ponctuels
+    leopard: ["Lp", "lp"],
+    pattern1: ["PATN1", "patn1"],
+    // Modificateurs (hypothétiques / non testables dans la vraie vie — tout en jeu)
+    sooty: ["So", "so"],           // fonce la robe (poils noirs disséminés)
+    flaxen: ["F", "f"],             // récessif, éclaircit les crins des alezans
+    pangare: ["P", "p"],            // éclaircit le ventre, le museau, le tour des yeux
+    bringe: ["BR1", "br1"],         // stries bringées (X-linked syndrome partiel)
   };
   const opts = alleles[locus] || ["n", "n"];
   return opts[Math.floor(Math.random() * opts.length)];
@@ -189,6 +197,12 @@ function parseGenotype(locus, genotypeStr) {
     overo: { "FrFr": ["Fr","Fr"], "Frn": ["Fr","n"], "nn": ["n","n"] },
     frame: { "FrFr": ["Fr","Fr"], "Frn": ["Fr","n"], "nn": ["n","n"] },
     rabicano: { "RbRb": ["Rb","Rb"], "Rbrb": ["Rb","rb"], "rbrb": ["rb","rb"] },
+    leopard: { "LpLp": ["Lp","Lp"], "Lplp": ["Lp","lp"], "lplp": ["lp","lp"] },
+    pattern1: { "PATN1PATN1": ["PATN1","PATN1"], "PATN1patn1": ["PATN1","patn1"], "patn1patn1": ["patn1","patn1"] },
+    sooty: { "SoSo": ["So","So"], "Soso": ["So","so"], "soso": ["so","so"] },
+    flaxen: { "FF": ["F","F"], "Ff": ["F","f"], "ff": ["f","f"] },
+    pangare: { "PP": ["P","P"], "Pp": ["P","p"], "pp": ["p","p"] },
+    bringe: { "BR1BR1": ["BR1","BR1"], "BR1br1": ["BR1","br1"], "br1br1": ["br1","br1"] },
     mushroom: { "mumu": ["mu","mu"], "Mumu": ["Mu","mu"], "MuMu": ["Mu","Mu"] },
   };
   return mappings[locus]?.[genotypeStr] || [randomAllele(locus), randomAllele(locus)];
@@ -251,8 +265,8 @@ function sortKitAlleles(a1, a2) {
 function combineAlleles(locus, a1, a2) {
   if (THREE_ALLELE_ORDER[locus]) return sortThreeAlleles(locus, a1, a2);
   if (locus === "kit") return sortKitAlleles(a1, a2);
-  const dominant = { extension: "E", agouti: "A", grey: "G", tobiano: "TO", roan: "RN", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr", frame: "Fr", rabicano: "Rb", mushroom: "Mu" };
-  const recessive = { extension: "e", agouti: "a", grey: "g", tobiano: "n", roan: "n", dun: "n", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n", frame: "n", rabicano: "rb", mushroom: "mu" };
+  const dominant = { extension: "E", agouti: "A", grey: "G", tobiano: "TO", roan: "RN", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr", frame: "Fr", rabicano: "Rb", leopard: "Lp", pattern1: "PATN1", sooty: "So", flaxen: "F", pangare: "P", bringe: "BR1", mushroom: "Mu" };
+  const recessive = { extension: "e", agouti: "a", grey: "g", tobiano: "n", roan: "n", dun: "n", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n", frame: "n", rabicano: "rb", leopard: "lp", pattern1: "patn1", sooty: "so", flaxen: "f", pangare: "p", bringe: "br1", mushroom: "mu" };
   // Remarque : cream et dun (3 allèles) sont triés en ligne, pas ici.
   if (THREE_ALLELE_ORDER[locus]) return sortThreeAlleles(locus, a1, a2);
   const d = dominant[locus], r = recessive[locus];
@@ -263,7 +277,7 @@ function combineAlleles(locus, a1, a2) {
 }
 
 export function generateRandomGenotype(breed) {
-  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "frame", "rabicano", "mushroom"];
+  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "frame", "rabicano", "leopard", "pattern1", "sooty", "flaxen", "pangare", "bringe", "mushroom"];
   const genotype = {};
   
   loci.forEach(locus => {
@@ -311,20 +325,40 @@ export function generateRandomGenotype(breed) {
   } else if (breed === "Appaloosa") {
     genotype.kit = Math.random() < 0.4 ? (Math.random() < 0.5 ? "Rnrn" : "RnRn") : "toto";
     if (Math.random() < 0.30) genotype.rabicano = "Rbrb";
+    // Complexe Léopard (LP + Pattern1) — caractéristique de la race Appaloosa
+    if (Math.random() < 0.55) genotype.leopard = Math.random() < 0.3 ? "LpLp" : "Lplp";
+    if (genotype.leopard !== "lplp" && Math.random() < 0.65) {
+      genotype.pattern1 = Math.random() < 0.3 ? "PATN1PATN1" : "PATN1patn1";
+    }
   } else {
     // Autres races : tobiano/dw/sabino/roan modérés via kit
     const r = Math.random();
     if (r < 0.08) genotype.kit = "Toto";
-    else if (r < 0.12) genotype.kit = Math.random() < 0.5 ? "dwnw" : "dwdw";  // ← NOUVEAU : Dominant White (rare)
+    else if (r < 0.12) genotype.kit = Math.random() < 0.5 ? "dwnw" : "dwdw";
     else if (r < 0.20) genotype.kit = Math.random() < 0.5 ? "Sb1sb1" : "Sb1Sb1";
     else if (r < 0.27) genotype.kit = Math.random() < 0.5 ? "Rnrn" : "RnRn";
     if (Math.random() < 0.04) genotype.splash = "Spln";
     if (Math.random() < 0.03) genotype.overo = "Frn";
     if (Math.random() < 0.04) genotype.frame = "Frn";
     if (Math.random() < 0.05) genotype.rabicano = "Rbrb";
+    // Léopard rare chez les autres races
+    if (Math.random() < 0.02) genotype.leopard = "Lplp";
+    if (Math.random() < 0.005) genotype.pattern1 = "PATN1patn1";
   }
 
-  // Races sans pie
+  // Modificateurs (hypothétiques / rares, sauf races spécifiques)
+  // Sooty (poils noirs disséminés) → ~5% général
+  if (Math.random() < 0.05) genotype.sooty = Math.random() < 0.3 ? "SoSo" : "Soso";
+  // Flaxé (crins lavés) → fréquent chez Haflinger, Connemara
+  if (breed === "Haflinger") { genotype.flaxen = "ff"; }
+  else if (Math.random() < 0.03) genotype.flaxen = "ff";
+  // Pangaré → quasi-omniprésent chez Shetland ✓, Haflinger ✓, assez fréquent ailleurs
+  if (["Shetland", "Haflinger", "Connemara"].includes(breed)) { genotype.pangare = Math.random() < 0.70 ? "PP" : "Pp"; }
+  else if (Math.random() < 0.12) genotype.pangare = Math.random() < 0.4 ? "PP" : "Pp";
+  // Bringé (stries) → très rare
+  if (Math.random() < 0.005) genotype.bringe = "BR1br1";
+
+  // Races sans pie (purs/semi-purs)
   if (["Haflinger","Lipizzaner","Friesian","Arabian","Thoroughbred"].includes(breed)) {
     genotype.kit = "toto";
     genotype.splash = "nn";
@@ -338,7 +372,7 @@ export function generateRandomGenotype(breed) {
 }
 
 export function breedGenotype(fatherGenotype, motherGenotype) {
-  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "frame", "rabicano", "mushroom"];
+  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "frame", "rabicano", "leopard", "pattern1", "sooty", "flaxen", "pangare", "bringe", "mushroom"];
   const childGenotype = {};
   
   loci.forEach(locus => {
@@ -459,6 +493,39 @@ function applyGrey(displayColor, baseColor, genotype) {
   };
 }
 
+// Étape D : Complexe Léopard (Lp + Pattern1)
+// TABLEAU DU SITE :
+//   LP_ patn1patn1 → Varnish Roan
+//   LP_ PATN1_ → Léopard / Few Spot / Capé selon zygosité et blanc
+function applyLeopard(color, genotype) {
+  const lp = genotype.leopard;
+  const patn = genotype.pattern1;
+  const lpActive = lp && lp !== 'lplp';
+  const patnActive = patn && patn !== 'patn1patn1';
+  if (!lpActive) return color;
+  if (!patnActive) return color + ' Varnish Roan';
+  // LP_ + PATN1_ → Léopard / Few Spot / Capé
+  if (lp === 'LpLp' && patn === 'PATN1PATN1') return color + ' Few Spot';
+  if (lp === 'LpLp') return color + ' Capé';
+  if (patn === 'PATN1PATN1') return color + ' Leopard Taché';
+  return color + ' Léopard';
+}
+
+// Étape E : Modificateurs (Sooty, Flaxen, Pangaré, Calico, Bringe)
+function applyModifiers(color, genotype) {
+  const hasSooty = genotype.sooty && genotype.sooty !== 'soso';
+  const hasFlaxen = genotype.flaxen === 'ff';
+  const hasPangare = genotype.pangare && genotype.pangare !== 'pp';
+  const hasBringe = genotype.bringe && (genotype.bringe === 'BR1BR1' || genotype.bringe === 'BR1br1');
+  if (!hasSooty && !hasFlaxen && !hasPangare && !hasBringe) return color;
+  const mod = [];
+  if (hasSooty) mod.push('Sooty');
+  if (hasFlaxen) mod.push('Flaxen');
+  if (hasPangare) mod.push('Pangaré');
+  if (hasBringe) mod.push('Bringé');
+  return color + ' [' + mod.join(' ') + ']';
+}
+
 // Étape D : Appliquer les patterns blancs (KIT, frame, splash, rabicano)
 function applyPatterns(color, genotype) {
   if (!genotype) return color;
@@ -474,17 +541,16 @@ function applyPatterns(color, genotype) {
   // KIT locus
   if (kit && kit !== 'toto') {
     const lower = kit.toLowerCase();
-    if (lower.includes('dw')) patterns.push('Dominant White');    // ← NOUVEAU
+    if (lower.includes('dw')) patterns.push('Dominant White');
     else if (lower.includes('to')) patterns.push('Tobiano');
     else if (lower.includes('sb1')) patterns.push('Sabino');
     else if (lower.includes('rn')) patterns.push('Roan');
     else patterns.push('Pattern KIT');
   }
-  // Autres gènes pies (remarque : Frame et Splash déjà présents dans le code, Overo aussi)
-  if (hasFrame) patterns.push('Frame Overo');                    // ← NOUVEAU
+  if (hasFrame) patterns.push('Frame Overo');
   if (hasSplash) patterns.push('Splash');
   if (hasOvero) patterns.push('Overo');
-  if (hasRabicano) patterns.push('Rabicano');                    // ← NOUVEAU
+  if (hasRabicano) patterns.push('Rabicano');
   
   return patterns.length > 0 ? color + ' ' + patterns.join(' ') : color;
 }
@@ -509,11 +575,19 @@ export function determineCoatColor(genotype, age) {
   // D'après Nature 2024 : les chevaux gris naissent avec leur robe complète et grisonnent la 1re année.
   if (isGrey && (age !== undefined && age < 3)) {
     const dil = applyDilutions(baseColorAtBirth, genotype);
-    return applyPatterns(dil, genotype);
+    let c = applyPatterns(dil, genotype);
+    c = applyLeopard(c, genotype);
+    c = applyModifiers(c, genotype);
+    return c;
   }
   
-  // Étape D : patterns — uniquement si le cheval n'est pas gris (le gris masque les patterns)
-  const finalColor = isGrey ? displayColor : applyPatterns(displayColor, genotype);
+  // Étape D : patterns
+  let finalColor = isGrey ? displayColor : displayColor;
+  if (!isGrey) {
+    finalColor = applyPatterns(displayColor, genotype);
+    finalColor = applyLeopard(finalColor, genotype);
+    finalColor = applyModifiers(finalColor, genotype);
+  }
   
   return finalColor;
 }
@@ -525,11 +599,13 @@ export function getCoatColorInfo(genotype) {
   const baseColor = determineBaseColor(genotype);
   const dilutedColor = applyDilutions(baseColor, genotype);
   const { displayColor, baseColorAtBirth, isGrey } = applyGrey(dilutedColor, baseColor, genotype);
-  const finalColor = applyPatterns(displayColor, genotype);
+  const applied = applyPatterns(displayColor, genotype);
+  const finalApplied = applyLeopard(applied, genotype);
+  const finalWithMods = applyModifiers(finalApplied, genotype);
   
   return {
-    displayColor: isGrey ? displayColor : finalColor,
-    baseColorAtBirth: isGrey ? applyPatterns(dilutedColor, genotype) : finalColor,
+    displayColor: isGrey ? displayColor : finalWithMods,
+    baseColorAtBirth: isGrey ? applyModifiers(applyLeopard(applyPatterns(dilutedColor, genotype), genotype), genotype) : finalWithMods,
     isGrey
   };
 }
@@ -770,6 +846,13 @@ const COAT_MULTIPLIERS = [
   { keywords: ['frame overo'], multiplier: 2.00 },
   { keywords: ['rabicano'], multiplier: 1.50 },
   { keywords: ['dominant white'], multiplier: 2.70 },
+  { keywords: ['varnish roan'], multiplier: 1.60 },
+  { keywords: ['few spot', 'capé'], multiplier: 3.00 },
+  { keywords: ['léopard', 'leopard'], multiplier: 2.60 },
+  { keywords: ['sooty'], multiplier: 1.05 },
+  { keywords: ['pangaré'], multiplier: 0.95 },
+  { keywords: ['bringé'], multiplier: 2.20 },
+  { keywords: ['flaxen'], multiplier: 1.10 },
   { keywords: ['mushroom'], multiplier: 2.10 },
   { keywords: ['perle', 'isabelle perle', 'smoky black perle', 'blanc', 'white'], multiplier: 2.50 },
   { keywords: ['double perle'], multiplier: 3.00 },

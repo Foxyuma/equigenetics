@@ -10,16 +10,26 @@ const GENE_LABELS = {
   kit:        { label: "Gène KIT",       visible: true  },
   splash:     { label: "Splash (SW)",    visible: true  },
   overo:      { label: "Overo (LWO)",    visible: true  },
+  frame:      { label: "Frame (LWO)",    visible: true  },
   dun:        { label: "Dun (D)",        visible: true  },
   champagne:  { label: "Champagne (CH)", visible: true  },
   silver:     { label: "Silver (Z)",     visible: true  },
   mushroom:   { label: "Mushroom (mu)",  visible: true  },
+  rabicano:   { label: "Rabicano (Rb)",  visible: true  },
+  leopard:    { label: "Léopard (LP)",   visible: true  },
+  pattern1:   { label: "Pattern1",       visible: true  },
+  sooty:      { label: "Sooty",          visible: true  },
+  flaxen:     { label: "Flaxen (f)",     visible: true  },
+  pangare:    { label: "Pangaré (P)",    visible: true  },
+  bringe:     { label: "Bringé (BR1)",   visible: true  },
 };
 
 const NEUTRAL = {
   extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg',
-  kit: 'toto', splash: 'nn', overo: 'nn',
+  kit: 'toto', splash: 'nn', overo: 'nn', frame: 'nn',
   dun: 'nd2nd2', champagne: 'nn', silver: 'zz', mushroom: 'MuMu',
+  rabicano: 'rbrb', leopard: 'lplp', pattern1: 'patn1patn1',
+  sooty: 'soso', flaxen: 'FF', pangare: 'pp', bringe: 'br1br1',
 };
 
 // Pasture background: sky → grass gradient

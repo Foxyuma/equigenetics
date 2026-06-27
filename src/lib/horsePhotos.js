@@ -96,6 +96,17 @@ function getKitPattern(genotype) {
   return null;
 }
 
+// Détecte si le complexe Léopard est actif (LP + PATN1)
+function isLeopardActive(genotype) {
+  const lp = genotype.leopard;
+  if (!lp || lp === 'lplp') return false;
+  return true;
+}
+function isPattern1Active(genotype) {
+  const patn = genotype.pattern1;
+  return patn && patn !== 'patn1patn1';
+}
+
 // Renvoie les infos de robe : couleur affichée + couleur de naissance sous-jacente si gris + isGrey
 // Utile pour que les chevaux gris montrent aussi leurs patterns cachés dans le visuel
 export function getCoatInfo(genotype) {
@@ -107,15 +118,15 @@ export function getCoatInfo(genotype) {
   const hasRoan = kitPat === 'rn' || genotype.roan === "RNn" || genotype.roan === "RNRN";
   const hasTobiano = kitPat === 'to';
   const hasSabino = kitPat === 'sb1';
-  const hasDW = kitPat === 'dw';                    // ← NOUVEAU
+  const hasDW = kitPat === 'dw';
   const hasFrame = genotype.frame && genotype.frame !== "nn";
   const hasRabicano = genotype.rabicano && genotype.rabicano !== "rbrb";
   const hasMushroom = genotype.mushroom === "mumu";
+  const hasLeopard = isLeopardActive(genotype);
   const isBlack = genotype.extension !== "ee";
   const hasAgouti = genotype.agouti !== "aa";
   const cream = genotype.cream;
   let base = isBlack ? (hasAgouti ? "bai" : "noir") : "alezan";
-  // Double dilutions : crème ou perle
   if (cream === "prlprl") {
     base = isBlack ? (hasAgouti ? "double perle bai" : "double perle noir") : "double perle alezan";
   } else if (cream === "Crprl") {
@@ -128,16 +139,39 @@ export function getCoatInfo(genotype) {
   if (hasMushroom && (base === "alezan" || base === "bai")) base = (base === "alezan" ? "ale" : "b") + "zan mushroom";
   const parts = [base];
   if (hasRoan) parts.push(isBlack ? "gris fer" : "granité");
-  if (hasDW) parts.push("blanc");                    // ← NOUVEAU
+  if (hasDW) parts.push("blanc");
   if (hasTobiano) parts.push("tobiano");
   else if (hasOvero) parts.push("overo");
   if (hasSplash) parts.push("splash");
   if (hasSabino) parts.push("sabino");
-  if (hasFrame) parts.push("frame overo");           // ← NOUVEAU
-  if (hasRabicano) parts.push("rabicano");           // ← NOUVEAU
+  if (hasFrame) parts.push("frame overo");
+  if (hasRabicano) parts.push("rabicano");
+  // Léopard complex
+  if (hasLeopard) {
+    const lp = genotype.leopard;
+    const patn = isPattern1Active(genotype);
+    if (lp === 'LpLp' && patn) { parts.push("few_spot"); }
+    else if (lp === 'LpLp') { parts.push("capé"); }
+    else if (patn) { parts.push("léopard"); }
+    else { parts.push("varnish_roan"); }
+  }
+  // Modificateurs
+  const hasSooty = genotype.sooty && genotype.sooty !== 'soso';
+  const hasFlaxen = genotype.flaxen === 'ff';
+  const hasPangare = genotype.pangare && genotype.pangare !== 'pp';
+  const hasBringe = genotype.bringe && (genotype.bringe === 'BR1BR1' || genotype.bringe === 'BR1br1');
+  if (hasSooty) parts.push("sooty");
+  if (hasFlaxen) parts.push("flaxen");
+  if (hasPangare) parts.push("pangaré");
+  if (hasBringe) parts.push("bringé");
   const hasDun = genotype.dun && genotype.dun !== 'nd2nd2';
   const birth = [...new Set(parts)].join(" ");
-  return { display: isGrey ? "Gris" : birth, birth: isGrey ? birth : birth, isGrey, primitiveMarkings: !isGrey && hasDun };
+  return { display: isGrey ? "Gris" : birth, birth: isGrey ? birth : birth, isGrey, primitiveMarkings: !isGrey && hasDun, isLeopard: hasLeopard };
+}
+
+function hasLeopardPhoto(genotype, breed) {
+  if (breed === 'Appaloosa') return isLeopardActive(genotype);
+  return isLeopardActive(genotype) && isPattern1Active(genotype);
 }
 
 // Map full genotype + breed + age → matching phenotype image
@@ -162,12 +196,17 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
   const hasOvero = genotype.overo && genotype.overo !== "nn";
   const hasFrame = genotype.frame && genotype.frame !== "nn";
   const hasRabicano = genotype.rabicano && genotype.rabicano !== "rbrb";
+  const hasLeopard = hasLeopardPhoto(genotype, breed);
 
-  // === Breed-specific overrides (highest priority) ===
+  // === Leopard complex overrides all (highest priority) ===
+  // Peut apparaître sur toute race avec LP activé — toujours spots = image Appaloosa dédiée
+  if ((breed === "Appaloosa" || (genotype.leopard && genotype.leopard !== 'lplp')) && !isGrey) {
+    return isFoal ? PHENO_IMAGES.foalRoan : PHENO_IMAGES.appaloosa;
+  }
   // Friesian: purebred is ALWAYS black — image dédiée avec fanons et crinière abondante
   if (breed === "Friesian") return isFoal ? PHENO_IMAGES.foalFriesian : PHENO_IMAGES.friesian;
-  // Appaloosa: leopard spots are the defining visual trait
-  if (breed === "Appaloosa" && !isGrey) return isFoal ? PHENO_IMAGES.foalRoan : PHENO_IMAGES.appaloosa;
+  // Haflinger: chestnut with flaxen mane — unique look
+  if (breed === "Haflinger" && !isGrey) return isFoal ? PHENO_IMAGES.foalChestnut : PHENO_IMAGES.haflinger;
   // Haflinger: chestnut with flaxen mane — unique look
   if (breed === "Haflinger" && !isGrey) return isFoal ? PHENO_IMAGES.foalChestnut : PHENO_IMAGES.haflinger;
 

@@ -476,8 +476,8 @@ export default function Guide() {
                     <span className="text-sm">{rewardData.items.join(' · ')}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Heart className="w-5 h-5 text-pink-500" />
-                    <span className="text-sm"><strong>{rewardData.horse.name}</strong> — {rewardData.horse.breed} {rewardData.horse.sex === 'male' ? '♂' : '♀'} (30 000 ₲)</span>
+                    <Sparkles className="w-5 h-5 text-purple-500" />
+                    <span className="text-sm"><strong>{rewardData.horse.name}</strong> — {rewardData.horse.breed} {rewardData.horse.sex === 'male' ? '♂' : '♀'}</span>
                   </div>
                 </div>
               </div>
@@ -499,8 +499,8 @@ export default function Guide() {
                 <h3 className="font-semibold text-stone-700 text-sm">Récompenses finales :</h3>
                 <div className="flex items-center gap-2 text-sm"><Trophy className="w-4 h-4 text-amber-500" /> 30 points de réputation</div>
                 <div className="flex items-center gap-2 text-sm"><ShoppingCart className="w-4 h-4 text-emerald-500" /> 5 000 ₲ Genesis</div>
-                <div className="flex items-center gap-2 text-sm"><Gift className="w-4 h-4 text-rose-500" /> Aliment énergétique ×2 + Baume ×2</div>
-                <div className="flex items-center gap-2 text-sm"><Heart className="w-4 h-4 text-pink-500" /> Un cheval d'une race aléatoire (valeur 30 000 ₲)</div>
+                <div className="flex items-center gap-2 text-sm"><Gift className="w-4 h-4 text-rose-500" /> Objets cadeaux ×4</div>
+                <div className="flex items-center gap-2 text-sm"><Sparkles className="w-4 h-4 text-purple-500" /> 🎁 Un cheval mystère !</div>
               </div>
               <Button
                 onClick={collectFinalRewards}

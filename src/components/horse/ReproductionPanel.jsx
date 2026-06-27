@@ -251,6 +251,19 @@ export default function ReproductionPanel({ mare }) {
     );
   }
 
+  // Vérification consanguinité directe (parent × enfant)
+  const isIncestPair = (stallion) => {
+    if (!stallion || !mare) return false;
+    // Poulain × sa mère
+    if (stallion.mother_id && stallion.mother_id === mare.id) return true;
+    // Fille × son père
+    if (mare.father_id && mare.father_id === stallion.id) return true;
+    return false;
+  };
+
+  // Bloque l'étalon sélectionné s'il est dans une relation incestueuse
+  const breedingBlocked = selectedStallion && isIncestPair(selectedStallion);
+
   return (
     <div className="space-y-6">
       {readyToBeborn.length > 0 && (
@@ -418,11 +431,12 @@ export default function ReproductionPanel({ mare }) {
                   const hasDiseases = s.health_genes?.some(g => g.status !== 'clear');
                   const approvalStatus = s.breeding_approval_status || 'not_evaluated';
                   const breedingImpact = getBreedingImpact(approvalStatus);
+                  const incestBlocked = isIncestPair(s);
                   return (
                    <Card
                       key={s.id}
-                      onClick={() => { setSelectedStallion(s); setFoalPreview(null); }}
-                      className={`cursor-pointer transition-all border-2 ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-transparent bg-white/70 hover:border-stone-300'}`}
+                      onClick={() => { if (!incestBlocked) { setSelectedStallion(s); setFoalPreview(null); } }}
+                      className={`transition-all border-2 ${incestBlocked ? 'opacity-50 cursor-not-allowed border-red-200 bg-red-50/30' : 'cursor-pointer hover:border-stone-300'} ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-transparent bg-white/70'}`}
                     >
                       <CardContent className="p-4 space-y-2">
                         <div className="flex items-start justify-between">
@@ -430,6 +444,9 @@ export default function ReproductionPanel({ mare }) {
                             <p className="font-bold text-stone-800 text-sm">{s.stallion_name}</p>
                             <p className="text-xs text-stone-400">{s.owner_name}</p>
                           </div>
+                          {incestBlocked && (
+                            <Badge className="bg-red-100 text-red-700 border-0 text-xs">🚫 Parent/enfant</Badge>
+                          )}
                           {s.is_own
                              ? <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
                              : <div className="text-right">
@@ -479,16 +496,28 @@ export default function ReproductionPanel({ mare }) {
                              </ul>
                            )}
                          </div>
+                          {incestBlocked && (
+                            <p className="text-xs text-red-600 mt-1">Ce cheval est le parent ou l'enfant de {mare.name} — reproduction impossible.</p>
+                          )}
                         </CardContent>
                         </Card>
                         );
                         })}
               </div>
             )}
+
+            {stallionsToShow.some(isIncestPair) && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-200">
+                <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-red-700">
+                  Certains chevaux sont grisés car ils sont le <strong>parent ou l'enfant</strong> de {mare.name}. La reproduction directe parent-enfant n'est pas autorisée.
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
-        {selectedStallion && (
+        {selectedStallion && !breedingBlocked && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-stone-600">Date de la saillie</p>
             <div className="flex gap-3">
@@ -518,7 +547,19 @@ export default function ReproductionPanel({ mare }) {
           </div>
         )}
 
-        {selectedStallion && !foalPreview && (
+        {breedingBlocked && selectedStallion && (
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border-2 border-red-200">
+            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-red-800">
+              <p className="font-semibold mb-1">🚫 Reproduction impossible</p>
+              <p className="text-xs">
+                <strong>{selectedStallion.stallion_name}</strong> et <strong>{mare.name}</strong> sont liés par un lien parent-enfant direct. Cette union n'est pas autorisée.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {selectedStallion && !foalPreview && !breedingBlocked && (
           <div className="space-y-3">
             {selectedStallion.breeding_approval_status && selectedStallion.breeding_approval_status !== 'approved' && selectedStallion.breeding_approval_status !== 'approved_restricted' && selectedStallion.breeding_approval_status !== 'provisional' && selectedStallion.breeding_approval_status !== 'elite' && (
               <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border-2 border-amber-200">

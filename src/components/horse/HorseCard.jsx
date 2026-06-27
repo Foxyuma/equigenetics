@@ -21,7 +21,7 @@ export default function HorseCard({ horse }) {
           {horse.image_url && !imgError ? (
             <img src={horse.image_url} alt={horse.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={() => setImgError(true)} />
           ) : (
-            <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} size={160} showGenotype={false} />
+            <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} breed={horse.breed} size={160} showGenotype={false} />
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className={`${sexColors[horse.sex]} border-0 text-xs font-medium`}>

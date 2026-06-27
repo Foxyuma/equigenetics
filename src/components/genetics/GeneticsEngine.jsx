@@ -156,6 +156,9 @@ function randomAllele(locus) {
     dun: ["D", "d"],
     champagne: ["CH", "n"],
     silver: ["Z", "z"],
+    sabino: ["Sb", "n"],
+    splash: ["Spl", "n"],
+    overo: ["Fr", "n"],
   };
   const opts = alleles[locus] || ["n", "n"];
   return opts[Math.floor(Math.random() * opts.length)];
@@ -179,13 +182,16 @@ function parseGenotype(locus, genotypeStr) {
     dun: { "DD": ["D","D"], "Dd": ["D","d"], "dd": ["d","d"] },
     champagne: { "CHn": ["CH","n"], "nn": ["n","n"], "CHCH": ["CH","CH"] },
     silver: { "ZZ": ["Z","Z"], "Zz": ["Z","z"], "zz": ["z","z"] },
+    sabino: { "SbSb": ["Sb","Sb"], "Sbn": ["Sb","n"], "nn": ["n","n"] },
+    splash: { "SplSpl": ["Spl","Spl"], "Spln": ["Spl","n"], "nn": ["n","n"] },
+    overo: { "FrFr": ["Fr","Fr"], "Frn": ["Fr","n"], "nn": ["n","n"] },
   };
   return mappings[locus]?.[genotypeStr] || [randomAllele(locus), randomAllele(locus)];
 }
 
 function combineAlleles(locus, a1, a2) {
-  const dominant = { extension: "E", agouti: "A", cream: "Cr", grey: "G", tobiano: "TO", roan: "RN", dun: "D", champagne: "CH", silver: "Z" };
-  const recessive = { extension: "e", agouti: "a", cream: "n", grey: "g", tobiano: "n", roan: "n", dun: "d", champagne: "n", silver: "z" };
+  const dominant = { extension: "E", agouti: "A", cream: "Cr", grey: "G", tobiano: "TO", roan: "RN", dun: "D", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr" };
+  const recessive = { extension: "e", agouti: "a", cream: "n", grey: "g", tobiano: "n", roan: "n", dun: "d", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n" };
   const d = dominant[locus], r = recessive[locus];
   
   if (a1 === d && a2 === d) return d + d;
@@ -194,7 +200,7 @@ function combineAlleles(locus, a1, a2) {
 }
 
 export function generateRandomGenotype(breed) {
-  const loci = ["extension", "agouti", "cream", "grey", "tobiano", "roan", "dun", "champagne", "silver"];
+  const loci = ["extension", "agouti", "cream", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo"];
   const genotype = {};
   
   loci.forEach(locus => {
@@ -215,33 +221,63 @@ export function generateRandomGenotype(breed) {
     genotype.grey = Math.random() < 0.3 ? "GG" : "Gg";
   }
 
+  // Patterns pie : fréquences par race
+  // Sabino : assez courant dans beaucoup de races
+  // Splash / Overo : plus rares, concentrés dans les races pie
+  if (breed === "Paint Horse") {
+    // Paint = pie obligatoire : tobiano OU overo
+    if (Math.random() < 0.7) genotype.tobiano = "TOn";
+    if (Math.random() < 0.4) genotype.overo = "Frn";
+    if (Math.random() < 0.25) genotype.splash = "Spln";
+    if (Math.random() < 0.3) genotype.sabino = "Sbn";
+  } else if (breed === "Appaloosa") {
+    genotype.roan = "RNn";
+    if (Math.random() < 0.3) genotype.sabino = "Sbn";
+  } else {
+    // Autres races : sabino modéré, splash/overo rares
+    if (Math.random() < 0.15) genotype.sabino = "Sbn";
+    if (Math.random() < 0.04) genotype.splash = "Spln";
+    if (Math.random() < 0.03) genotype.overo = "Frn";
+  }
+
   // Cas spéciaux legacy
   if (breed === "Haflinger") {
-    // Alezan obligatoire (ee) + crins lavés = pas de crème ni grey
     genotype.extension = "ee";
     genotype.cream = "nn";
     genotype.grey = "gg";
     genotype.tobiano = "nn";
     genotype.roan = "nn";
+    genotype.sabino = "nn";
+    genotype.splash = "nn";
+    genotype.overo = "nn";
   }
   if (breed === "Lipizzaner") {
-    // Quasi tous gris
     genotype.grey = Math.random() < 0.85 ? "Gg" : "gg";
+    genotype.tobiano = "nn";
+    genotype.sabino = "nn";
+    genotype.splash = "nn";
+    genotype.overo = "nn";
   }
-  if (breed === "Appaloosa") {
-    // Pattern LP simulé par roan
-    genotype.roan = "RNn";
+  if (breed === "Friesian") {
+    genotype.tobiano = "nn";
+    genotype.sabino = "nn";
+    genotype.splash = "nn";
+    genotype.overo = "nn";
+    genotype.roan = "nn";
   }
-  if (breed === "Paint Horse") {
-    // Tobiano fréquent
-    if (Math.random() < 0.7) genotype.tobiano = "TOn";
+  if (breed === "Arabian" || breed === "Thoroughbred") {
+    // Sang purs : pas de pie
+    genotype.tobiano = "nn";
+    genotype.sabino = "nn";
+    genotype.splash = "nn";
+    genotype.overo = "nn";
   }
 
   return genotype;
 }
 
 export function breedGenotype(fatherGenotype, motherGenotype) {
-  const loci = ["extension", "agouti", "cream", "grey", "tobiano", "roan", "dun", "champagne", "silver"];
+  const loci = ["extension", "agouti", "cream", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo"];
   const childGenotype = {};
   
   loci.forEach(locus => {
@@ -331,11 +367,11 @@ function applyGrey(displayColor, baseColor, genotype) {
 function applyPatterns(color, genotype) {
   if (!genotype) return color;
   
-  const hasTobiano = genotype.tobiano !== 'nn';
-  const hasSabino = genotype.sabino !== 'nn';
-  const hasSplash = genotype.splash !== 'nn';
-  const hasRoan = genotype.roan !== 'nn';
-  const hasOvero = genotype.overo !== 'nn';
+  const hasTobiano = genotype.tobiano && genotype.tobiano !== 'nn';
+  const hasSabino = genotype.sabino && genotype.sabino !== 'nn';
+  const hasSplash = genotype.splash && genotype.splash !== 'nn';
+  const hasRoan = genotype.roan && genotype.roan !== 'nn';
+  const hasOvero = genotype.overo && genotype.overo !== 'nn';
   
   let patterns = [];
   

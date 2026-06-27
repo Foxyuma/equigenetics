@@ -38,6 +38,9 @@ const GENE_LABELS = {
   cream:      { label: "Crème (Cr)",      visible: true  },
   grey:       { label: "Gris (G)",        visible: true  },
   tobiano:    { label: "Tobiano (TO)",    visible: true  },
+  sabino:     { label: "Sabino (Sb)",     visible: true  },
+  splash:     { label: "Splash (Spl)",    visible: true  },
+  overo:      { label: "Overo/Frame (Fr)",visible: true  },
   roan:       { label: "Rouan (RN)",      visible: true  },
   dun:        { label: "Dun (D)",         visible: true  },
   champagne:  { label: "Champagne (CH)",  visible: false },
@@ -46,17 +49,18 @@ const GENE_LABELS = {
 
 const NEUTRAL = {
   extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg',
-  tobiano: 'nn', roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
+  tobiano: 'nn', sabino: 'nn', splash: 'nn', overo: 'nn',
+  roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
 };
 
-export default function HorseVisualizer({ genotype, coatColor, horseId, size = 320, showGenotype = true }) {
+export default function HorseVisualizer({ genotype, coatColor, horseId, breed, size = 320, showGenotype = true }) {
   const [imgError, setImgError] = useState(false);
-  const photoUrl = getHorsePhotoUrl(genotype, horseId);
+  const photoUrl = getHorsePhotoUrl(genotype, horseId, breed);
   const bg = getCoatBg(genotype);
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Horse photo from Unsplash by coat color */}
+      {/* Horse photo matching genetics + breed */}
       <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ width: size, height: size, background: bg }}>
         {imgError ? (
           <div className="absolute inset-0 flex items-center justify-center">

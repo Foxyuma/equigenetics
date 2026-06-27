@@ -168,7 +168,7 @@ export default function HorseDetail() {
                 </div>
               ) : (
                 <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl">
-                  <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} size={280} showGenotype={false} />
+                  <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} breed={horse.breed} size={280} showGenotype={false} />
                 </div>
               )}
               <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">

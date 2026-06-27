@@ -13,9 +13,11 @@ export default function Training() {
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
-  const { data: horses = [] } = useQuery({
-    queryKey: ['horses'],
-    queryFn: () => base44.entities.Horse.list('-created_date', 100),
+  const userEmail = currentUser?.email;
+  const { data: myHorses = [] } = useQuery({
+    queryKey: ['horses', userEmail],
+    queryFn: () => base44.entities.Horse.filter({ owner_email: userEmail }, '-created_date', 100),
+    enabled: !!userEmail,
   });
   const { data: recentTrainings = [] } = useQuery({
     queryKey: ['recent-trainings', selectedHorseId],
@@ -24,8 +26,6 @@ export default function Training() {
       : [],
     enabled: !!selectedHorseId,
   });
-
-  const myHorses = horses.filter(h => (h.owner_email || h.created_by_id) === (currentUser?.email || currentUser?.id) && (h.age || 0) >= 0);
   const selectedHorse = myHorses.find(h => h.id === selectedHorseId);
   const recentTypes = recentTrainings.map(t => t.training_type);
 

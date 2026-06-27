@@ -113,15 +113,15 @@ export default function AppLayout() {
                     onMouseLeave={() => setOpenDropdown(null)}
                   >
                     <button
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                      className={`flex items-center gap-1.5 md:gap-2 px-2 md:px-3 lg:px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all duration-300 ${
                         isAnyActive 
                           ? 'bg-stone-800 text-white shadow-lg shadow-stone-300/30' 
                           : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100'
                       }`}
                     >
-                      <GroupIcon className="w-4 h-4" />
+                      <GroupIcon className="w-4 h-4 hidden lg:inline" />
                       {group.label}
-                      <ChevronDown className={`w-3 h-3 transition-transform ${openDropdown === group.label ? 'rotate-180' : ''}`} />
+                                             <ChevronDown className={`w-3 h-3 transition-transform hidden lg:inline ${openDropdown === group.label ? 'rotate-180' : ''}`} />
                     </button>
                     
                     {openDropdown === group.label && (
@@ -160,7 +160,7 @@ export default function AppLayout() {
             </nav>
 
             {/* Currencies */}
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-1.5 md:gap-2 xl:gap-3">
               <GameClockDisplay />
               <Link to="/Messages" className="relative p-2 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors" title="Notifications">
                 <Bell className="w-5 h-5" />
@@ -176,7 +176,7 @@ export default function AppLayout() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Déconnexion
+                <span className="hidden xl:inline">Déconnexion</span>
               </button>
             </div>
 

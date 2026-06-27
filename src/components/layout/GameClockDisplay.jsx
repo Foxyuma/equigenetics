@@ -45,7 +45,7 @@ export default function GameClockDisplay({ variant = 'default' }) {
       <span className="text-stone-700 font-semibold text-sm tabular-nums">
         {SEASON_LABELS[season]} A{year}
       </span>
-      <span className="text-xs text-stone-400 tabular-nums">
+      <span className="text-[10px] text-stone-400 tabular-nums hidden xl:inline">
         J{day} · {daysLeftMonth}j mois · {daysLeftSeason}j saison
       </span>
     </div>

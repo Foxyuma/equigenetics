@@ -48,14 +48,11 @@ export default function Stable() {
 
   const availableAges = [...new Set(horses.map(h => h.age || 0))].sort((a, b) => a - b);
 
-  // Onboarding seulement si aucun cheval existant avec cet owner_email (première inscription)
+  // Onboarding pour les nouveaux joueurs — aucun cheval = premier cheval à créer
   const [showOnboarding, setShowOnboarding] = useState(false);
   useEffect(() => {
     if (!isLoading && horses.length === 0 && currentUser && !showOnboarding) {
-      // Vérifier si l'utilisateur vient de s'inscrire (aucun historique de jeu)
-      base44.entities.Transaction.filter({ user_email: currentUser.email }, '-created_date', 1).then(txs => {
-        if (txs.length === 0) setShowOnboarding(true);
-      }).catch(() => setShowOnboarding(false));
+      setShowOnboarding(true);
     }
   }, [isLoading, horses.length, currentUser]);
 

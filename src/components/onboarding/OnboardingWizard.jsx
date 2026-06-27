@@ -93,6 +93,7 @@ export default function OnboardingWizard({ onComplete }) {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      const me = await base44.auth.me();
       const genotype = { ...visibleGenes, ...hiddenGenes };
       const coat_color = determineCoatColor(genotype);
       const stats = generateBaseStats();
@@ -126,7 +127,6 @@ export default function OnboardingWizard({ onComplete }) {
           }]
         });
       }
-      const me = await base44.auth.me();
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
@@ -149,9 +149,10 @@ export default function OnboardingWizard({ onComplete }) {
         genetic_potential: foalTraits.genetic_potential,
         ...(image_url && { image_url }),
       });
+      return { email: me.email };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['horses'] });
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['horses', data.email] });
       toast.success(`${name} a rejoint votre écurie ! 🐴`);
       onComplete?.();
     },

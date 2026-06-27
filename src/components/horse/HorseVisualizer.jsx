@@ -25,7 +25,7 @@ const NEUTRAL = {
 // Pasture background: sky → grass gradient
 const pastureBg = 'linear-gradient(to bottom, #aed4e8 0%, #cee5d0 38%, #8cc66f 62%, #6ba858 100%)';
 
-export default function HorseVisualizer({ genotype, coatColor, horseId, breed, age, size = 320, showGenotype = true }) {
+export default function HorseVisualizer({ genotype, coatColor, horseId, breed, age, size = 320, showGenotype = true, fill = false }) {
   const [imgError, setImgError] = useState(false);
   const photoUrl = getHorsePhotoUrl(genotype, horseId, breed, age);
   const isFoal = typeof age === "number" && age < 3;
@@ -44,8 +44,8 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
     <div className="flex flex-col items-center gap-3">
       {/* Horse photo with pasture background + gene overlays */}
       <div
-        className="relative rounded-2xl overflow-hidden shadow-md"
-        style={{ width: size, height: size, background: pastureBg }}
+        className={`relative rounded-2xl overflow-hidden shadow-md ${fill ? 'w-full h-full' : ''}`}
+        style={fill ? { background: pastureBg } : { width: size, height: size, background: pastureBg }}
       >
         {imgError ? (
           <div className="absolute inset-0 flex items-center justify-center">

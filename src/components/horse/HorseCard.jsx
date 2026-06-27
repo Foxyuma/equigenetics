@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Trophy, AlertTriangle } from 'lucide-react';
@@ -12,17 +12,12 @@ const sexLabels = { male: "♂ Mâle", female: "♀ Femelle" };
 export default function HorseCard({ horse }) {
   const hasDisease = horse.health_genes?.some(h => h.status === "affected");
   const isCarrier = horse.health_genes?.some(h => h.status === "carrier");
-  const [imgError, setImgError] = useState(false);
 
   return (
     <Link to={`/HorseDetail?id=${horse.id}`}>
       <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-amber-50 to-stone-100 flex items-center justify-center">
-          {horse.image_url && !imgError ? (
-            <img src={horse.image_url} alt={horse.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={() => setImgError(true)} />
-          ) : (
-            <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} breed={horse.breed} age={horse.age} size={160} showGenotype={false} />
-          )}
+        <div className="relative h-48 overflow-hidden flex items-center justify-center">
+          <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} breed={horse.breed} age={horse.age} fill showGenotype={false} />
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className={`${sexColors[horse.sex]} border-0 text-xs font-medium`}>
               {sexLabels[horse.sex]}

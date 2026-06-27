@@ -182,6 +182,7 @@ export default function AppLayout() {
 
             {/* Mobile bell + toggle */}
             <div className="flex md:hidden items-center gap-1">
+              <GameClockDisplay variant="compact" />
               <Link to="/Messages" className="relative p-2 rounded-lg text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors">
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (

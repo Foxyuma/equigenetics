@@ -40,56 +40,141 @@ function getCoatBonus(coatColor) {
   return 0;
 }
 
-export function getModeleAlluresScore(horse) {
-  if (!horse) return 0;
+// Score a morphological criterion /10 from a positive/negative trait pair
+function scoreMorphoCriterion(morphology, positiveTrait, negativeTrait) {
+  let score = 5.5;
+  if (morphology.includes(positiveTrait)) score += 2.5;
+  else if (morphology.includes(negativeTrait)) score -= 2.5;
+  score += (Math.random() - 0.5) * 1.5;
+  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
+}
+
+// Score a stat-based criterion /10
+function scoreStatCriterion(value) {
+  const v = value ?? 30;
+  let score = 3 + (v / 100) * 6; // 3→9 range
+  score += (Math.random() - 0.5) * 1.5;
+  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
+}
+
+function clampScore(v) {
+  return Math.max(0, Math.min(100, Math.round(v * 10) / 10));
+}
+
+// Grille FCT — note adulte (A), 10 critères /10 = /100, poids 60%
+function getAdultGridScore(horse) {
   const morphology = horse.morphology || [];
   const potential = horse.genetic_potential || {};
   const stats = horse.stats || {};
 
-  // 1. Model (40%) — morphology traits
-  let modelScore = 50;
-  morphology.forEach((trait) => {
-    if (POSITIVE_MORPHO.includes(trait)) modelScore += 8;
-    else if (NEGATIVE_MORPHO.includes(trait)) modelScore -= 6;
-  });
-  modelScore = Math.max(0, Math.min(100, modelScore));
+  const criteria = {
+    'Tête': scoreStatCriterion(stats.temperament),
+    'Encolure': scoreMorphoCriterion(morphology, 'encolure_arquee', 'encolure_ewe'),
+    'Membres antérieurs': scoreMorphoCriterion(morphology, 'epaules_inclinees', 'epaules_droites'),
+    'Corps': scoreMorphoCriterion(morphology, 'dos_court', 'dos_long'),
+    'Rein': scoreMorphoCriterion(morphology, 'poitrine_large', 'poitrine_etroite'),
+    'Membres postérieurs': scoreMorphoCriterion(morphology, 'jarrets_puissants', 'jarrets_droits'),
+    'Aplombs': scoreMorphoCriterion(morphology, 'aplombs_parfaits', 'aplombs_defectueux'),
+    'Action (Pas)': scoreStatCriterion(potential.dressage || stats.dressage),
+    'Épaisseur': scoreStatCriterion(stats.strength),
+    'Impression générale & Type': getImpressionScore(horse),
+  };
 
-  // 2. Allures (30%) — genetic potential (inherent quality, not training)
-  const dressagePot = potential.dressage || stats.dressage || 30;
-  const temperamentPot = potential.temperament || stats.temperament || 30;
-  const alluresScore = dressagePot * 0.5 + temperamentPot * 0.5;
+  const total = Object.values(criteria).reduce((sum, v) => sum + v, 0); // /100
+  return { criteria, total: clampScore(total) };
+}
 
-  // 3. Breed type/conformity (20%)
-  let conformityScore = 65;
+function getImpressionScore(horse) {
   const profile = getBreedProfile(horse.breed);
+  let score = 6.5;
   if (profile?.forbiddenCoats) {
     const coatLower = (horse.coat_color || '').toLowerCase();
     if (profile.forbiddenCoats.some((fc) => coatLower.includes(fc.toLowerCase()))) {
-      conformityScore -= 15;
+      score -= 2;
     }
   }
-  conformityScore = Math.max(0, Math.min(100, conformityScore));
+  score += getCoatBonus(horse.coat_color) * 0.2;
+  score += (Math.random() - 0.5) * 1.5;
+  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
+}
 
-  // 4. Presentation (10%) — coat rarity
-  const presentationScore = Math.min(100, 50 + getCoatBonus(horse.coat_color));
+// Grille poulain (B), 4 critères /10 = /40 → /100, poids 40%
+function getFoalGridScore(horse) {
+  const morphology = horse.morphology || [];
+  const potential = horse.genetic_potential || {};
 
-  let score =
-    modelScore * 0.40 +
-    alluresScore * 0.30 +
-    conformityScore * 0.20 +
-    presentationScore * 0.10;
+  const positives = morphology.filter((t) => POSITIVE_MORPHO.includes(t)).length;
+  const negatives = morphology.filter((t) => NEGATIVE_MORPHO.includes(t)).length;
 
-  // Penalties
+  const criteria = {
+    'Type dans la race': getImpressionScore(horse),
+    'Harmonie générale': clampCriterion(5.5 + positives * 0.7 - negatives * 0.7),
+    'Développement': scoreStatCriterion(
+      Object.values(potential).length
+        ? Object.values(potential).reduce((a, b) => a + b, 0) / Object.values(potential).length
+        : 50
+    ),
+    'Aplombs': scoreMorphoCriterion(morphology, 'aplombs_parfaits', 'aplombs_defectueux'),
+  };
+
+  const total = (Object.values(criteria).reduce((sum, v) => sum + v, 0) / 40) * 100; // /100
+  return { criteria, total: clampScore(total) };
+}
+
+function clampCriterion(v) {
+  const score = v + (Math.random() - 0.5) * 1.5;
+  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
+}
+
+// Note de présentation (C) /20
+function getPresentationScore(horse) {
+  const energy = horse.energy ?? 100;
+  const cheval = Math.min(10, 5 + (energy / 100) * 4 + getCoatBonus(horse.coat_color) * 0.2);
+  const presentateur = 6 + Math.random() * 2;
+  const total = Math.min(20, cheval + presentateur);
+  return { cheval: Math.round(cheval * 10) / 10, presentateur: Math.round(presentateur * 10) / 10, total: Math.round(total * 10) / 10 };
+}
+
+export function getModeleAlluresBreakdown(horse) {
+  if (!horse) return null;
+  const adult = getAdultGridScore(horse);
+  const foal = getFoalGridScore(horse);
+  const presentation = getPresentationScore(horse);
+
+  const adultContribution = adult.total * 0.60;
+  const foalContribution = foal.total * 0.40;
+  const presentationBonus = (presentation.total / 20) * 5; // max +5
+
+  let total = adultContribution + foalContribution + presentationBonus;
+
   const affected = horse.health_genes?.filter((h) => h.status === 'affected') || [];
-  score -= affected.length * 5;
+  total -= affected.length * 4;
   if (horse.doping_risk_until && new Date(horse.doping_risk_until) > new Date()) {
-    score -= 3;
+    total -= 3;
   }
 
-  // Small random variance (judged competition)
-  score += (Math.random() - 0.5) * 6;
+  return {
+    adult,
+    foal,
+    presentation,
+    adultContribution: clampScore(adultContribution),
+    foalContribution: clampScore(foalContribution),
+    presentationBonus: Math.round(presentationBonus * 10) / 10,
+    total: clampScore(total),
+    qualification: getQualification(total),
+  };
+}
 
-  return Math.max(0, Math.min(100, Math.round(score * 10) / 10));
+export function getModeleAlluresScore(horse) {
+  const breakdown = getModeleAlluresBreakdown(horse);
+  return breakdown ? breakdown.total : 0;
+}
+
+export function getQualification(score) {
+  if (score >= 70) return { label: 'Qualifié Excellent', badgeClass: 'bg-emerald-50 text-emerald-700' };
+  if (score >= 60) return { label: 'Qualifié Bon', badgeClass: 'bg-blue-50 text-blue-700' };
+  if (score >= 50) return { label: 'Qualifié', badgeClass: 'bg-amber-50 text-amber-700' };
+  return { label: 'Ajourné', badgeClass: 'bg-red-50 text-red-700' };
 }
 
 export function isEligibleForModeleAllures(horse) {

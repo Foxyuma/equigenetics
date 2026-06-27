@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Trophy, ShieldAlert, Info, Calendar } from 'lucide-react';
+import GridBreakdownDialog from '@/components/modeleallures/GridBreakdownDialog';
+import { Sparkles, Trophy, ShieldAlert, Info, Calendar, ClipboardList } from 'lucide-react';
 import {
   getModeleAlluresScore,
+  getQualification,
   isEligibleForModeleAllures,
   getAgeClassLabel,
   AGE_CLASSES,
@@ -26,6 +28,7 @@ function rankMedal(rank) {
 
 export default function ModeleAllures() {
   const [tab, setTab] = useState('inscriptions');
+  const [breakdownHorse, setBreakdownHorse] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -272,17 +275,33 @@ export default function ModeleAllures() {
                                         <Badge variant="outline" className="text-xs border-0 bg-amber-50 text-amber-700">
                                           ~{estScore.toFixed(1)} pts
                                         </Badge>
+                                        <Badge
+                                          variant="outline"
+                                          className={`text-xs border-0 ${getQualification(estScore).badgeClass}`}
+                                        >
+                                          {getQualification(estScore).label}
+                                        </Badge>
                                       </div>
                                     </div>
                                   </div>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => registerMutation.mutate(horse)}
-                                    disabled={alreadyReg || registerMutation.isPending}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white flex-shrink-0"
-                                  >
-                                    {alreadyReg ? '✓ Inscrit' : 'Inscrire'}
-                                  </Button>
+                                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setBreakdownHorse(horse)}
+                                      className="border-stone-200 text-stone-600 hover:bg-stone-50"
+                                    >
+                                      <ClipboardList className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => registerMutation.mutate(horse)}
+                                      disabled={alreadyReg || registerMutation.isPending}
+                                      className="bg-amber-600 hover:bg-amber-700 text-white"
+                                    >
+                                      {alreadyReg ? '✓ Inscrit' : 'Inscrire'}
+                                    </Button>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -376,6 +395,9 @@ export default function ModeleAllures() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialogue grille FCT */}
+      <GridBreakdownDialog horse={breakdownHorse} onClose={() => setBreakdownHorse(null)} />
     </div>
   );
 }

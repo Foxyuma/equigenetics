@@ -184,7 +184,7 @@ export default function Competitions() {
       queryClient.invalidateQueries({ queryKey: ['pending-competitions', currentUser?.email] });
       setSelectedHorseId('');
       setSelectedDiscipline('');
-      toast.success('Inscription confirmée ! Résultats demain à minuit 🌙');
+      toast.success('Inscription confirmée ! Résultats demain à 3h30 UTC 🌙');
     }
   });
 
@@ -327,7 +327,7 @@ export default function Competitions() {
           {pendingCompetitions.length > 0 && (
             <Card className="border-0 bg-blue-50 border border-blue-200">
               <CardContent className="p-4">
-                <p className="text-sm font-semibold text-blue-800 mb-2">🌙 Inscriptions en attente (résultats à minuit)</p>
+                <p className="text-sm font-semibold text-blue-800 mb-2">🌙 Inscriptions en attente (résultats à 3h30 UTC)</p>
                 <div className="space-y-2">
                   {pendingCompetitions.map(c => (
                     <div key={c.id} className="flex items-center justify-between text-sm text-blue-700 bg-white/60 rounded-lg p-2">
@@ -353,7 +353,7 @@ export default function Competitions() {
               ) : (
                 <Trophy className="w-5 h-5 mr-2" />
               )}
-              Inscrire pour demain à minuit
+              Inscrire pour demain à 3h30 UTC
             </Button>
           </div>
         </TabsContent>

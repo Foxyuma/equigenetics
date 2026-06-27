@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useEffect } from 'react';
+import { runDailyTick } from '@/lib/dailyTick';
 
-const DAYS_PER_MONTH = 14;
+const DAYS_PER_MONTH = 14; // 14 jours = 2 semaines réelles = 1 mois de jeu
 const MONTHS_PER_YEAR = 8; // 8 mois par an → 2 cycles de 4 saisons
-const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
 
 function getSeasonForMonth(month) {
-  // Cycle de 4 mois (2 mois par saison) → 2 cycles complets en 8 mois
   const m = ((month - 1) % 4) + 1;
   if (m <= 1) return 'spring';
   if (m <= 2) return 'summer';
@@ -15,13 +14,29 @@ function getSeasonForMonth(month) {
   return 'winter';
 }
 
-// Un jour de jeu = 1h réelle (pour que le temps avance perceptiblement)
-const TICK_INTERVAL_MS = 60 * 60 * 1000; // 1h
+// Le jour change à 3h30 UTC
+function getTodayTickThreshold() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 3, 30, 0));
+}
 
-function needsTick(lastTickReal) {
-  if (!lastTickReal) return true;
+// Nombre de jours à avancer (rattrapage si l'utilisateur était hors ligne)
+function getDaysToAdvance(lastTickReal) {
+  const threshold = getTodayTickThreshold();
+  if (!lastTickReal) return 1;
   const last = new Date(lastTickReal);
-  return (Date.now() - last.getTime()) >= TICK_INTERVAL_MS;
+  if (last.getTime() >= threshold.getTime()) return 0; // déjà tické aujourd'hui
+
+  // Seuil du jour du dernier tick
+  const lastThreshold = new Date(
+    Date.UTC(last.getUTCFullYear(), last.getUTCMonth(), last.getUTCDate(), 3, 30, 0)
+  );
+  // Si le dernier tick était avant 3h30 ce jour-là, il appartenait au jour précédent
+  if (last.getTime() < lastThreshold.getTime()) {
+    lastThreshold.setUTCDate(lastThreshold.getUTCDate() - 1);
+  }
+  const diffMs = threshold.getTime() - lastThreshold.getTime();
+  return Math.max(1, Math.round(diffMs / (24 * 60 * 60 * 1000)));
 }
 
 export function useGameClock() {
@@ -33,22 +48,31 @@ export function useGameClock() {
     staleTime: 30_000,
   });
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me-clock'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const clock = clocks[0];
 
   const { mutate: advanceDay } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ daysToAdvance, userEmail }) => {
       const current = clock || { day: 1, month: 1, year: 1, total_days: 0 };
-      let newDay = (current.day || 1) + 1;
+      let newDay = current.day || 1;
       let newMonth = current.month || 1;
       let newYear = current.year || 1;
-      let totalDays = (current.total_days || 0) + 1;
+      let totalDays = current.total_days || 0;
 
-      if (newDay > DAYS_PER_MONTH) {
-        newDay = 1;
-        newMonth += 1;
-        if (newMonth > MONTHS_PER_YEAR) {
-          newMonth = 1;
-          newYear += 1;
+      for (let i = 0; i < daysToAdvance; i++) {
+        newDay += 1;
+        totalDays += 1;
+        if (newDay > DAYS_PER_MONTH) {
+          newDay = 1;
+          newMonth += 1;
+          if (newMonth > MONTHS_PER_YEAR) {
+            newMonth = 1;
+            newYear += 1;
+          }
         }
       }
 
@@ -68,24 +92,35 @@ export function useGameClock() {
         return base44.entities.GameClock.create(payload);
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['game-clock'] }),
+    onSuccess: async (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['game-clock'] });
+      // Exécuter le tick quotidien : résoudre les compétitions, faire naître les poulains
+      if (variables?.userEmail) {
+        await runDailyTick(variables.userEmail);
+        queryClient.invalidateQueries();
+      }
+    },
   });
 
-  // Vérifie au chargement et initialise si besoin
+  // Vérifie au chargement et initialise / tick si besoin
   useEffect(() => {
     if (clocks === undefined) return;
     if (!clock) {
       base44.entities.GameClock.create({
-        day: 1, month: 1, year: 1, total_days: 0,
-        last_tick_real: new Date(Date.now() - TICK_INTERVAL_MS - 1).toISOString(), // force tick immédiat
+        day: 1,
+        month: 1,
+        year: 1,
+        total_days: 0,
+        last_tick_real: new Date(0).toISOString(),
         season: 'spring',
       }).then(() => queryClient.invalidateQueries({ queryKey: ['game-clock'] }));
       return;
     }
-    if (needsTick(clock.last_tick_real)) {
-      advanceDay();
+    const daysToAdvance = getDaysToAdvance(clock.last_tick_real);
+    if (daysToAdvance > 0) {
+      advanceDay({ daysToAdvance, userEmail: currentUser?.email });
     }
-  }, [clock?.id, clocks.length]);
+  }, [clock?.id, clocks.length, currentUser?.email]);
 
   // Re-vérifier toutes les 10 minutes
   useEffect(() => {

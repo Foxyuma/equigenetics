@@ -28,12 +28,12 @@ import { getBreedingImpact } from '../breeding/InspectionScoring';
 import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
-import { addWeeks, format, isPast, parseISO, differenceInWeeks } from 'date-fns';
+import { addDays, format, isPast, parseISO, differenceInWeeks } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-// 3 semaines réelles = 1 saison = ~11 mois jeu
-// La gestation dure 11 "saisons jeu" = 11 × 3 semaines réelles = 33 semaines réelles
-const GESTATION_WEEKS_REAL = 33;
+// 1 mois de jeu = 14 jours réels (2 semaines)
+// Gestation = 11 mois + 4 jours = 11 × 14 + 4 = 158 jours réels
+const GESTATION_DAYS = 158;
 
 export default function ReproductionPanel({ mare }) {
   const [selectedStallion, setSelectedStallion] = useState(null);
@@ -120,7 +120,7 @@ export default function ReproductionPanel({ mare }) {
         });
       }
       const breedingDate = getBreedingDate();
-      const dueDate = addWeeks(breedingDate, GESTATION_WEEKS_REAL);
+      const dueDate = addDays(breedingDate, GESTATION_DAYS);
       await base44.entities.BreedingRecord.create({
         father_id: selectedStallion.is_own ? selectedStallion.id : null,
         mother_id: mare.id,
@@ -143,7 +143,7 @@ export default function ReproductionPanel({ mare }) {
       queryClient.invalidateQueries({ queryKey: ['breeding-pending', mare.id] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
       const breedingDate = getBreedingDate();
-      const dueDate = addWeeks(breedingDate, GESTATION_WEEKS_REAL);
+      const dueDate = addDays(breedingDate, GESTATION_DAYS);
       const label = breedingDateChoice === 'immediate' ? 'immédiatement' : 'dans 30 jours';
       toast.success(`Saillie confirmée ${label} ! Naissance prévue le ${format(dueDate, 'd MMMM yyyy', { locale: fr })} 🐴`);
       setFoalPreview(null);
@@ -510,7 +510,7 @@ export default function ReproductionPanel({ mare }) {
                 <div className="text-left">
                   <p className="font-semibold text-stone-800">Dans 30 jours</p>
                   <p className="text-xs text-stone-400">
-                    Naissance le {format(addWeeks(new Date(new Date().setDate(new Date().getDate() + 30)), GESTATION_WEEKS_REAL), 'd MMM yyyy', { locale: fr })}
+                    Naissance le {format(addDays(new Date(new Date().setDate(new Date().getDate() + 30)), GESTATION_DAYS), 'd MMM yyyy', { locale: fr })}
                   </p>
                 </div>
               </button>

@@ -253,12 +253,16 @@ export function buildHorseImagePrompt({ breed, coat_color, sex, age = null, isFo
 
   // Gestion des races à couleur imposée
   let colorDesc = coat_color || 'bay';
+  let forcedColor = false;
   if (ALWAYS_BLACK_BREEDS.includes(breed)) {
     colorDesc = 'solid jet black, no other color';
+    forcedColor = true;
   } else if (ALWAYS_GREY_BREEDS.includes(breed)) {
     colorDesc = 'light grey to white (Camargue grey)';
+    forcedColor = true;
   } else if (ALWAYS_CHESTNUT_FLAXEN_BREEDS.includes(breed)) {
     colorDesc = 'chestnut with a flaxen cream-white mane and tail';
+    forcedColor = true;
   }
 
   // Gestion des croisements
@@ -282,7 +286,8 @@ export function buildHorseImagePrompt({ breed, coat_color, sex, age = null, isFo
       ? (sex === 'male' ? 'young male horse' : 'young female horse')
       : (sex === 'male' ? 'stallion' : 'mare');
 
-  const markingsDesc = markings
+  // Si la race impose une couleur, on ignore les marquages (tobiano, roan, etc.) pour éviter les conflits
+  const markingsDesc = (markings && !forcedColor)
     ? `The horse has these exact coat markings which must be carefully preserved: ${markings}.`
     : '';
 

@@ -19,7 +19,8 @@
         "vaulting",
         "driving",
         "trail",
-        "western_pleasure"
+        "western_pleasure",
+        "modele_allures"
       ]
     },
     "level": {
@@ -71,6 +72,18 @@
     "disqualification_reason": {
       "type": "string",
       "description": "Motif de la disqualification"
+    },
+    "breed": {
+      "type": "string",
+      "description": "Race du concours (pour les mod\u00e8les et allures)"
+    },
+    "age_class": {
+      "type": "number",
+      "description": "Classe d'\u00e2ge (0-4) pour les mod\u00e8les et allures"
+    },
+    "game_year": {
+      "type": "number",
+      "description": "Ann\u00e9e de jeu du concours (pour limiter \u00e0 1 par an)"
     }
   },
   "required": [

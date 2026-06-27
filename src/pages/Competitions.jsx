@@ -56,13 +56,19 @@ export default function Competitions() {
 
   const { data: allCompetitions = [] } = useQuery({
     queryKey: ['all-competitions', currentUser?.email],
-    queryFn: () => base44.entities.Competition.filter({ created_by: currentUser.email, status: 'completed' }, '-created_date', 50),
+    queryFn: async () => {
+      const all = await base44.entities.Competition.filter({ created_by: currentUser.email, status: 'completed' }, '-created_date', 50);
+      return all.filter(c => c.discipline !== 'modele_allures');
+    },
     enabled: !!currentUser?.email,
   });
 
   const { data: pendingCompetitions = [] } = useQuery({
     queryKey: ['pending-competitions', currentUser?.email],
-    queryFn: () => base44.entities.Competition.filter({ created_by: currentUser.email, status: 'registered' }, '-created_date', 20),
+    queryFn: async () => {
+      const all = await base44.entities.Competition.filter({ created_by: currentUser.email, status: 'registered' }, '-created_date', 20);
+      return all.filter(c => c.discipline !== 'modele_allures');
+    },
     enabled: !!currentUser?.email,
   });
 

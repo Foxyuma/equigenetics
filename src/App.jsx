@@ -27,6 +27,7 @@ import Staff from './pages/Staff';
 import Profile from './pages/Profile';
 import Transactions from './pages/Transactions';
 import StallionMarket from './pages/StallionMarket';
+import ModeleAllures from './pages/ModeleAllures';
 import BuyCredits from './pages/BuyCredits';
 import GeneticTest from './pages/GeneticTest';
 import PublicHorseProfile from './pages/PublicHorseProfile';
@@ -81,6 +82,7 @@ const AuthenticatedApp = () => {
         <Route path="/Profile" element={<Profile />} />
         <Route path="/Transactions" element={<Transactions />} />
         <Route path="/StallionMarket" element={<StallionMarket />} />
+        <Route path="/ModeleAllures" element={<ModeleAllures />} />
         <Route path="/BuyCredits" element={<BuyCredits />} />
         <Route path="/GeneticTest" element={<GeneticTest />} />
         <Route path="/PublicHorseProfile" element={<PublicHorseProfile />} />

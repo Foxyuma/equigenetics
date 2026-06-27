@@ -163,12 +163,12 @@ export default function HorseDetail() {
               ) : generatingImage ? (
                 <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
                   <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin" />
-                  <p className="text-sm text-stone-400">Génération du dessin...</p>
+                  <p className="text-sm text-stone-400">Génération de l'image...</p>
                 </div>
               ) : (
                 <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
-                  <span className="text-6xl opacity-30">🎨</span>
-                  <p className="text-sm text-stone-400">Dessin en attente</p>
+                  <span className="text-6xl opacity-30">🐴</span>
+                  <p className="text-sm text-stone-400">Image en attente</p>
                 </div>
               )}
               <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">

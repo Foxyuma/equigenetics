@@ -27,7 +27,7 @@ export default function Inventory() {
   const useMutation = useMutation({
     mutationFn: async ({ item, horseId }) => {
       const horse = horses.find(h => h.id === horseId);
-      if (!horse) throw new Error("Cheval introuvable");
+      if (!horse) throw new Error("Horse not found");
 
       const effect = item.effect || {};
       const updates = {};
@@ -80,7 +80,7 @@ export default function Inventory() {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['item-usage'] });
-      toast.success(`${item.item_name} utilisé !`);
+      toast.success(`${item.item_name} used!`);
       setShowUseDialog(false);
       setSelectedItem(null);
       setSelectedHorseId('');
@@ -103,8 +103,8 @@ export default function Inventory() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Inventaire</h1>
-        <p className="text-stone-500 mt-1">Gérez vos consommables</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Inventory</h1>
+        <p className="text-stone-500 mt-1">Manage your consumables</p>
       </div>
 
       {isLoading ? (
@@ -114,8 +114,8 @@ export default function Inventory() {
       ) : availableItems.length === 0 ? (
         <div className="text-center py-20">
           <Package className="w-12 h-12 mx-auto text-stone-300 mb-3" />
-          <h3 className="text-lg font-semibold text-stone-600">Inventaire vide</h3>
-          <p className="text-stone-400 mt-1">Achetez des objets dans la boutique !</p>
+          <h3 className="text-lg font-semibold text-stone-600">Empty inventory</h3>
+          <p className="text-stone-400 mt-1">Buy items from the shop!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -136,12 +136,12 @@ export default function Inventory() {
       <Dialog open={showUseDialog} onOpenChange={setShowUseDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Utiliser {selectedItem?.item_name}</DialogTitle>
+            <DialogTitle>Use {selectedItem?.item_name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <p className="text-sm text-stone-500">Sur quel cheval souhaitez-vous utiliser cet objet ?</p>
+            <p className="text-sm text-stone-500">Which horse would you like to use this item on?</p>
             <Select value={selectedHorseId} onValueChange={setSelectedHorseId}>
-              <SelectTrigger><SelectValue placeholder="Choisir un cheval..." /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Choose a horse..." /></SelectTrigger>
               <SelectContent>
                 {horses.map(h => (
                   <SelectItem key={h.id} value={h.id}>
@@ -155,7 +155,7 @@ export default function Inventory() {
               disabled={!selectedHorseId || useMutation.isPending}
               className="w-full bg-emerald-600 hover:bg-emerald-700"
             >
-              <Zap className="w-4 h-4 mr-2" />Confirmer
+              <Zap className="w-4 h-4 mr-2" />Confirm
             </Button>
           </div>
         </DialogContent>

@@ -12,16 +12,16 @@ import { ArrowUpCircle, ArrowDownCircle, History, RefreshCw, Sparkles, Coins } f
 import { toast } from 'sonner';
 
 const REASON_LABELS = {
-  competition: '🏆 Compétition',
-  breeding: '🧬 Élevage',
-  purchase: '🛒 Achat',
-  sale: '💰 Vente',
+  competition: '🏆 Competition',
+  breeding: '🧬 Breeding',
+  purchase: '🛒 Purchase',
+  sale: '💰 Sale',
   gain: '🎁 Gain',
-  salary: '👔 Salaire personnel',
-  shop: '🏪 Boutique',
-  bet: '🎲 Pari',
-  dépense: '📦 Dépense',
-  trade: '🔄 Échange',
+  salary: '👔 Staff salary',
+  shop: '🏪 Shop',
+  bet: '🎲 Bet',
+  dépense: '📦 Expense',
+  trade: '🔄 Trade',
 };
 
 function reasonLabel(reason) {
@@ -46,18 +46,18 @@ function TransactionRow({ tx }) {
         <div>
           <p className="text-sm font-medium text-stone-700">{reasonLabel(tx.reason)}</p>
           <p className="text-xs text-stone-400">
-            {new Date(tx.created_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            {new Date(tx.created_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
       </div>
       <div className="text-right">
         <p className={`font-bold text-sm ${isGain ? 'text-emerald-600' : 'text-red-500'}`}>
-          {isGain ? '+' : ''}{tx.amount.toLocaleString('fr-FR')}
+          {isGain ? '+' : ''}{tx.amount.toLocaleString('en-GB')}
           <span className="ml-1 text-xs">{isGenesis ? '₲' : '✦'}</span>
         </p>
         {tx.balance_after != null && (
           <p className="text-xs text-stone-400">
-            Solde : {tx.balance_after.toLocaleString('fr-FR')} {isGenesis ? '₲' : '✦'}
+            Balance: {tx.balance_after.toLocaleString('en-GB')} {isGenesis ? '₲' : '✦'}
           </p>
         )}
       </div>
@@ -93,7 +93,7 @@ export default function Transactions() {
 
   const handleConvert = async (rate) => {
     if ((user?.credits_balance ?? 0) < rate.credits) {
-      toast.error('Crédits insuffisants');
+      toast.error('Insufficient credits');
       return;
     }
     setConverting(true);
@@ -112,7 +112,7 @@ export default function Transactions() {
     ]);
     queryClient.invalidateQueries({ queryKey: ['me'] });
     queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    toast.success(`+${rate.genesis.toLocaleString('fr-FR')} ₲ ajoutés !`);
+    toast.success(`+${rate.genesis.toLocaleString('en-GB')} ₲ added!`);
     setConverting(false);
   };
 
@@ -124,7 +124,7 @@ export default function Transactions() {
   return (
     <div className="space-y-6">
       <Link to="/Stable" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors">
-        <ArrowLeft className="w-4 h-4" />Retour
+        <ArrowLeft className="w-4 h-4" />Back
       </Link>
 
       <div className="flex items-center gap-3">
@@ -132,8 +132,8 @@ export default function Transactions() {
           <History className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Historique des transactions</h1>
-          <p className="text-stone-500 text-sm">Consultez tous vos gains et dépenses passés</p>
+          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Transaction history</h1>
+          <p className="text-stone-500 text-sm">View all your past earnings and expenses</p>
         </div>
       </div>
 
@@ -141,13 +141,13 @@ export default function Transactions() {
       <div className="grid grid-cols-2 gap-3">
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="p-4">
-            <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Balance Genesis</p>
-            <p className="text-3xl font-extrabold text-amber-800">{(user?.genesis_balance ?? 0).toLocaleString('fr-FR')} <span className="text-lg">₲</span></p>
+            <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Genesis Balance</p>
+            <p className="text-3xl font-extrabold text-amber-800">{(user?.genesis_balance ?? 0).toLocaleString('en-GB')} <span className="text-lg">₲</span></p>
           </CardContent>
         </Card>
         <Card className="border-violet-200 bg-violet-50">
           <CardContent className="p-4">
-            <p className="text-xs text-violet-600 font-semibold uppercase tracking-wide mb-1">Balance Crédits</p>
+            <p className="text-xs text-violet-600 font-semibold uppercase tracking-wide mb-1">Credits Balance</p>
             <p className="text-3xl font-extrabold text-violet-800">{user?.credits_balance ?? 0} <span className="text-lg">✦</span></p>
           </CardContent>
         </Card>
@@ -158,7 +158,7 @@ export default function Transactions() {
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <RefreshCw className="w-4 h-4 text-amber-600" />
-            Convertir Crédits → Genesis
+            Convert Credits → Genesis
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -172,7 +172,7 @@ export default function Transactions() {
               >
                 <span className="text-violet-600 font-bold">-{rate.credits} ✦</span>
                 <RefreshCw className="w-3.5 h-3.5 text-stone-400" />
-                <span className="text-amber-700 font-bold">+{rate.genesis.toLocaleString('fr-FR')} ₲</span>
+                <span className="text-amber-700 font-bold">+{rate.genesis.toLocaleString('en-GB')} ₲</span>
               </button>
             ))}
           </div>
@@ -182,21 +182,21 @@ export default function Transactions() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Genesis gagnés', value: totalGenesis, symbol: '₲', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
-          { label: 'Genesis dépensés', value: spentGenesis, symbol: '₲', color: 'text-red-500', bg: 'bg-red-50 border-red-200' },
-          { label: 'Crédits gagnés', value: totalCredits, symbol: '✦', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200' },
-          { label: 'Crédits dépensés', value: spentCredits, symbol: '✦', color: 'text-red-500', bg: 'bg-red-50 border-red-200' },
+          { label: 'Genesis earned', value: totalGenesis, symbol: '₲', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
+          { label: 'Genesis spent', value: spentGenesis, symbol: '₲', color: 'text-red-500', bg: 'bg-red-50 border-red-200' },
+          { label: 'Credits earned', value: totalCredits, symbol: '✦', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200' },
+          { label: 'Credits spent', value: spentCredits, symbol: '✦', color: 'text-red-500', bg: 'bg-red-50 border-red-200' },
         ].map(c => (
           <div key={c.label} className={`rounded-xl border p-4 ${c.bg}`}>
             <p className="text-xs text-stone-500 mb-1">{c.label}</p>
-            <p className={`text-xl font-bold ${c.color}`}>{c.value.toLocaleString('fr-FR')} <span className="text-sm">{c.symbol}</span></p>
+            <p className={`text-xl font-bold ${c.color}`}>{c.value.toLocaleString('en-GB')} <span className="text-sm">{c.symbol}</span></p>
           </div>
         ))}
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="bg-stone-100/80">
-          <TabsTrigger value="all">Toutes ({transactions.length})</TabsTrigger>
+          <TabsTrigger value="all">All ({transactions.length})</TabsTrigger>
           <TabsTrigger value="genesis">₲ Genesis</TabsTrigger>
           <TabsTrigger value="credits">✦ Crédits</TabsTrigger>
         </TabsList>
@@ -209,7 +209,7 @@ export default function Transactions() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-stone-400">
               <History className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p>Aucune transaction pour le moment</p>
+              <p>No transactions yet</p>
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm px-2 py-1">

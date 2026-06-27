@@ -86,16 +86,16 @@ const NPC_STALLION_NAMES = {
 // Tiers de qualité pour les étalons NPC
 const QUALITY_TIERS = {
   medium: {
-    label: 'Moyen',
+    label: 'Medium',
     statBoostRange: [0, 8],
     approvalStatus: 'approved_for_breeding',
     badgeClass: 'bg-blue-100 text-blue-700',
-    badgeLabel: '✅ Approuvé',
+    badgeLabel: '✅ Approved',
     diseaseProb: 0.4,
     ageRange: [5, 15],
   },
   good: {
-    label: 'Bon',
+    label: 'Good',
     statBoostRange: [10, 20],
     approvalStatus: 'approved_for_sport_breeding',
     badgeClass: 'bg-green-100 text-green-700',
@@ -104,11 +104,11 @@ const QUALITY_TIERS = {
     ageRange: [6, 14],
   },
   excellent: {
-    label: 'Très bon',
+    label: 'Very Good',
     statBoostRange: [22, 35],
     approvalStatus: 'elite_approved',
     badgeClass: 'bg-yellow-100 text-yellow-700',
-    badgeLabel: '⭐ Élite',
+    badgeLabel: '⭐ Elite',
     diseaseProb: 0.12,
     ageRange: [5, 12],
   },
@@ -214,11 +214,11 @@ export default function StallionMarket() {
 
   // Le prix stocké est déjà dynamique ; on l'expose tel quel
   const APPROVAL_CONFIG = {
-    elite_approved: { label: '⭐ Élite', color: 'bg-yellow-100 text-yellow-700', multLabel: '×2.5' },
+    elite_approved: { label: '⭐ Elite', color: 'bg-yellow-100 text-yellow-700', multLabel: '×2.5' },
     approved_for_sport_breeding: { label: '🏆 Sport', color: 'bg-green-100 text-green-700', multLabel: '×1.8' },
-    approved_for_breeding: { label: '✅ Approuvé', color: 'bg-blue-100 text-blue-700', multLabel: '×1.4' },
-    not_evaluated: { label: '⏳ En attente', color: 'bg-stone-100 text-stone-500', multLabel: '×1.0' },
-    rejected: { label: '❌ Refusé', color: 'bg-red-100 text-red-700', multLabel: '×0.7' },
+    approved_for_breeding: { label: '✅ Approved', color: 'bg-blue-100 text-blue-700', multLabel: '×1.4' },
+    not_evaluated: { label: '⏳ Pending', color: 'bg-stone-100 text-stone-500', multLabel: '×1.0' },
+    rejected: { label: '❌ Rejected', color: 'bg-red-100 text-red-700', multLabel: '×0.7' },
   };
 
   const stallionsWithDynamicPrices = filteredStallions.map(s => ({
@@ -259,7 +259,7 @@ export default function StallionMarket() {
          currency: 'genesis',
          amount: -actualPrice,
          balance_after: balance - actualPrice,
-         reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
+         reason: `Breeding - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
        });
       await base44.entities.BreedingRecord.create({
         father_id: selectedStallion.id,
@@ -303,11 +303,11 @@ export default function StallionMarket() {
         <Info className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
         <span>Stallions are ranked by approval level — the breeding fee is <strong>multiplied</strong> by their status.</span>
         <div className="flex flex-wrap gap-1">
-          <Badge className="bg-yellow-100 text-yellow-700 border-0 text-[10px]">⭐ Élite : ×2.5</Badge>
+          <Badge className="bg-yellow-100 text-yellow-700 border-0 text-[10px]">⭐ Elite : ×2.5</Badge>
           <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">🏆 Sport : ×1.8</Badge>
-          <Badge className="bg-blue-100 text-blue-700 border-0 text-[10px]">✅ Approuvé : ×1.4</Badge>
-          <Badge className="bg-stone-100 text-stone-400 border-0 text-[10px]">⏳ En attente : ×1.0</Badge>
-          <Badge className="bg-red-100 text-red-700 border-0 text-[10px]">❌ Refusé : ×0.7</Badge>
+          <Badge className="bg-blue-100 text-blue-700 border-0 text-[10px]">✅ Approved : ×1.4</Badge>
+          <Badge className="bg-stone-100 text-stone-400 border-0 text-[10px]">⏳ Pending : ×1.0</Badge>
+          <Badge className="bg-red-100 text-red-700 border-0 text-[10px]">❌ Rejected : ×0.7</Badge>
         </div>
       </div>
 
@@ -357,9 +357,9 @@ export default function StallionMarket() {
                     </div>
                     <div className="text-right">
                       {s.dynamicPrice !== s.price && (
-                        <span className="text-xs text-stone-400 line-through block">{s.price.toLocaleString('fr-FR')} ₲</span>
+                        <span className="text-xs text-stone-400 line-through block">{s.price.toLocaleString('en-GB')} ₲</span>
                       )}
-                      <span className="text-amber-700 font-bold text-base">{s.dynamicPrice.toLocaleString('fr-FR')} ₲</span>
+                      <span className="text-amber-700 font-bold text-base">{s.dynamicPrice.toLocaleString('en-GB')} ₲</span>
                       {s.approvalConfig && s.approvalConfig.multLabel !== '×1.0' && (
                         <span className="text-[10px] text-amber-500 block">{s.approvalConfig.multLabel}</span>
                       )}
@@ -487,16 +487,16 @@ export default function StallionMarket() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-stone-200">
-                  <Input placeholder="Nom du poulain..." value={foalName} onChange={e => setFoalName(e.target.value)} className="flex-1" />
+                  <                   Input placeholder="Foal's name..." value={foalName} onChange={e => setFoalName(e.target.value)} className="flex-1" />
                   <Button
                    onClick={() => createFoalMutation.mutate()}
                    disabled={!foalName || createFoalMutation.isPending}
                    className="bg-stone-800 hover:bg-stone-900"
                   >
                    <Baby className="w-4 h-4 mr-2" />
-                   Confirmer — {selectedStallion.dynamicPrice?.toLocaleString('fr-FR') || selectedStallion.price?.toLocaleString('fr-FR')} ₲
+                   Confirm — {selectedStallion.dynamicPrice?.toLocaleString('en-GB') || selectedStallion.price?.toLocaleString('en-GB')} ₲
                   </Button>
-                  <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
+                  <Button variant="outline" onClick={simulateBreeding}>🎲 Re-roll</Button>
                 </div>
               </div>
             )}

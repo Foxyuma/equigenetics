@@ -75,7 +75,7 @@ export default function Profile() {
             {user?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || '?'}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-stone-800">{user?.full_name || 'Éleveur'}</h1>
+            <h1 className="text-2xl font-bold text-stone-800">{user?.full_name || 'Breeder'}</h1>
             <p className="text-stone-500 text-sm">{user?.email}</p>
             <Badge variant="outline" className="mt-1 text-xs capitalize">{user?.role || 'user'}</Badge>
           </div>
@@ -83,7 +83,7 @@ export default function Profile() {
 
       </div>
 
-      {/* Réputation d'élevage */}
+      {/* Breeding reputation */}
       <BreedingReputation reputation={user?.breeding_reputation ?? 0} affixes={user?.affixes ?? []} />
 
       {/* Gestion affixes */}
@@ -92,12 +92,12 @@ export default function Profile() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-amber-600" />
-              <h3 className="font-semibold text-stone-800">Affixes d'élevage</h3>
+              <h3 className="font-semibold text-stone-800">Breeding affixes</h3>
               <Badge variant="outline" className="text-xs">{currentAffixes.length} / {maxAffixes}</Badge>
             </div>
             {canAddAffixe && !showAffixeForm && (
               <Button size="sm" variant="outline" onClick={() => setShowAffixeForm(true)} className="text-amber-700 border-amber-300 hover:bg-amber-50">
-                <Plus className="w-3.5 h-3.5 mr-1" /> Ajouter
+                <Plus className="w-3.5 h-3.5 mr-1" /> Add
               </Button>
             )}
           </div>
@@ -107,16 +107,16 @@ export default function Profile() {
               {currentAffixes.map((a, i) => (
                 <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200">
                   <span className="text-sm font-semibold text-amber-800">{a.position === 'prefix' ? `${a.name} …` : `… ${a.name}`}</span>
-                  <span className="text-xs text-amber-500">{a.position === 'prefix' ? 'préfixe' : 'suffixe'}</span>
+                  <span className="text-xs text-amber-500">{a.position === 'prefix' ? 'prefix' : 'suffix'}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-stone-400 italic">Aucun affixe. Ajoutez-en un pour personnaliser les noms de vos poulains !</p>
+            <p className="text-sm text-stone-400 italic">No affixes. Add one to personalize your foals' names!</p>
           )}
 
           {!canAddAffixe && (
-            <p className="text-xs text-stone-400">Prochain affixe disponible au niveau {Math.ceil(tier.level / 5) * 5 + 1}</p>
+            <p className="text-xs text-stone-400">Next affix available at level {Math.ceil(tier.level / 5) * 5 + 1}</p>
           )}
 
           {showAffixeForm && (
@@ -124,23 +124,23 @@ export default function Profile() {
               <Input
                 value={newAffixeName}
                 onChange={e => setNewAffixeName(e.target.value)}
-                placeholder="Nom de l'affixe…"
+                placeholder="Affix name…"
                 maxLength={30}
                 className="bg-stone-50"
               />
               <div className="flex gap-2">
                 <button onClick={() => setNewAffixePos('prefix')} className={`flex-1 text-sm py-2 rounded-lg border-2 transition-all ${newAffixePos === 'prefix' ? 'border-amber-400 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 text-stone-500'}`}>
-                  {newAffixeName || 'Affixe'} … (préfixe)
+                  {newAffixeName || 'Affix'} … (prefix)
                 </button>
                 <button onClick={() => setNewAffixePos('suffix')} className={`flex-1 text-sm py-2 rounded-lg border-2 transition-all ${newAffixePos === 'suffix' ? 'border-amber-400 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 text-stone-500'}`}>
-                  … {newAffixeName || 'Affixe'} (suffixe)
+                  … {newAffixeName || 'Affix'} (suffix)
                 </button>
               </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => addAffixeMutation.mutate()} disabled={newAffixeName.trim().length < 2 || addAffixeMutation.isPending} className="bg-amber-600 hover:bg-amber-700">
-                  Enregistrer l'affixe
+                  Save affix
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setShowAffixeForm(false)}>Annuler</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowAffixeForm(false)}>Cancel</Button>
               </div>
             </div>
           )}
@@ -163,7 +163,7 @@ export default function Profile() {
             <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 text-xl font-bold">✦</div>
             <div>
               <p className="text-2xl font-bold text-violet-700">{credits}</p>
-              <p className="text-xs text-violet-600">Crédits premium</p>
+              <p className="text-xs text-violet-600">Premium credits</p>
             </div>
           </CardContent>
         </Card>
@@ -172,10 +172,10 @@ export default function Profile() {
       {/* Stats rapides */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Chevaux', value: horses.length, icon: Dna, color: 'text-amber-600 bg-amber-50' },
-          { label: 'Victoires', value: totalWins, icon: Trophy, color: 'text-yellow-600 bg-yellow-50' },
-          { label: 'Compétitions', value: competitions.length, icon: Star, color: 'text-indigo-600 bg-indigo-50' },
-          { label: 'Stats moy.', value: avgStats, icon: Zap, color: 'text-green-600 bg-green-50' },
+          { label: 'Horses', value: horses.length, icon: Dna, color: 'text-amber-600 bg-amber-50' },
+          { label: 'Wins', value: totalWins, icon: Trophy, color: 'text-yellow-600 bg-yellow-50' },
+          { label: 'Competitions', value: competitions.length, icon: Star, color: 'text-indigo-600 bg-indigo-50' },
+          { label: 'Avg stats', value: avgStats, icon: Zap, color: 'text-green-600 bg-green-50' },
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label} className="border-0 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
@@ -191,7 +191,7 @@ export default function Profile() {
         ))}
       </div>
 
-      {/* Infos élevage */}
+      {/* Breeding info */}
       {(topBreed || user?.created_date) && (
         <Card className="border-0 shadow-sm bg-amber-50/50">
           <CardContent className="p-4 flex items-center gap-3 flex-wrap">
@@ -200,12 +200,12 @@ export default function Profile() {
             </div>
             {topBreed && (
               <div>
-                <p className="text-sm font-semibold text-stone-700">Race favorite</p>
-                <p className="text-xs text-stone-500">{topBreed[0]} — {topBreed[1]} cheval{topBreed[1] > 1 ? 'x' : ''}</p>
+                <p className="text-sm font-semibold text-stone-700">Favorite breed</p>
+                <p className="text-xs text-stone-500">{topBreed[0]} — {topBreed[1]} horse{topBreed[1] > 1 ? 's' : ''}</p>
               </div>
             )}
             <div className="ml-auto text-xs text-stone-400">
-              Membre depuis {user?.created_date ? new Date(user.created_date).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '—'}
+              Member since {user?.created_date ? new Date(user.created_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : '—'}
             </div>
           </CardContent>
         </Card>
@@ -214,18 +214,18 @@ export default function Profile() {
       {/* Mes chevaux */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-stone-800">Mes chevaux</h2>
+          <h2 className="text-lg font-bold text-stone-800">My horses</h2>
           <Link to="/Stable">
-            <Button variant="outline" size="sm">Voir l'écurie</Button>
+            <Button variant="outline" size="sm">View stable</Button>
           </Link>
         </div>
 
         {horses.length === 0 ? (
           <Card className="border-dashed border-2 border-stone-200">
             <CardContent className="p-8 text-center">
-              <p className="text-stone-400 text-sm">Aucun cheval pour l'instant.</p>
+              <p className="text-stone-400 text-sm">No horses yet.</p>
               <Link to="/Stable">
-                <Button className="mt-3 bg-amber-600 hover:bg-amber-700">Créer mon premier cheval</Button>
+                <Button className="mt-3 bg-amber-600 hover:bg-amber-700">Create my first horse</Button>
               </Link>
             </CardContent>
           </Card>
@@ -246,7 +246,7 @@ export default function Profile() {
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-stone-800 truncate">{horse.name}</p>
-                          <p className="text-xs text-stone-500 truncate">{horse.breed} · {horse.sex === 'male' ? '♂' : '♀'} · {horse.age} ans</p>
+                          <p className="text-xs text-stone-500 truncate">{horse.breed} · {horse.sex === 'male' ? '♂' : '♀'} · {horse.age} yrs</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-stone-400">{horse.coat_color || '—'}</span>
                             {horse.competition_wins > 0 && (
@@ -258,7 +258,7 @@ export default function Profile() {
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-amber-600">{avg}</p>
-                          <p className="text-xs text-stone-400">moy.</p>
+                          <p className="text-xs text-stone-400">avg</p>
                         </div>
                       </div>
                     </CardContent>

@@ -10,11 +10,11 @@ import HireDialog from '../components/staff/HireDialog';
 import { ROLE_CONFIG, getStaffBonuses } from '@/lib/staffConfig';
 
 const BONUS_DISPLAY = [
-  { key: 'energy_recovery_bonus', icon: Zap, color: 'text-amber-500', label: 'Récupération énergie', suffix: '' },
-  { key: 'illness_risk_reduction', icon: Shield, color: 'text-blue-500', label: 'Réduction maladies', suffix: '%' },
-  { key: 'training_success_bonus', icon: TrendingUp, color: 'text-purple-500', label: 'Bonus entraînement', suffix: '%' },
-  { key: 'breeding_success_bonus', icon: Heart, color: 'text-pink-500', label: 'Bonus élevage', suffix: '%' },
-  { key: 'competition_score_bonus', icon: Trophy, color: 'text-emerald-500', label: 'Bonus compétition', suffix: ' pts' },
+  { key: 'energy_recovery_bonus', icon: Zap, color: 'text-amber-500', label: 'Energy recovery', suffix: '' },
+  { key: 'illness_risk_reduction', icon: Shield, color: 'text-blue-500', label: 'Illness reduction', suffix: '%' },
+  { key: 'training_success_bonus', icon: TrendingUp, color: 'text-purple-500', label: 'Training bonus', suffix: '%' },
+  { key: 'breeding_success_bonus', icon: Heart, color: 'text-pink-500', label: 'Breeding bonus', suffix: '%' },
+  { key: 'competition_score_bonus', icon: Trophy, color: 'text-emerald-500', label: 'Competition bonus', suffix: ' pts' },
 ];
 
 export default function Staff() {
@@ -58,7 +58,7 @@ export default function Staff() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       queryClient.invalidateQueries({ queryKey: ['finances'] });
-      toast.success('Employé embauché !');
+      toast.success('Staff hired!');
     },
   });
 
@@ -66,14 +66,14 @@ export default function Staff() {
     mutationFn: (id) => base44.entities.Staff.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success('Employé licencié.');
+      toast.success('Staff fired.');
     },
   });
 
   const payrollMutation = useMutation({
     mutationFn: async () => {
       const totalSalary = staffList.filter(s => s.is_active).reduce((acc, s) => acc + s.salary, 0);
-      if (balance < totalSalary) throw new Error('Solde insuffisant');
+      if (balance < totalSalary) throw new Error('Insufficient balance');
       await base44.entities.StableFinances.update(finance.id, {
         balance: balance - totalSalary,
         total_spent: (finance.total_spent || 0) + totalSalary,
@@ -84,9 +84,9 @@ export default function Staff() {
     },
     onSuccess: (total) => {
       queryClient.invalidateQueries({ queryKey: ['finances'] });
-      toast.success(`Paie versée : ${total} pts déduits.`);
+      toast.success(`Payroll paid: ${total} pts deducted.`);
     },
-    onError: () => toast.error('Solde insuffisant pour verser les salaires !'),
+    onError: () => toast.error('Insufficient balance to pay salaries!'),
   });
 
   const totalSalary = staffList.filter(s => s.is_active).reduce((acc, s) => acc + s.salary, 0);
@@ -97,8 +97,8 @@ export default function Staff() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Personnel de l'Écurie</h1>
-          <p className="text-stone-500 mt-1">Gérez votre équipe et bénéficiez de bonus passifs</p>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Stable Staff</h1>
+          <p className="text-stone-500 mt-1">Manage your team and benefit from passive bonuses</p>
         </div>
         <div className="flex gap-2">
           <HireDialog balance={balance} onHire={(data) => hireMutation.mutate(data)} />
@@ -110,11 +110,11 @@ export default function Staff() {
         <Card className="border-0 bg-white/60 sm:col-span-2">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-stone-500">Solde disponible</p>
+              <p className="text-xs text-stone-500">Available balance</p>
               <p className="text-3xl font-bold text-stone-800">💰 {balance.toLocaleString()} pts</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-stone-500">Masse salariale / mois</p>
+              <p className="text-xs text-stone-500">Payroll / month</p>
               <p className={`text-xl font-bold ${totalSalary > balance ? 'text-red-500' : 'text-stone-700'}`}>
                 -{totalSalary} pts
               </p>
@@ -124,7 +124,7 @@ export default function Staff() {
                   disabled={payrollMutation.isPending}
                   className="mt-1 text-xs text-emerald-600 underline hover:text-emerald-800"
                 >
-                  Verser la paie
+                  Pay payroll
                 </button>
               )}
             </div>
@@ -135,7 +135,7 @@ export default function Staff() {
             <Users className="w-5 h-5 text-stone-500" />
             <div>
               <p className="text-2xl font-bold text-stone-800">{staffList.length}</p>
-              <p className="text-xs text-stone-500">Employés</p>
+              <p className="text-xs text-stone-500">Employees</p>
             </div>
           </CardContent>
         </Card>
@@ -144,8 +144,8 @@ export default function Staff() {
             <CardContent className="p-4 flex items-center gap-3">
               <AlertTriangle className="w-5 h-5 text-red-500" />
               <div>
-                <p className="text-sm font-bold text-red-700">Déficit !</p>
-                <p className="text-xs text-red-500">Solde insuffisant</p>
+                <p className="text-sm font-bold text-red-700">Deficit!</p>
+                <p className="text-xs text-red-500">Insufficient balance</p>
               </div>
             </CardContent>
           </Card>
@@ -155,7 +155,7 @@ export default function Staff() {
               <Shield className="w-5 h-5 text-emerald-500" />
               <div>
                 <p className="text-2xl font-bold text-stone-800">{Math.round(balance / (totalSalary || 1))} mois</p>
-                <p className="text-xs text-stone-500">Autonomie</p>
+                <p className="text-xs text-stone-500">Runway</p>
               </div>
             </CardContent>
           </Card>
@@ -166,7 +166,7 @@ export default function Staff() {
       {staffList.length > 0 && (
         <Card className="border-0 bg-gradient-to-r from-stone-50 to-amber-50/30 border border-amber-100">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-stone-700">✨ Bonus passifs actifs</CardTitle>
+            <CardTitle className="text-sm font-semibold text-stone-700">✨ Active passive bonuses</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
@@ -187,7 +187,7 @@ export default function Staff() {
                 );
               })}
               {Object.values(bonuses).every(v => v === 0) && (
-                <p className="text-sm text-stone-400 italic">Aucun bonus actif pour le moment</p>
+                <p className="text-sm text-stone-400 italic">No active bonuses yet</p>
               )}
             </div>
           </CardContent>
@@ -202,8 +202,8 @@ export default function Staff() {
       ) : staffList.length === 0 ? (
         <div className="text-center py-16">
           <span className="text-5xl mb-4 block">👥</span>
-          <h3 className="text-lg font-semibold text-stone-600">Aucun employé</h3>
-          <p className="text-stone-400 mt-1">Embauchez du personnel pour améliorer votre écurie.</p>
+          <h3 className="text-lg font-semibold text-stone-600">No staff</h3>
+          <p className="text-stone-400 mt-1">Hire staff to improve your stable.</p>
         </div>
       ) : (
         <div className="space-y-6">

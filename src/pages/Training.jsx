@@ -71,7 +71,7 @@ export default function Training() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['recent-trainings', selectedHorseId] });
-      toast.success('Séance sauvegardée !');
+      toast.success('Session saved!');
     },
     onError: (err) => toast.error(err.message),
   });
@@ -79,24 +79,24 @@ export default function Training() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Entraînement</h1>
-        <p className="text-stone-500 mt-1">Entraînez vos chevaux pour améliorer leurs compétences</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Training</h1>
+        <p className="text-stone-500 mt-1">Train your horses to improve their skills</p>
       </div>
 
-      {/* Sélection cheval */}
+      {/* Horse selection */}
       <Card className="border-0 bg-white/70">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
             <Dumbbell className="w-5 h-5 text-indigo-500 flex-shrink-0" />
             <Select value={selectedHorseId} onValueChange={setSelectedHorseId}>
               <SelectTrigger className="flex-1 bg-white">
-                <SelectValue placeholder="Choisir un cheval à entraîner..." />
+                <SelectValue placeholder="Choose a horse to train..." />
               </SelectTrigger>
               <SelectContent>
                 {myHorses.map(h => (
                   <SelectItem key={h.id} value={h.id}>
-                    {h.name} — {h.breed} ({h.age || 0} ans)
-                    {(h.age || 0) < 3 ? ' 🐴 Poulain' : ''}
+                    {h.name} — {h.breed} ({h.age || 0} yrs)
+                    {(h.age || 0) < 3 ? ' 🐴 Foal' : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -104,14 +104,14 @@ export default function Training() {
             {selectedHorse && (
               <div className="flex gap-2 flex-wrap">
                 <Badge variant="outline">{selectedHorse.breed}</Badge>
-                <Badge className="bg-stone-100 text-stone-600 border-0">{selectedHorse.age || 0} ans</Badge>
+                <Badge className="bg-stone-100 text-stone-600 border-0">{selectedHorse.age || 0} yrs</Badge>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Session d'entraînement */}
+      {/* Training session */}
       {selectedHorse ? (
         <NewTrainingSession
           horse={selectedHorse}
@@ -122,7 +122,7 @@ export default function Training() {
       ) : (
         <div className="text-center py-16 text-stone-400">
           <Dumbbell className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>Sélectionnez un cheval pour commencer une séance</p>
+          <p>Select a horse to start a session</p>
         </div>
       )}
     </div>

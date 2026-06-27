@@ -42,7 +42,7 @@ export default function Paddocks() {
       queryClient.invalidateQueries({ queryKey: ['paddocks'] });
       setShowCreate(false);
       setNewPaddock({ name: '', type: 'pasture' });
-      toast.success('Enclos créé !');
+      toast.success('Paddock created!');
     },
   });
 
@@ -59,7 +59,7 @@ export default function Paddocks() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['paddocks'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
-      toast.success('Cheval assigné !');
+      toast.success('Horse assigned!');
     },
   });
 
@@ -70,7 +70,7 @@ export default function Paddocks() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['paddocks'] });
-      toast.success('Cheval retiré de l\'enclos.');
+      toast.success('Horse removed from paddock.');
     },
   });
 
@@ -78,7 +78,7 @@ export default function Paddocks() {
     mutationFn: (id) => base44.entities.Paddock.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['paddocks'] });
-      toast.success('Enclos supprimé.');
+      toast.success('Paddock deleted.');
     },
   });
 
@@ -93,22 +93,22 @@ export default function Paddocks() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Gestion des Paddocks</h1>
-          <p className="text-stone-500 mt-1">Assignez vos chevaux à des enclos pour optimiser leur moral et récupération</p>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Paddock Management</h1>
+          <p className="text-stone-500 mt-1">Assign your horses to paddocks to optimize their morale and recovery</p>
         </div>
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogTrigger asChild>
             <Button className="bg-stone-800 hover:bg-stone-900">
-              <Plus className="w-4 h-4 mr-2" /> Nouvel enclos
+              <Plus className="w-4 h-4 mr-2" /> New paddock
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle>Créer un enclos</DialogTitle>
+              <DialogTitle>Create a paddock</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <Input
-                placeholder="Nom de l'enclos..."
+                placeholder="Paddock name..."
                 value={newPaddock.name}
                 onChange={(e) => setNewPaddock({ ...newPaddock, name: e.target.value })}
               />
@@ -133,7 +133,7 @@ export default function Paddocks() {
                 </div>
               )}
               <Button onClick={() => createMutation.mutate(newPaddock)} disabled={!newPaddock.name} className="w-full bg-stone-800 hover:bg-stone-900">
-                Créer l'enclos
+                Create paddock
               </Button>
             </div>
           </DialogContent>
@@ -143,10 +143,10 @@ export default function Paddocks() {
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Enclos', value: paddocks.length, icon: LayoutGrid, color: 'text-stone-700' },
-          { label: 'Assignés', value: totalAssigned, icon: Users, color: 'text-blue-600' },
-          { label: 'Sans enclos', value: unassigned.length, icon: Users, color: 'text-orange-600' },
-          { label: 'Récup. moy.', value: `+${avgRecovery}/h`, icon: Zap, color: 'text-amber-600' },
+          { label: 'Paddocks', value: paddocks.length, icon: LayoutGrid, color: 'text-stone-700' },
+          { label: 'Assigned', value: totalAssigned, icon: Users, color: 'text-blue-600' },
+          { label: 'Unassigned', value: unassigned.length, icon: Users, color: 'text-orange-600' },
+          { label: 'Avg recov.', value: `+${avgRecovery}/h`, icon: Zap, color: 'text-amber-600' },
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label} className="border-0 bg-white/60">
             <CardContent className="p-4 flex items-center gap-3">
@@ -168,8 +168,8 @@ export default function Paddocks() {
       ) : paddocks.length === 0 ? (
         <div className="text-center py-20">
           <span className="text-5xl mb-4 block">🏡</span>
-          <h3 className="text-lg font-semibold text-stone-600">Aucun enclos créé</h3>
-          <p className="text-stone-400 mt-1">Créez votre premier enclos pour organiser votre écurie.</p>
+          <h3 className="text-lg font-semibold text-stone-600">No paddocks created</h3>
+          <p className="text-stone-400 mt-1">Create your first paddock to organize your stable.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -198,7 +198,7 @@ export default function Paddocks() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-orange-400 inline-block" />
-              Chevaux sans enclos ({unassigned.length})
+              Horses without paddock ({unassigned.length})
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -629,6 +629,19 @@ export function getScoreColor(score) {
   return 'from-red-500 to-rose-500';
 }
 
+const APPROVAL_STATUS_MAP = {
+  elite_approved: 'elite',
+  approved_for_sport_breeding: 'provisional',
+  approved_for_breeding: 'approved',
+  approved_restricted: 'approved_restricted',
+  rejected: 'not_approved',
+  not_evaluated: 'not_evaluated',
+  'not_approved': 'not_approved',
+  elite: 'elite',
+  provisional: 'provisional',
+  approved: 'approved',
+};
+
 export function getBreedingImpact(approvalStatus) {
   const impacts = {
     elite: {
@@ -680,7 +693,8 @@ export function getBreedingImpact(approvalStatus) {
       description: 'En attente d\'inspection studbook'
     }
   };
-  return impacts[approvalStatus] || impacts.not_evaluated;
+  const mappedKey = APPROVAL_STATUS_MAP[approvalStatus] || 'not_evaluated';
+  return impacts[mappedKey] || impacts.not_evaluated;
 }
 
 export { SCORING_CATEGORIES, APPROVAL_THRESHOLDS, SCORING_CATEGORIES as SCORING_CRITERIA };

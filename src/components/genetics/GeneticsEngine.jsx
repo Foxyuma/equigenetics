@@ -149,7 +149,7 @@ function randomAllele(locus) {
   const alleles = {
     extension: ["E", "e"],
     agouti: ["A", "a"],
-    cream: ["Cr", "n"],
+    cream: ["Cr", "n", "prl"],
     grey: ["G", "g"],
     tobiano: ["TO", "n"],
     roan: ["RN", "n"],
@@ -159,6 +159,7 @@ function randomAllele(locus) {
     sabino: ["Sb", "n"],
     splash: ["Spl", "n"],
     overo: ["Fr", "n"],
+    mushroom: ["Mu", "mu"],
   };
   const opts = alleles[locus] || ["n", "n"];
   return opts[Math.floor(Math.random() * opts.length)];
@@ -175,7 +176,7 @@ function parseGenotype(locus, genotypeStr) {
   const mappings = {
     extension: { "EE": ["E","E"], "Ee": ["E","e"], "ee": ["e","e"] },
     agouti: { "AA": ["A","A"], "Aa": ["A","a"], "aa": ["a","a"] },
-    cream: { "CrCr": ["Cr","Cr"], "Crn": ["Cr","n"], "nn": ["n","n"] },
+    cream: { "CrCr": ["Cr","Cr"], "Crn": ["Cr","n"], "nn": ["n","n"], "Crprl": ["Cr","prl"], "nprl": ["n","prl"], "prlprl": ["prl","prl"] },
     grey: { "GG": ["G","G"], "Gg": ["G","g"], "gg": ["g","g"] },
     tobiano: { "TOTO": ["TO","TO"], "TOn": ["TO","n"], "nn": ["n","n"] },
     roan: { "RNn": ["RN","n"], "nn": ["n","n"], "RNRN": ["RN","RN"] },
@@ -185,13 +186,15 @@ function parseGenotype(locus, genotypeStr) {
     sabino: { "SbSb": ["Sb","Sb"], "Sbn": ["Sb","n"], "nn": ["n","n"] },
     splash: { "SplSpl": ["Spl","Spl"], "Spln": ["Spl","n"], "nn": ["n","n"] },
     overo: { "FrFr": ["Fr","Fr"], "Frn": ["Fr","n"], "nn": ["n","n"] },
+    mushroom: { "mumu": ["mu","mu"], "Mumu": ["Mu","mu"], "MuMu": ["Mu","Mu"] },
   };
   return mappings[locus]?.[genotypeStr] || [randomAllele(locus), randomAllele(locus)];
 }
 
 function combineAlleles(locus, a1, a2) {
-  const dominant = { extension: "E", agouti: "A", cream: "Cr", grey: "G", tobiano: "TO", roan: "RN", dun: "D", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr" };
-  const recessive = { extension: "e", agouti: "a", cream: "n", grey: "g", tobiano: "n", roan: "n", dun: "d", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n" };
+  const dominant = { extension: "E", agouti: "A", grey: "G", tobiano: "TO", roan: "RN", dun: "D", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr", mushroom: "Mu" };
+  const recessive = { extension: "e", agouti: "a", grey: "g", tobiano: "n", roan: "n", dun: "n", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n", mushroom: "mu" };
+  // Remarque : cream (MATP = 3 allèles Cr/n/prl) n'est pas traité par combineAlleles — généré en ligne.
   const d = dominant[locus], r = recessive[locus];
   
   if (a1 === d && a2 === d) return d + d;
@@ -200,7 +203,7 @@ function combineAlleles(locus, a1, a2) {
 }
 
 export function generateRandomGenotype(breed) {
-  const loci = ["extension", "agouti", "cream", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo"];
+  const loci = ["extension", "agouti", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo", "mushroom"];
   const genotype = {};
   
   loci.forEach(locus => {
@@ -209,10 +212,21 @@ export function generateRandomGenotype(breed) {
     genotype[locus] = combineAlleles(locus, a1, a2);
   });
 
+  // Générer cream en ligne (locus MATP : 3 allèles Cr/n/prl, ordre canonique Cr>n>prl)
+  const matpPool = ["Cr", "n", "prl"];
+  const a1 = matpPool[Math.floor(Math.random() * matpPool.length)];
+  const a2 = matpPool[Math.floor(Math.random() * matpPool.length)];
+  genotype.cream = (["Cr","n","prl"].indexOf(a1) <= ["Cr","n","prl"].indexOf(a2) ? [a1, a2] : [a2, a1]).join("");
+
   // Appliquer les gènes forcés depuis le profil de race
   const profile = BREED_PROFILES[breed];
   if (profile?.forcedGenotype) {
     Object.assign(genotype, profile.forcedGenotype);
+  }
+
+  // Mushroom : récessif, principalement chez les Shetland
+  if (breed === "Shetland") {
+    if (Math.random() < 0.08) genotype.mushroom = "mumu";
   }
 
   // Gris fréquent selon la race
@@ -277,7 +291,7 @@ export function generateRandomGenotype(breed) {
 }
 
 export function breedGenotype(fatherGenotype, motherGenotype) {
-  const loci = ["extension", "agouti", "cream", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo"];
+  const loci = ["extension", "agouti", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo", "mushroom"];
   const childGenotype = {};
   
   loci.forEach(locus => {
@@ -285,6 +299,12 @@ export function breedGenotype(fatherGenotype, motherGenotype) {
     const a2 = inheritAllele(motherGenotype, locus);
     childGenotype[locus] = combineAlleles(locus, a1, a2);
   });
+
+  // Héritage cream en ligne (MATP = 3 allèles)
+  const fa = inheritAllele(fatherGenotype, "cream");
+  const fb = inheritAllele(motherGenotype, "cream");
+  const sorted = ["Cr","n","prl"];
+  childGenotype.cream = (sorted.indexOf(fa) <= sorted.indexOf(fb) ? [fa, fb] : [fb, fa]).join("");
   
   return childGenotype;
 }

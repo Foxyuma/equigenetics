@@ -481,7 +481,7 @@ export default function VetClinic() {
                 </div>
               </div>
               <div className="pt-2 border-t border-stone-200">
-                <p className="text-xs font-semibold text-stone-700 mb-1">Traitement requis:</p>
+                <p className="text-xs font-semibold text-stone-700 mb-1">Required treatment:</p>
                 <div className="flex flex-wrap gap-1">
                   {illness?.treatment.map(med => (
                     <Badge key={med} variant="outline" className="text-xs">{med}</Badge>
@@ -497,17 +497,17 @@ export default function VetClinic() {
                 size="sm"
               >
                 <Pill className="w-3 h-3 mr-1" />
-                Traiter ({illness?.duration || 0} jours)
+                Treat ({illness?.duration || 0} days)
               </Button>
             </div>
           ) : (
             <div className="space-y-2">
               {record?.last_checkup ? (
                 <p className="text-xs text-stone-500">
-                  Dernier contrôle: {format(new Date(record.last_checkup), 'dd/MM/yyyy')}
+                  Last checkup: {format(new Date(record.last_checkup), 'dd/MM/yyyy')}
                 </p>
               ) : (
-                <p className="text-xs text-stone-400 italic">Aucun contrôle effectué</p>
+                <p className="text-xs text-stone-400 italic">No checkup done</p>
               )}
               <Button
                 onClick={() => checkupMutation.mutate(horse)}
@@ -516,7 +516,7 @@ export default function VetClinic() {
                 size="sm"
               >
                 <Activity className="w-3 h-3 mr-1" />
-                Contrôle vétérinaire (Gratuit)
+                Veterinary checkup (Free)
               </Button>
             </div>
           )}
@@ -599,11 +599,11 @@ export default function VetClinic() {
                           <Beaker className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-stone-800">Tester mes chevaux non testés</h3>
+                          <h3 className="font-bold text-stone-800">Test my untested horses</h3>
                           <p className="text-sm text-stone-500">
                             {untestedHorses.length > 0
-                              ? `${untestedHorses.length} cheval(aux) restant(s) à tester pour ce type`
-                              : 'Tous vos chevaux ont déjà été testés pour ce type'}
+                              ? `${untestedHorses.length} horse(s) remaining to test for this type`
+                              : 'All your horses have already been tested for this type'}
                           </p>
                         </div>
                       </div>
@@ -623,10 +623,10 @@ export default function VetClinic() {
                           className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
                         >
                           {testAllHorsesMutation.isPending
-                            ? 'En cours...'
+                            ? 'In progress...'
                             : untestedHorses.length === 0
-                              ? '✓ Tous testés'
-                              : `Tester (${untestedHorses.length} — ${TEST_TYPES[bulkTestType].price * untestedHorses.length} ₲)`}
+                              ? '✓ All tested'
+                              : `Test (${untestedHorses.length} — ${TEST_TYPES[bulkTestType].price * untestedHorses.length} ₲)`}
                         </Button>
                       </div>
                     </div>
@@ -638,7 +638,7 @@ export default function VetClinic() {
                 <Card className="border-0 bg-stone-50 col-span-3">
                   <CardContent className="p-12 text-center">
                     <Dna className="w-16 h-16 mx-auto text-stone-300 mb-4" />
-                    <p className="text-stone-400">Aucun cheval à tester</p>
+                    <p className="text-stone-400">No horses to test</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -666,10 +666,10 @@ export default function VetClinic() {
                 <div>
                   <h2 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
                     <Dna className="w-6 h-6 text-blue-600" />
-                    Tests ADN pour {selectedTestHorse.name}
+                    DNA Tests for {selectedTestHorse.name}
                   </h2>
                 </div>
-                <Button variant="outline" onClick={() => setSelectedTestHorse(null)}>← Changer de cheval</Button>
+                <Button variant="outline" onClick={() => setSelectedTestHorse(null)}>← Change horse</Button>
               </div>
 
               {showTestResults ? (
@@ -683,23 +683,23 @@ export default function VetClinic() {
                   <CardContent className="space-y-4">
                     {showTestResults.test_type === 'health_panel' && (
                       <div>
-                        <h3 className="font-semibold text-stone-800 mb-3">Maladies génétiques détectées</h3>
+                        <h3 className="font-semibold text-stone-800 mb-3">Genetic diseases detected</h3>
                         {showTestResults.results.health_genes && showTestResults.results.health_genes.length > 0 ? (
                           <div className="space-y-2">
                             {showTestResults.results.health_genes.map(gene => (
                               <Badge key={gene.disease} className={`block text-left py-2 px-3 border-0 ${gene.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                {gene.disease}: {gene.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                                {gene.disease}: {gene.status === 'carrier' ? 'Carrier' : 'Affected'}
                               </Badge>
                             ))}
                           </div>
                         ) : (
                           <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-                            <p className="text-emerald-700">✨ Aucune maladie détectée !</p>
+                            <p className="text-emerald-700">✨ No disease detected!</p>
                           </div>
                         )}
                       </div>
                     )}
-                    <Button onClick={() => { setShowTestResults(null); setSelectedTestHorse(null); }} className="w-full bg-stone-800 hover:bg-stone-900">Tester un autre cheval</Button>
+                    <Button onClick={() => { setShowTestResults(null); setSelectedTestHorse(null); }} className="w-full bg-stone-800 hover:bg-stone-900">Test another horse</Button>
                   </CardContent>
                 </Card>
               ) : (
@@ -732,7 +732,7 @@ export default function VetClinic() {
                               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                               size="sm"
                             >
-                              {!canAfford ? '❌ Fonds insuffisants' : performTestMutation.isPending ? 'En cours...' : 'Commander ce test'}
+                              {!canAfford ? '❌ Insufficient funds' : performTestMutation.isPending ? 'In progress...' : 'Order this test'}
                             </Button>
                           )}
                         </CardContent>
@@ -756,11 +756,11 @@ export default function VetClinic() {
                         <Activity className="w-6 h-6 text-emerald-600" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-stone-800">Contrôle de toute l'écurie</h3>
+                        <h3 className="font-bold text-stone-800">Full stable checkup</h3>
                         <p className="text-sm text-stone-500">
                           {currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]
-                            ? "✓ Contrôle groupé déjà effectué aujourd'hui — revenez demain"
-                            : `Vérifiez la santé de vos ${horses.length} chevaux en un clic (1x/jour)`}
+                            ? "✓ Bulk checkup already done today — come back tomorrow"
+                            : `Check health of your ${horses.length} horses in one click (1x/day)`}
                         </p>
                       </div>
                     </div>
@@ -769,7 +769,7 @@ export default function VetClinic() {
                       disabled={bulkCheckupMutation.isPending || currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0]}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white whitespace-nowrap"
                     >
-                      {bulkCheckupMutation.isPending ? 'En cours...' : currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0] ? "✓ Fait aujourd'hui" : `Contrôler (${horses.length} chevaux)`}
+                      {bulkCheckupMutation.isPending ? 'In progress...' : currentUser?.last_bulk_checkup_date === new Date().toISOString().split('T')[0] ? "✓ Done today" : `Check (${horses.length} horses)`}
                     </Button>
                   </div>
                 </CardContent>
@@ -784,8 +784,8 @@ export default function VetClinic() {
                           <Pill className="w-6 h-6 text-red-600" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-stone-800">Soigner tous les chevaux malades</h3>
-                          <p className="text-sm text-stone-500">{sickHorses.length} cheval(aux) nécessite(nt) un traitement</p>
+                          <h3 className="font-bold text-stone-800">Treat all sick horses</h3>
+                          <p className="text-sm text-stone-500">{sickHorses.length} horse(s) need treatment</p>
                           {sickHorses.some(h => {
                             const r = getHealthRecord(h.id);
                             const ill = ILLNESSES.find(i => i.name === r?.current_illness);
@@ -793,7 +793,7 @@ export default function VetClinic() {
                           }) && (
                             <p className="text-xs text-orange-600 flex items-center gap-1 mt-1">
                               <AlertTriangle className="w-3 h-3" />
-                              Certains traitements contiennent des substances à risque de dopage (14 jours de restriction)
+                              Some treatments contain doping-risk substances (14-day restriction)
                             </p>
                           )}
                         </div>
@@ -803,7 +803,7 @@ export default function VetClinic() {
                         disabled={bulkTreatMutation.isPending}
                         className="bg-red-600 hover:bg-red-700 text-white whitespace-nowrap"
                       >
-                        {bulkTreatMutation.isPending ? 'En cours...' : `Soigner (${sickHorses.length} malades)`}
+                        {bulkTreatMutation.isPending ? 'In progress...' : `Treat (${sickHorses.length} sick)`}
                       </Button>
                     </div>
                   </CardContent>
@@ -816,7 +816,7 @@ export default function VetClinic() {
               <Card className="border-0 bg-stone-50 col-span-2">
                 <CardContent className="p-12 text-center">
                   <Heart className="w-16 h-16 mx-auto text-stone-300 mb-4" />
-                  <p className="text-stone-400">Aucun cheval dans votre écurie</p>
+                  <p className="text-stone-400">No horses in your stable</p>
                 </CardContent>
               </Card>
             ) : (
@@ -833,7 +833,7 @@ export default function VetClinic() {
                   <div className="text-4xl mb-2">{med.icon}</div>
                   <h3 className="font-semibold text-stone-800 text-sm mb-1">{med.name}</h3>
                   <p className="text-lg font-bold text-indigo-600 mb-3">{med.price} €</p>
-                  <p className="text-xs text-stone-500 italic">Disponible en boutique</p>
+                  <p className="text-xs text-stone-500 italic">Available in Shop</p>
                 </CardContent>
               </Card>
             ))}
@@ -850,8 +850,8 @@ export default function VetClinic() {
                       <Syringe className="w-6 h-6 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-stone-800">Vacciner toute l'écurie</h3>
-                      <p className="text-sm text-stone-500">Applique le vaccin choisi à tous les chevaux non à jour</p>
+                      <h3 className="font-bold text-stone-800">Vaccinate the whole stable</h3>
+                      <p className="text-sm text-stone-500">Apply the chosen vaccine to all horses not up to date</p>
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">

@@ -84,21 +84,32 @@ function pickByBase(base, map) {
   return map.bay;
 }
 
+// Détecte le pattern KIT unifié (Tobiano / Dominant White / Sabino / Roan)
+function getKitPattern(genotype) {
+  const kit = migrateKit(genotype);
+  if (!kit || kit === 'toto') return null;
+  const low = kit.toLowerCase();
+  if (low.includes('dw')) return 'dw';
+  if (low.includes('to')) return 'to';
+  if (low.includes('sb1')) return 'sb1';
+  if (low.includes('rn')) return 'rn';
+  return null;
+}
+
 // Renvoie les infos de robe : couleur affichée + couleur de naissance sous-jacente si gris + isGrey
 // Utile pour que les chevaux gris montrent aussi leurs patterns cachés dans le visuel
 export function getCoatInfo(genotype) {
   if (!genotype) return { display: "Inconnu", birth: "Inconnu", isGrey: false };
   const isGrey = genotype.grey === "GG" || genotype.grey === "Gg";
-  const kit = migrateKit(genotype);
-  const hasKit = kit !== 'toto';
-  const isKitTo = hasKit && kit.toLowerCase().includes('to');
-  const isKitSb1 = hasKit && kit.toLowerCase().includes('sb1');
-  const isKitRn = hasKit && kit.toLowerCase().includes('rn');
+  const kitPat = getKitPattern(genotype);
   const hasSplash = genotype.splash && genotype.splash !== "nn";
   const hasOvero = genotype.overo && genotype.overo !== "nn";
-  const hasRoan = isKitRn || genotype.roan === "RNn" || genotype.roan === "RNRN";
-  const hasTobiano = isKitTo;
-  const hasSabino = isKitSb1;
+  const hasRoan = kitPat === 'rn' || genotype.roan === "RNn" || genotype.roan === "RNRN";
+  const hasTobiano = kitPat === 'to';
+  const hasSabino = kitPat === 'sb1';
+  const hasDW = kitPat === 'dw';                    // ← NOUVEAU
+  const hasFrame = genotype.frame && genotype.frame !== "nn";
+  const hasRabicano = genotype.rabicano && genotype.rabicano !== "rbrb";
   const hasMushroom = genotype.mushroom === "mumu";
   const isBlack = genotype.extension !== "ee";
   const hasAgouti = genotype.agouti !== "aa";
@@ -117,10 +128,13 @@ export function getCoatInfo(genotype) {
   if (hasMushroom && (base === "alezan" || base === "bai")) base = (base === "alezan" ? "ale" : "b") + "zan mushroom";
   const parts = [base];
   if (hasRoan) parts.push(isBlack ? "gris fer" : "granité");
+  if (hasDW) parts.push("blanc");                    // ← NOUVEAU
   if (hasTobiano) parts.push("tobiano");
   else if (hasOvero) parts.push("overo");
   if (hasSplash) parts.push("splash");
   if (hasSabino) parts.push("sabino");
+  if (hasFrame) parts.push("frame overo");           // ← NOUVEAU
+  if (hasRabicano) parts.push("rabicano");           // ← NOUVEAU
   const hasDun = genotype.dun && genotype.dun !== 'nd2nd2';
   const birth = [...new Set(parts)].join(" ");
   return { display: isGrey ? "Gris" : birth, birth: isGrey ? birth : birth, isGrey, primitiveMarkings: !isGrey && hasDun };
@@ -139,11 +153,15 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
   const isKitRn = kit !== 'toto' && kit.toLowerCase().includes('rn');
   const isKitTo = kit !== 'toto' && kit.toLowerCase().includes('to');
   const isKitSb1 = kit !== 'toto' && kit.toLowerCase().includes('sb1');
+  const isKitDW = kit !== 'toto' && kit.toLowerCase().includes('dw');
+  const hasDW = isKitDW;
   const hasRoan = isKitRn || genotype.roan === "RNn" || genotype.roan === "RNRN";
   const hasTobiano = isKitTo;
   const hasSabino = isKitSb1;
   const hasSplash = genotype.splash && genotype.splash !== "nn";
   const hasOvero = genotype.overo && genotype.overo !== "nn";
+  const hasFrame = genotype.frame && genotype.frame !== "nn";
+  const hasRabicano = genotype.rabicano && genotype.rabicano !== "rbrb";
 
   // === Breed-specific overrides (highest priority) ===
   // Friesian: purebred is ALWAYS black — image dédiée avec fanons et crinière abondante
@@ -159,10 +177,11 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
   // === Foals: per-pattern images ===
   if (isFoal) {
     if (hasTobiano) return PHENO_IMAGES.foalTobiano;
+    if (hasDW || hasFrame) return PHENO_IMAGES.foalOvero; // ← NOUVEAU : DW/Frame utilises Overo visuel
     if (hasOvero) return PHENO_IMAGES.foalOvero;
     if (hasSplash) return PHENO_IMAGES.foalSplash;
     if (hasSabino) return PHENO_IMAGES.foalSabino;
-    if (hasRoan) return PHENO_IMAGES.foalRoan;
+    if (hasRoan || hasRabicano) return PHENO_IMAGES.foalRoan; // ← NOUVEAU : Rabicano utilise Roan visuel
     // Solid foal colors
     const base = getBaseCategory(genotype);
     if (base === "chestnut" || base === "palomino") return PHENO_IMAGES.foalChestnut;
@@ -183,7 +202,16 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
     return PHENO_IMAGES.bayRoan;
   }
 
-  // === Pie patterns: tobiano > overo > splash > sabino ===
+  // === Pie patterns: DW > tobiano > frame > overo > splash > sabino > roan/rabicano ===
+  if (hasDW || hasFrame) {
+    // Dominant White & Frame Overo: pas d'image dédiée, réutiliser overo
+    return pickByBase(base, {
+      chestnut: PHENO_IMAGES.chestnutOvero,
+      black: PHENO_IMAGES.blackOvero,
+      bay: PHENO_IMAGES.bayOvero,
+    });
+  }
+
   if (hasTobiano) {
     return pickByBase(base, {
       chestnut: PHENO_IMAGES.chestnutTobiano,
@@ -214,6 +242,13 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
       black: PHENO_IMAGES.blackSabino,
       bay: PHENO_IMAGES.baySabino,
     });
+  }
+
+  if (hasRabicano) {
+    // Rabicano: pas d'image dédiée, réutiliser roan
+    if (base === "black" || base === "silverBlack") return PHENO_IMAGES.blueRoan;
+    if (base === "chestnut" || base === "palomino") return PHENO_IMAGES.chestnutRoan;
+    return PHENO_IMAGES.bayRoan;
   }
 
   // === Solid base colors ===

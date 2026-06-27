@@ -49,9 +49,9 @@ function calculateStallionPrice(stallion) {
 
   // Multiplicateur d'approbation studbook
   const approvalMultipliers = {
-    elite_approved: 2.0,
-    approved_for_sport_breeding: 1.6,
-    approved_for_breeding: 1.3,
+    elite_approved: 2.5,
+    approved_for_sport_breeding: 1.8,
+    approved_for_breeding: 1.4,
     not_evaluated: 1.0,
     rejected: 0.7,
   };
@@ -213,16 +213,18 @@ export default function StallionMarket() {
   }
 
   // Le prix stocké est déjà dynamique ; on l'expose tel quel
-  const TIER_CONFIG = {
-    elite_approved: { label: 'Très bon', color: 'bg-yellow-100 text-yellow-700', star: true },
-    approved_for_sport_breeding: { label: 'Bon', color: 'bg-green-100 text-green-700', star: false },
-    approved_for_breeding: { label: 'Moyen', color: 'bg-blue-100 text-blue-700', star: false },
+  const APPROVAL_CONFIG = {
+    elite_approved: { label: '⭐ Élite', color: 'bg-yellow-100 text-yellow-700', multLabel: '×2.5' },
+    approved_for_sport_breeding: { label: '🏆 Sport', color: 'bg-green-100 text-green-700', multLabel: '×1.8' },
+    approved_for_breeding: { label: '✅ Approuvé', color: 'bg-blue-100 text-blue-700', multLabel: '×1.4' },
+    not_evaluated: { label: '⏳ En attente', color: 'bg-stone-100 text-stone-500', multLabel: '×1.0' },
+    rejected: { label: '❌ Refusé', color: 'bg-red-100 text-red-700', multLabel: '×0.7' },
   };
 
   const stallionsWithDynamicPrices = filteredStallions.map(s => ({
     ...s,
     dynamicPrice: s.price || calculateStallionPrice(s),
-    tierConfig: TIER_CONFIG[s.breeding_approval_status] || null,
+    approvalConfig: APPROVAL_CONFIG[s.breeding_approval_status] || null,
   }));
 
   const simulateBreeding = () => {
@@ -297,10 +299,17 @@ export default function StallionMarket() {
       </div>
 
       {/* Info qualité */}
-      <p className="text-xs text-stone-500 flex items-center gap-1.5">
-        <Info className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
-        Les étalons des Haras Nationaux sont classés en 3 niveaux (Moyen, Bon, Très bon) et tous approuvés pour le studbook.
-      </p>
+      <div className="text-xs text-stone-500 flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-200 p-3 rounded-xl">
+        <Info className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+        <span>Les étalons sont classés par niveau d'approbation — le prix de saillie est <strong>multiplié</strong> selon le statut.</span>
+        <div className="flex flex-wrap gap-1">
+          <Badge className="bg-yellow-100 text-yellow-700 border-0 text-[10px]">⭐ Élite : ×2.5</Badge>
+          <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">🏆 Sport : ×1.8</Badge>
+          <Badge className="bg-blue-100 text-blue-700 border-0 text-[10px]">✅ Approuvé : ×1.4</Badge>
+          <Badge className="bg-stone-100 text-stone-400 border-0 text-[10px]">⏳ En attente : ×1.0</Badge>
+          <Badge className="bg-red-100 text-red-700 border-0 text-[10px]">❌ Refusé : ×0.7</Badge>
+        </div>
+      </div>
 
       {/* Filter */}
       <div className="flex gap-3 flex-wrap items-center">
@@ -350,16 +359,19 @@ export default function StallionMarket() {
                       {s.dynamicPrice !== s.price && (
                         <span className="text-xs text-stone-400 line-through block">{s.price.toLocaleString('fr-FR')} ₲</span>
                       )}
-                      <span className="text-amber-700 font-bold text-sm">{s.dynamicPrice.toLocaleString('fr-FR')} ₲</span>
+                      <span className="text-amber-700 font-bold text-base">{s.dynamicPrice.toLocaleString('fr-FR')} ₲</span>
+                      {s.approvalConfig && s.approvalConfig.multLabel !== '×1.0' && (
+                        <span className="text-[10px] text-amber-500 block">{s.approvalConfig.multLabel}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
                     <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
-                    {s.tierConfig && (
-                      <Badge className={`border-0 text-xs ${s.tierConfig.color}`}>
-                        {s.tierConfig.star ? `⭐ ${s.tierConfig.label}` : s.tierConfig.label}
+                    {s.approvalConfig && (
+                      <Badge className={`border-0 text-xs ${s.approvalConfig.color}`} title={`Multiplicateur de prix : ${s.approvalConfig.multLabel}`}>
+                        {s.approvalConfig.label}
                       </Badge>
                     )}
                   </div>

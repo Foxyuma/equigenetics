@@ -7,6 +7,7 @@ import {
   generateFoalTraits,
 } from '@/components/genetics/GeneticsEngine';
 import { calcFoalBirthRepGain } from '@/lib/breedingReputation';
+import { processPendingStudbookRequests } from '@/lib/studbookValidation';
 
 const FOAL_NAMES_MALE = ['Tornado', 'Eclipse', 'Sultan', 'Orage', 'Apollo', 'Zéphyr', 'Atlas', 'Titan', 'Merlin', 'Sirius'];
 const FOAL_NAMES_FEMALE = ['Luna', 'Aurore', 'Perle', 'Tempête', 'Étoile', 'Jade', 'Iris', 'Stella', 'Naya', 'Olympe'];
@@ -154,6 +155,7 @@ export async function runDailyTick(userEmail) {
     const user = await base44.auth.me();
     const compRep = await resolvePendingCompetitions(userEmail);
     const birthRep = await autoBirthMares(userEmail);
+    await processPendingStudbookRequests(userEmail, user);
     const totalRep = compRep + birthRep;
     if (totalRep !== 0) {
       await base44.auth.updateMe({

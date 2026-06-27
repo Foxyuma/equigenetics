@@ -29,8 +29,10 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
   const hasDnaTest = geneticTests.some(t => t.test_type === 'full_test' || t.test_type === 'health_panel');
 
   const isRegistered = horse.studbook_registered;
-  const isOC = !horse.studbook_registered && horse.studbook_registration_date;
-  const isNotRegistered = !horse.studbook_registered && !horse.studbook_registration_date;
+  const isOC = !horse.studbook_registered && horse.studbook_registration_date && horse.studbook_request_status !== 'pending' && horse.studbook_request_status !== 'rejected';
+  const isPending = horse.studbook_request_status === 'pending';
+  const isRejected = horse.studbook_request_status === 'rejected';
+  const isNotRegistered = !isRegistered && !isOC && !isPending;
 
   const canRegisterStudbook = hasParentage && fatherApproved && hasDnaTest;
   const canRegisterOC = hasParentage;
@@ -42,30 +44,25 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
       const balance = currentUser.genesis_balance ?? 0;
       if (balance < fee) throw new Error(`Fonds insuffisants. Coût : ${fee} ₲`);
 
-      const updateData = {
+      // La demande est mise en attente — la commission statue au prochain tick (3h30 UTC)
+      await base44.entities.Horse.update(horse.id, {
+        studbook_request_status: 'pending',
+        studbook_request_type: type,
         studbook_registration_date: format(new Date(), 'yyyy-MM-dd'),
-      };
-
-      if (type === 'studbook') {
-        updateData.studbook_registered = true;
-      } else {
-        updateData.studbook_registered = false;
-      }
-
-      await base44.entities.Horse.update(horse.id, updateData);
+      });
       await base44.auth.updateMe({ genesis_balance: balance - fee });
       await base44.entities.Transaction.create({
         user_email: currentUser.email,
         currency: 'genesis',
         amount: -fee,
         balance_after: balance - fee,
-        reason: `Inscription studbook ${type === 'studbook' ? 'plein registre' : 'OC'} - ${horse.name}`,
+        reason: `Demande studbook ${type === 'studbook' ? 'plein registre' : 'OC'} - ${horse.name}`,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
-      toast.success('Demande d\'inscription au studbook acceptée ! 📜');
+      toast.success('Demande envoyée ! La commission statue au prochain changement de jour (3h30 UTC). 📜');
     },
     onError: (err) => toast.error(err.message),
   });
@@ -91,13 +88,15 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
   }
 
   return (
-    <Card className={`border-2 ${isRegistered ? 'border-emerald-200 bg-emerald-50/50' : isOC ? 'border-amber-200 bg-amber-50/50' : 'border-stone-200 bg-white/60'}`}>
+    <Card className={`border-2 ${isRegistered ? 'border-emerald-200 bg-emerald-50/50' : isOC ? 'border-amber-200 bg-amber-50/50' : isPending ? 'border-blue-200 bg-blue-50/50' : isRejected ? 'border-red-200 bg-red-50/50' : 'border-stone-200 bg-white/60'}`}>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <ScrollText className="w-5 h-5 text-stone-600" />
           <h3 className="font-semibold text-stone-800 text-sm">Inscription au studbook</h3>
           {isRegistered && <Badge className="bg-emerald-100 text-emerald-700 border-0">✅ Plein registre</Badge>}
           {isOC && <Badge className="bg-amber-100 text-amber-700 border-0">OC</Badge>}
+          {isPending && <Badge className="bg-blue-100 text-blue-700 border-0"><Loader2 className="w-3 h-3 mr-1 animate-spin" />En attente</Badge>}
+          {isRejected && <Badge className="bg-red-100 text-red-700 border-0">❌ Refusé</Badge>}
           {isNotRegistered && <Badge variant="outline" className="text-stone-500">Non inscrit</Badge>}
         </div>
 
@@ -107,8 +106,32 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
           </p>
         )}
 
-        {isNotRegistered && (
+        {isPending && (
+          <p className="text-xs text-blue-600">
+            Demande de {horse.studbook_request_type === 'studbook' ? 'plein registre' : 'OC'} en cours d'examen.
+            La commission statue au prochain changement de jour (3h30 UTC).
+          </p>
+        )}
+
+        {isRejected && (
+          <div className="space-y-2">
+            <p className="text-xs text-red-600 font-semibold">Demande refusée le {format(new Date(horse.studbook_registration_date), 'd MMMM yyyy', { locale: fr })}</p>
+            <div className="p-2 rounded-lg bg-red-50 border border-red-100 space-y-1">
+              {(horse.studbook_rejection_reasons || []).map((reason, i) => (
+                <p key={i} className="text-xs text-red-700 flex items-start gap-1.5">
+                  <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  {reason}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isNotRegistered && !isPending && (
           <>
+            {isRejected && (
+              <p className="text-xs text-stone-500 italic">Vous pouvez corriger les points ci-dessus et soumettre une nouvelle demande.</p>
+            )}
             <div className="space-y-2 text-xs">
               <div className="flex items-center gap-2">
                 {fatherApproved

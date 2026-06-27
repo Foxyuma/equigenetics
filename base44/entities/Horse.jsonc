@@ -63,6 +63,33 @@
       "format": "date",
       "description": "Date de demande/inscription au studbook"
     },
+    "studbook_request_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "none",
+      "description": "Statut de la demande de studbook"
+    },
+    "studbook_request_type": {
+      "type": "string",
+      "enum": [
+        "studbook",
+        "oc"
+      ],
+      "description": "Type de demande (plein registre ou OC)"
+    },
+    "studbook_rejection_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Raisons du refus de studbook"
+    },
     "genotype": {
       "type": "object",
       "description": "Full genetic profile",

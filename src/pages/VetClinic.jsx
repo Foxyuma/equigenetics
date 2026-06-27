@@ -221,7 +221,7 @@ export default function VetClinic() {
 
   const performTestMutation = useMutation({
     mutationFn: async (testType) => {
-      if (!currentUser || !selectedTestHorse) throw new Error('Données manquantes');
+      if (!currentUser || !selectedTestHorse) throw new Error('Missing data');
       
       const testConfig = TEST_TYPES[testType];
       const balance = currentUser.genesis_balance || 0;
@@ -921,7 +921,7 @@ export default function VetClinic() {
                               variant={isValid ? "outline" : "default"}
                             >
                               <Syringe className="w-3 h-3 mr-1" />
-                              {isValid ? 'À jour' : `${vac.price} €`}
+                              {isValid ? 'Up to date' : `${vac.price} €`}
                             </Button>
                           </div>
                         );
@@ -939,7 +939,7 @@ export default function VetClinic() {
       <Dialog open={treatmentDialog} onOpenChange={setTreatmentDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Traiter {selectedHorse?.name}</DialogTitle>
+            <DialogTitle>Treat {selectedHorse?.name}</DialogTitle>
           </DialogHeader>
           {selectedHorse && (() => {
             const record = getHealthRecord(selectedHorse.id);
@@ -953,11 +953,11 @@ export default function VetClinic() {
               <div className="space-y-4">
                 <div className="p-4 bg-red-50 rounded-lg">
                   <h3 className="font-semibold text-red-800 mb-2">{record?.current_illness}</h3>
-                  <p className="text-sm text-red-600">Durée du traitement: {illness?.duration} jours</p>
+                  <p className="text-sm text-red-600">Treatment duration: {illness?.duration} days</p>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-stone-700 mb-2">Médicaments requis:</h4>
+                  <h4 className="font-semibold text-stone-700 mb-2">Required medication:</h4>
                   <div className="space-y-2">
                     {illness?.treatment.map(med => {
                       const medication = MEDICATIONS.find(m => m.name === med);
@@ -978,14 +978,14 @@ export default function VetClinic() {
                   </div>
                   {illness?.treatment.some(t => MEDICATIONS.find(m => m.name === t)?.doping_risk) && (
                     <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700">
-                      ⚠️ Ce traitement contient des substances détectables lors d'un contrôle antidopage. Votre cheval sera soumis à une restriction de compétition de 14 jours.
+                      ⚠️ This treatment contains substances detectable during doping controls. Your horse will be restricted from competitions for 14 days.
                     </div>
                   )}
                 </div>
 
                 <div className="pt-4 border-t border-stone-200">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="font-semibold text-stone-700">Coût total:</span>
+                    <span className="font-semibold text-stone-700">Total cost:</span>
                     <span className="text-xl font-bold text-indigo-600">{totalCost} €</span>
                   </div>
                   <Button
@@ -993,7 +993,7 @@ export default function VetClinic() {
                     className="w-full bg-green-600 hover:bg-green-700"
                   >
                     <Pill className="w-4 h-4 mr-2" />
-                    Appliquer le traitement
+                    Apply treatment
                   </Button>
                 </div>
               </div>

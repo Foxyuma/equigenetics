@@ -137,8 +137,8 @@ export default function HorseDetail() {
 
   if (!horse) return (
     <div className="text-center py-20">
-      <p className="text-stone-400">Cheval introuvable</p>
-      <Link to="/Stable"><Button variant="outline" className="mt-4">Retour à l'écurie</Button></Link>
+      <p className="text-stone-400">Horse not found</p>
+      <Link to="/Stable"><Button variant="outline" className="mt-4">Back to Stable</Button></Link>
     </div>
   );
 
@@ -148,7 +148,7 @@ export default function HorseDetail() {
   return (
     <div className="space-y-6">
       <Link to="/Stable" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors">
-        <ArrowLeft className="w-4 h-4" />Retour à l'écurie
+        <ArrowLeft className="w-4 h-4" />Back to Stable
       </Link>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -164,7 +164,7 @@ export default function HorseDetail() {
               ) : generatingImage ? (
                 <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
                   <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin" />
-                  <p className="text-sm text-stone-400">Génération de l'image...</p>
+                  <p className="text-sm text-stone-400">Generating image...</p>
                 </div>
               ) : (
                 <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl">
@@ -184,10 +184,10 @@ export default function HorseDetail() {
               <h1 className="text-3xl font-bold text-stone-800">{horse.name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <Badge className={`border-0 ${horse.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
-                  {horse.sex === 'male' ? '♂ Mâle' : '♀ Femelle'}
+                  {horse.sex === 'male' ? '♂ Male' : '♀ Female'}
                 </Badge>
                 <Badge variant="outline">{getDisplayBreed(horse.breed)}</Badge>
-                <Badge variant="outline">{horse.age || 0} ans</Badge>
+                <Badge variant="outline">{horse.age || 0} years</Badge>
                 <Badge className="bg-stone-100 text-stone-600 border-0">{horse.coat_color}</Badge>
               </div>
             </div>
@@ -195,7 +195,7 @@ export default function HorseDetail() {
               {horse.is_for_sale ? (
                 <Button variant="outline" size="sm" onClick={() => toggleSaleMutation.mutate(0)}>
                   <ShoppingCart className="w-4 h-4 mr-1" />
-                  Retirer de la vente
+                  Remove from sale
                 </Button>
               ) : currentUser && horse.created_by === currentUser.email ? (
                 <Button variant="outline" size="sm" onClick={() => {
@@ -203,7 +203,7 @@ export default function HorseDetail() {
                   setShowSellDialog(true);
                 }}>
                   <ShoppingCart className="w-4 h-4 mr-1" />
-                  Mettre en vente
+                  Put up for sale
                 </Button>
               ) : null}
             </div>
@@ -211,14 +211,14 @@ export default function HorseDetail() {
             <Dialog open={showSellDialog} onOpenChange={setShowSellDialog}>
               <DialogContent className="max-w-sm">
                 <DialogHeader>
-                  <DialogTitle>Mettre {horse.name} en vente</DialogTitle>
+                  <DialogTitle>Sell {horse.name}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                   <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700">
-                    Valeur estimée : <strong>{estimateHorseValue(horse).toLocaleString('fr-FR')} ₲</strong>
+                    Estimated value: <strong>{estimateHorseValue(horse).toLocaleString('fr-FR')} ₲</strong>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="custom-price">Prix de vente (₲ Genesis)</Label>
+                    <Label htmlFor="custom-price">Sale price (₲ Genesis)</Label>
                     <Input
                       id="custom-price"
                       type="number"
@@ -228,18 +228,18 @@ export default function HorseDetail() {
                       className="text-lg font-semibold"
                     />
                     {Number(customPrice) < estimateHorseValue(horse) && (
-                      <p className="text-xs text-orange-500">⚠️ Prix inférieur à la valeur estimée</p>
+                      <p className="text-xs text-orange-500">⚠️ Price below estimated value</p>
                     )}
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowSellDialog(false)}>Annuler</Button>
+                  <Button variant="outline" onClick={() => setShowSellDialog(false)}>Cancel</Button>
                   <Button
                     disabled={!customPrice || Number(customPrice) <= 0 || toggleSaleMutation.isPending}
                     onClick={() => toggleSaleMutation.mutate(Number(customPrice))}
                     className="bg-stone-800 hover:bg-stone-900"
                   >
-                    Confirmer la vente
+                    Confirm sale
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -251,8 +251,8 @@ export default function HorseDetail() {
               <CardContent className="p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-orange-800">⚠️ Substance détectable — Risque antidopage</p>
-                  <p className="text-xs text-orange-600 mt-0.5">Ce cheval a reçu un traitement contenant des substances sous surveillance jusqu'au <strong>{new Date(horse.doping_risk_until).toLocaleDateString('fr-FR')}</strong>. Participer à une compétition avant cette date expose à un contrôle positif.</p>
+                  <p className="text-sm font-semibold text-orange-800">⚠️ Detectable substance — Doping risk</p>
+                  <p className="text-xs text-orange-600 mt-0.5">This horse received treatment with monitored substances until <strong>{new Date(horse.doping_risk_until).toLocaleDateString('en-GB')}</strong>. Competing before this date risks a positive doping test.</p>
                 </div>
               </CardContent>
             </Card>
@@ -263,11 +263,11 @@ export default function HorseDetail() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-0.5">Valeur estimée</p>
+                    <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-0.5">Estimated value</p>
                     <p className="text-2xl font-bold text-amber-800">
-                      {estimateHorseValue(horse).toLocaleString('fr-FR')} <span className="text-base font-semibold">₲ Genesis</span>
+                    {estimateHorseValue(horse).toLocaleString('en-GB')} <span className="text-base font-semibold">₲ Genesis</span>
                     </p>
-                    <p className="text-xs text-amber-600/70 mt-1">Estimation basée sur la génétique, les performances, l'âge, la rareté et le potentiel en compétition.</p>
+                    <p className="text-xs text-amber-600/70 mt-1">Based on genetics, performance, age, rarity and competition potential.</p>
                   </div>
                   <div className="text-3xl opacity-30">₲</div>
                 </div>
@@ -280,7 +280,7 @@ export default function HorseDetail() {
               <CardContent className="p-4 text-center">
                 <Activity className="w-5 h-5 mx-auto text-emerald-500 mb-1" />
                 <p className="text-2xl font-bold text-stone-800">{avgStat}</p>
-                <p className="text-xs text-stone-500">Moy. Stats</p>
+                <p className="text-xs text-stone-500">Avg. Stats</p>
               </CardContent>
             </Card>
             <Card className="border-0 bg-white/60">

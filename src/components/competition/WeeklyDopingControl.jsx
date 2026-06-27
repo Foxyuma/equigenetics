@@ -105,6 +105,22 @@ export default function WeeklyDopingControl() {
           reason: 'amende_antidopage',
           reference_id: comp.id,
         });
+        // Send bell notification
+        await base44.entities.Message.create({
+          sender_email: 'system@equigenesis.fr',
+          sender_name: 'Fédération Équestre',
+          recipient_email: user.email,
+          recipient_name: user.full_name || 'Joueur',
+          subject: `🚨 Contrôle antidopage positif : ${horse.name}`,
+          content: `Le cheval **${horse.name}** a été contrôlé positif lors de l'épreuve **${comp.name}** (niveau ${comp.level}).\n\n` +
+            `Substance détectée : ${control.substance}.\n\n` +
+            `Sanctions appliquées :\n` +
+            `• Disqualification de l'épreuve\n` +
+            `• Amende de **${fine.toLocaleString('fr-FR')} ₲**\n` +
+            `• Perte de réputation\n\n` +
+            `Veillez à respecter les délais d'élimination des substances après tout traitement médical.`,
+          is_read: false,
+        });
         positives.push({ horseName: horse.name, compName: comp.name, fine });
         checkedHorses.add(horse.id);
       }
@@ -113,6 +129,8 @@ export default function WeeklyDopingControl() {
     queryClient.invalidateQueries({ queryKey: ['me'] });
     queryClient.invalidateQueries({ queryKey: ['health-record'] });
     queryClient.invalidateQueries({ queryKey: ['health-records'] });
+    queryClient.invalidateQueries({ queryKey: ['messages'] });
+    queryClient.invalidateQueries({ queryKey: ['messages-nav'] });
 
     positives.forEach(p => {
       toast.error(

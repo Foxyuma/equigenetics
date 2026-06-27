@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter } from 'lucide-react';
@@ -12,6 +13,7 @@ const HORSE_NAMES_MALE = ["Tornado", "Eclipse", "Sultan", "Orage", "Apollo", "Z�
 const HORSE_NAMES_FEMALE = ["Luna", "Aurore", "Perle", "Tempête", "Étoile", "Jade", "Iris", "Stella", "Naya", "Olympe"];
 
 export default function Stable() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filterBreed, setFilterBreed] = useState('all');
   const [filterSex, setFilterSex] = useState('all');
@@ -57,7 +59,10 @@ export default function Stable() {
   }, [isLoading, horses.length, currentUser]);
 
   if (showOnboarding) {
-    return <OnboardingWizard onComplete={() => setShowOnboarding(false)} />;
+    return <OnboardingWizard onComplete={() => {
+      setShowOnboarding(false);
+      navigate('/Guide');
+    }} />;
   }
 
   return (

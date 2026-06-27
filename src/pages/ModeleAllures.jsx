@@ -96,7 +96,7 @@ export default function ModeleAllures() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modele-allures-comps', currentUser?.email] });
-      toast.success('Inscription confirmée ! Résultats demain à minuit 🌙');
+      toast.success('Registration confirmed! Results tomorrow at midnight 🌙');
     },
     onError: (err) => toast.error(err.message),
   });
@@ -162,11 +162,11 @@ export default function ModeleAllures() {
     },
     onSuccess: (result) => {
       if (result?.disqualified) {
-        toast.error(`🚨 ${result.horseName} disqualifié(e) du concours ${result.breed} ! Contrôle antidopage positif.`);
+      toast.error(`🚨 ${result.horseName} disqualified from ${result.breed} championship! Positive doping control.`);
       } else if (result?.rank === 1) {
-        toast.success(`🏆 ${result.horseName} remporte le championnat ${result.breed} (${getAgeClassLabel(result.ageClass)}) ! +${result.prize} ₲`);
+      toast.success(`🏆 ${result.horseName} wins the ${result.breed} championship (${getAgeClassLabel(result.ageClass)})! +${result.prize} ₲`);
       } else if (result?.rank <= 3) {
-        toast.success(`${rankMedal(result.rank)} ${result.horseName} — championnat ${result.breed} ! +${result.prize} ₲`);
+      toast.success(`${rankMedal(result.rank)} ${result.horseName} — ${result.breed} championship! +${result.prize} ₲`);
       }
       queryClient.invalidateQueries({ queryKey: ['modele-allures-comps', currentUser?.email] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -246,7 +246,7 @@ export default function ModeleAllures() {
                         {breed}
                       </CardTitle>
                       <Badge variant="outline" className="text-xs">
-                        Année {gameYear} · {breedHorses.length} cheval(x)
+                        Year {gameYear} · {breedHorses.length} horse(s)
                       </Badge>
                     </div>
                   </CardHeader>
@@ -311,7 +311,7 @@ export default function ModeleAllures() {
                                       disabled={alreadyReg || registerMutation.isPending || !foalSeasonOpen}
                                       className="bg-amber-600 hover:bg-amber-700 text-white"
                                     >
-                                      {alreadyReg ? '✓ Inscrit' : foalSeasonOpen ? 'Inscrire' : 'Hors saison'}
+                                      {alreadyReg ? '✓ Registered' : foalSeasonOpen ? 'Register' : 'Out of season'}
                                     </Button>
                                   </div>
                                 </div>
@@ -333,7 +333,7 @@ export default function ModeleAllures() {
               <CardContent className="p-4">
                 <p className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  Inscriptions en attente (résultats à minuit)
+                  Pending registrations (results at midnight)
                 </p>
                 <div className="space-y-2">
                   {pendingComps.map((c) => (
@@ -342,7 +342,7 @@ export default function ModeleAllures() {
                       className="flex items-center justify-between text-sm text-blue-700 bg-white/60 rounded-lg p-2"
                     >
                       <span>{c.horse_name} — {c.breed} ({getAgeClassLabel(c.age_class)})</span>
-                      <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">Le {c.competition_date}</Badge>
+                      <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">{c.competition_date}</Badge>
                     </div>
                   ))}
                 </div>
@@ -351,18 +351,18 @@ export default function ModeleAllures() {
           )}
         </TabsContent>
 
-        {/* Résultats */}
-        <TabsContent value="resultats" className="mt-4">
+        {/* Results */}
+        <TabsContent value="results" className="mt-4">
           <Card className="border-0 bg-white/60">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-500" />
-                Palmarès des championnats
+                Championship results
               </CardTitle>
             </CardHeader>
             <CardContent>
               {completedComps.length === 0 ? (
-                <p className="text-center text-stone-400 py-8">Aucun résultat pour le moment</p>
+                <p className="text-center text-stone-400 py-8">No results yet</p>
               ) : (
                 <div className="space-y-2">
                   {completedComps.map((c) => (
@@ -389,7 +389,7 @@ export default function ModeleAllures() {
                       </div>
                       <div className="text-right">
                         {c.disqualified ? (
-                          <Badge className="bg-red-100 text-red-700 border-0 text-xs">Disqualifié</Badge>
+                          <Badge className="bg-red-100 text-red-700 border-0 text-xs">Disqualified</Badge>
                         ) : (
                           <>
                             <p className="font-bold text-stone-800">{c.score?.toFixed(1)} pts</p>

@@ -294,14 +294,14 @@ export default function StallionMarket() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Marché des Saillies</h1>
-        <p className="text-stone-500 mt-1">Choisissez un étalon pour reproduire avec votre jument</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Stallion Market</h1>
+        <p className="text-stone-500 mt-1">Choose a stallion to breed with your mare</p>
       </div>
 
       {/* Info qualité */}
       <div className="text-xs text-stone-500 flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-200 p-3 rounded-xl">
         <Info className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-        <span>Les étalons sont classés par niveau d'approbation — le prix de saillie est <strong>multiplié</strong> selon le statut.</span>
+        <span>Stallions are ranked by approval level — the breeding fee is <strong>multiplied</strong> by their status.</span>
         <div className="flex flex-wrap gap-1">
           <Badge className="bg-yellow-100 text-yellow-700 border-0 text-[10px]">⭐ Élite : ×2.5</Badge>
           <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">🏆 Sport : ×1.8</Badge>
@@ -314,9 +314,9 @@ export default function StallionMarket() {
       {/* Filter */}
       <div className="flex gap-3 flex-wrap items-center">
         <Select value={filterBreed} onValueChange={setFilterBreed}>
-          <SelectTrigger className="w-52 bg-white/80"><SelectValue placeholder="Toutes les races" /></SelectTrigger>
+          <SelectTrigger className="w-52 bg-white/80"><SelectValue placeholder="All breeds" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes les races</SelectItem>
+            <SelectItem value="all">All breeds</SelectItem>
             {BREEDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -328,9 +328,9 @@ export default function StallionMarket() {
               : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
           }`}
         >
-          ✓ Approuvés uniquement
+          ✓ Approved only
         </button>
-        <Badge className="bg-stone-100 text-stone-600 border-0 self-center">{stallionsWithDynamicPrices.length} étalons disponibles</Badge>
+        <Badge className="bg-stone-100 text-stone-600 border-0 self-center">{stallionsWithDynamicPrices.length} stallions available</Badge>
       </div>
 
       {/* Stallions grid */}
@@ -368,7 +368,7 @@ export default function StallionMarket() {
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="outline" className="text-xs">{s.breed}</Badge>
                     <Badge className="bg-stone-100 text-stone-600 border-0 text-xs">{s.coat_color}</Badge>
-                    <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} ans</Badge>
+                    <Badge className="bg-blue-50 text-blue-600 border-0 text-xs">{s.age} yr(s)</Badge>
                     {s.approvalConfig && (
                       <Badge className={`border-0 text-xs ${s.approvalConfig.color}`} title={`Multiplicateur de prix : ${s.approvalConfig.multLabel}`}>
                         {s.approvalConfig.label}
@@ -380,7 +380,7 @@ export default function StallionMarket() {
                     <div className="flex items-center gap-1.5">
                       <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                       <span className="text-xs text-stone-500">
-                        Moy. stats: <strong className="text-stone-700">{Math.round(Object.values(s.stats).reduce((a, b) => a + b, 0) / Object.keys(s.stats).length)}</strong>
+                        Avg stats: <strong className="text-stone-700">{Math.round(Object.values(s.stats).reduce((a, b) => a + b, 0) / Object.keys(s.stats).length)}</strong>
                       </span>
                     </div>
                   )}
@@ -415,13 +415,13 @@ export default function StallionMarket() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Dna className="w-5 h-5 text-violet-500" />
-              Reproduction avec {selectedStallion.stallion_name}
+              Breeding with {selectedStallion.stallion_name}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={selectedMareId} onValueChange={(v) => { setSelectedMareId(v); setFoalPreview(null); }}>
-                <SelectTrigger className="bg-white flex-1"><SelectValue placeholder="Choisir votre jument..." /></SelectTrigger>
+                <SelectTrigger className="bg-white flex-1"><SelectValue placeholder="Choose your mare..." /></SelectTrigger>
                 <SelectContent>
                   {mares.map(h => <SelectItem key={h.id} value={h.id}>{h.name} — {h.breed}</SelectItem>)}
                 </SelectContent>
@@ -432,7 +432,7 @@ export default function StallionMarket() {
                 className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
               >
                 <FlaskConical className="w-4 h-4 mr-2" />
-                Simuler le croisement
+                Simulate breeding
               </Button>
             </div>
 
@@ -443,21 +443,21 @@ export default function StallionMarket() {
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
                   <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-blue-700">
-                    <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe du poulain peuvent varier lors de la naissance réelle. Cette simulation donne une estimation probabiliste basée sur les gènes des deux parents.
+                    <strong>Indicative forecast:</strong> the foal's skills, genotype and sex may vary at actual birth. This simulation gives a probabilistic estimate based on both parents' genes.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={`border-0 ${foalPreview.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
-                    {foalPreview.sex === 'male' ? '♂ Mâle (estimé)' : '♀ Femelle (estimé)'}
+                    {foalPreview.sex === 'male' ? '♂ Male (est.)' : '♀ Female (est.)'}
                   </Badge>
                   <Badge variant="outline">{foalPreview.breed}</Badge>
-                  <Badge className="bg-stone-100 text-stone-600 border-0">{foalPreview.coat_color} (estimé)</Badge>
+                  <Badge className="bg-stone-100 text-stone-600 border-0">{foalPreview.coat_color} (est.)</Badge>
                 </div>
 
                 <div>
                   <h4 className="text-sm font-semibold text-stone-600 mb-2 flex items-center gap-1">
-                    Compétences estimées <span className="text-xs font-normal text-stone-400">(peuvent varier)</span>
+                    Estimated skills <span className="text-xs font-normal text-stone-400">(may vary)</span>
                   </h4>
                   <div className="space-y-1.5">
                     {Object.entries(foalPreview.stats).map(([s, v]) => <StatBar key={s} stat={s} value={v} />)}
@@ -466,7 +466,7 @@ export default function StallionMarket() {
 
                 <div>
                   <h4 className="text-sm font-semibold text-stone-600 mb-2 flex items-center gap-1">
-                    Génotype estimé <span className="text-xs font-normal text-stone-400">(peut varier)</span>
+                    Estimated genotype <span className="text-xs font-normal text-stone-400">(may vary)</span>
                   </h4>
                   <GeneticPanel genotype={foalPreview.genotype} />
                 </div>
@@ -474,7 +474,7 @@ export default function StallionMarket() {
                 {foalPreview.health_genes?.some(g => g.status !== 'clear') && (
                   <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
                     <p className="text-xs font-semibold text-orange-700 mb-2 flex items-center gap-1">
-                      <AlertTriangle className="w-3.5 h-3.5" /> Risques génétiques détectés
+                      <AlertTriangle className="w-3.5 h-3.5" /> Genetic risks detected
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {foalPreview.health_genes.filter(g => g.status !== 'clear').map(g => (

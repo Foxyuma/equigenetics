@@ -43,8 +43,8 @@ const GENE_LABELS = {
   overo:      { label: "Overo/Frame (Fr)",visible: true  },
   roan:       { label: "Rouan (RN)",      visible: true  },
   dun:        { label: "Dun (D)",         visible: true  },
-  champagne:  { label: "Champagne (CH)",  visible: false },
-  silver:     { label: "Silver (Z)",      visible: false },
+  champagne:  { label: "Champagne (CH)",  visible: true  },
+  silver:     { label: "Silver (Z)",      visible: true  },
 };
 
 const NEUTRAL = {

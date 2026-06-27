@@ -46,7 +46,7 @@ export default function Stable() {
     if (filterSex !== 'all' && h.sex !== filterSex) return false;
     if (filterAge !== 'all' && h.age !== parseInt(filterAge, 10)) return false;
     if (filterValue !== 'all') {
-      const val = h.estimated_value || estimateHorseValue(h);
+      const val = estimateHorseValue(h);
       if (filterValue === 'lt5k' && !(val < 5000)) return false;
       if (filterValue === '5to15k' && !(val >= 5000 && val < 15000)) return false;
       if (filterValue === '15to50k' && !(val >= 15000 && val < 50000)) return false;

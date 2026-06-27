@@ -126,12 +126,15 @@ function generateSingleStallion(breed, name, tier) {
 
   const [ageMin, ageMax] = tier.ageRange;
   const stats = boostedStats;
+  const adultAge = ageMin + Math.floor(Math.random() * (ageMax - ageMin + 1));
+  // NPC stallions are adults → show adult coat (Gris if grey, not the birth colour)
+  const adultCoat = determineCoatColor(starter.genotype, adultAge);
 
   const stallionObj = {
     stallion_name: name,
     breed,
-    coat_color: starter.coat_color,
-    age: ageMin + Math.floor(Math.random() * (ageMax - ageMin + 1)),
+    coat_color: adultCoat,
+    age: adultAge,
     genotype: starter.genotype,
     stats,
     health_genes,
@@ -220,7 +223,7 @@ export default function StallionMarket() {
     const childGenotype = breedGenotype(selectedStallion.genotype, selectedMare.genotype);
     const childStats = generateRandomStats(selectedStallion.stats, selectedMare.stats);
     const childHealth = inheritDiseases(selectedStallion.health_genes, selectedMare.health_genes, selectedMare.breed);
-    const coatColor = determineCoatColor(childGenotype);
+    const coatColor = determineCoatColor(childGenotype, 0);
     setFoalPreview({
       genotype: childGenotype,
       stats: childStats,

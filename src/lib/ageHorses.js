@@ -1,7 +1,7 @@
 // Horse aging service — ages horses by game months (14 real days = 1 game month)
 // Runs each daily tick. Horses age 1 year per game month, capped at 35.
 import { base44 } from '@/api/base44Client';
-import { estimateHorseValue } from '@/components/genetics/GeneticsEngine';
+import { estimateHorseValue, determineCoatColor } from '@/components/genetics/GeneticsEngine';
 
 const MAX_AGE = 35;
 
@@ -48,6 +48,11 @@ export async function ageHorses(userEmail, newMonth) {
         ...horse,
         age: newAge,
       });
+      // Poulain → adulte : grisonnement pour les chevaux gris (Nature 2024 : les gris naissent colorés)
+      const oldAge = horse.age || 0;
+      if (oldAge < 3 && newAge >= 3 && horse.genotype) {
+        update.coat_color = determineCoatColor(horse.genotype, newAge);
+      }
       agedCount++;
     }
 

@@ -385,7 +385,9 @@ function applyPatterns(color, genotype) {
 }
 
 // Fonction principale : déterminer la robe complète
-export function determineCoatColor(genotype) {
+// Si age < 3 (poulain), un cheval gris affiche sa couleur de naissance pleine, PAS "Gris"
+// — conformément à l'article Nature 2024 : les chevaux gris naissent entièrement pigmentés et grisonnent à partir de 1 an.
+export function determineCoatColor(genotype, age) {
   if (!genotype) return 'Unknown';
   
   // Étape A : base
@@ -394,9 +396,16 @@ export function determineCoatColor(genotype) {
   // Étape B : dilutions
   let displayColor = applyDilutions(baseColor, genotype);
   
-  // Étape C : grey — le gène gris MASQUE tous les patterns pies (tobiano, sabino, splash, roan, overo)
+  // Étape C : grey
   const { displayColor: finalDisplay, baseColorAtBirth, isGrey } = applyGrey(displayColor, baseColor, genotype);
   displayColor = finalDisplay;
+  
+  // Poulain (< 3 ans) → couleur de naissance pleine, PAS le gris.
+  // D'après Nature 2024 : les chevaux gris naissent avec leur robe complète et grisonnent la 1re année.
+  if (isGrey && (age !== undefined && age < 3)) {
+    const dil = applyDilutions(baseColorAtBirth, genotype);
+    return applyPatterns(dil, genotype);
+  }
   
   // Étape D : patterns — uniquement si le cheval n'est pas gris (le gris masque les patterns)
   const finalColor = isGrey ? displayColor : applyPatterns(displayColor, genotype);
@@ -576,7 +585,7 @@ export function generateStarterHorse(breed) {
   
   return {
     genotype,
-    coat_color: determineCoatColor(genotype),
+    coat_color: determineCoatColor(genotype, 0),
     stats,
     health_genes: healthGenes,
     energy: 100,

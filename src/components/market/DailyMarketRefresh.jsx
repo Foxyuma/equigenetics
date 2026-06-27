@@ -48,6 +48,9 @@ function generateNpcHorse() {
 
   // Varier l'âge (0 à 12 ans)
   const age = Math.floor(Math.random() * 13);
+  // Recalculer la robe selon l'âge : les poulains affichent leur couleur de naissance,
+  // les adultes (≥ 3 ans) grisonnent pour les chevaux gris.
+  coat_color = determineCoatColor(genotype, age);
 
   // Améliorer les stats selon l'âge (les chevaux plus vieux ont plus d'expérience)
   if (age >= 3) {

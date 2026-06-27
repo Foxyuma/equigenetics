@@ -79,7 +79,7 @@ export default function ReproductionPanel({ mare }) {
     const childGenotype = breedGenotype(selectedStallion.genotype, mare.genotype);
     const childStats = generateRandomStats(selectedStallion.stats, mare.stats);
     const childHealth = inheritDiseases(selectedStallion.health_genes, mare.health_genes, mare.breed);
-    const coatColor = determineCoatColor(childGenotype);
+    const coatColor = determineCoatColor(childGenotype, 0);
     
     const viability = checkFoalViability(selectedStallion.health_genes, mare.health_genes, mare.breed);
     const deathAge = !viability.viable ? null : determineFoalDeathAge(childHealth);

@@ -61,7 +61,7 @@ export default function Breeding() {
     const childGenotype = breedGenotype(father.genotype, mother.genotype);
     const childStats = generateRandomStats(father.stats, mother.stats);
     const childHealth = inheritDiseases(father.health_genes, mother.health_genes, mother.breed);
-    const coatColor = determineCoatColor(childGenotype);
+    const coatColor = determineCoatColor(childGenotype, 0);
     
     setFoalPreview({
       genotype: childGenotype,

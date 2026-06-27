@@ -394,12 +394,12 @@ export function determineCoatColor(genotype) {
   // Étape B : dilutions
   let displayColor = applyDilutions(baseColor, genotype);
   
-  // Étape C : grey
+  // Étape C : grey — le gène gris MASQUE tous les patterns pies (tobiano, sabino, splash, roan, overo)
   const { displayColor: finalDisplay, baseColorAtBirth, isGrey } = applyGrey(displayColor, baseColor, genotype);
   displayColor = finalDisplay;
   
-  // Étape D : patterns
-  const finalColor = applyPatterns(displayColor, genotype);
+  // Étape D : patterns — uniquement si le cheval n'est pas gris (le gris masque les patterns)
+  const finalColor = isGrey ? displayColor : applyPatterns(displayColor, genotype);
   
   return finalColor;
 }
@@ -414,7 +414,7 @@ export function getCoatColorInfo(genotype) {
   const finalColor = applyPatterns(displayColor, genotype);
   
   return {
-    displayColor: finalColor,
+    displayColor: isGrey ? displayColor : finalColor,
     baseColorAtBirth: isGrey ? applyPatterns(dilutedColor, genotype) : finalColor,
     isGrey
   };

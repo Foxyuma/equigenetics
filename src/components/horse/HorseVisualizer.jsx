@@ -1,12 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { getHorsePhotoUrl } from '@/lib/horsePhotos';
 
-const BASE_IMAGE = "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/be5f70039_228d75cd-d270-459c-ba6f-9549efdcc916.png";
-
-// Derive coat background color + image filter from genotype
-// Base image is a BAY horse (brown body + black mane/legs)
-// mix-blend-mode:multiply on image × background color = tinted result
-const getCoatStyle = (genotype) => {
-  if (!genotype) return { bg: '#c47a3a', imgFilter: 'none' };
+// Derive coat background color from genotype (for fallback / accent)
+const getCoatBg = (genotype) => {
+  if (!genotype) return '#c47a3a';
 
   const isBlack  = genotype.extension !== "ee";
   const hasAgouti = genotype.agouti !== "aa";
@@ -15,68 +12,24 @@ const getCoatStyle = (genotype) => {
   const isGrey    = genotype.grey === "GG" || genotype.grey === "Gg";
   const hasChampagne = genotype.champagne === "CHn" || genotype.champagne === "CHCH";
   const hasSilver = genotype.silver === "Zz" || genotype.silver === "ZZ";
-  const hasDun    = genotype.dun === "Dd" || genotype.dun === "DD";
-  const hasTobiano = genotype.tobiano && genotype.tobiano !== "nn";
-  const hasRoan   = genotype.roan === "RNn" || genotype.roan === "RNRN";
 
-  let bg = '#c47a3a';           // Default bay-ish tint
-  let imgFilter = 'none';
-
-  if (isGrey) {
-    bg = '#e0ddd8';
-    imgFilter = 'saturate(0.05) brightness(1.2)';
-  } else if (!isBlack) {
-    // Chestnut family (no black pigment → no black mane)
-    if (doubleCream) {
-      bg = '#fff8e7';
-      imgFilter = 'saturate(0.25) brightness(1.6) sepia(0.15)';
-    } else if (hasCream) {
-      bg = '#f0c060';           // Palomino gold
-      imgFilter = 'saturate(0.6) brightness(1.3) sepia(0.3)';
-    } else if (hasChampagne) {
-      bg = '#d4a840';
-      imgFilter = 'saturate(0.8) brightness(1.15) sepia(0.25)';
-    } else {
-      bg = '#c46030';           // Chestnut
-      imgFilter = 'saturate(1.1) brightness(1.0) hue-rotate(-8deg)';
-    }
-  } else if (hasAgouti) {
-    // Bay family
-    if (doubleCream) {
-      bg = '#f0e0b8';
-      imgFilter = 'saturate(0.3) brightness(1.7)';
-    } else if (hasCream) {
-      bg = '#d4b870';           // Buckskin
-      imgFilter = 'saturate(0.7) brightness(1.25)';
-    } else if (hasChampagne) {
-      bg = '#c89040';
-      imgFilter = 'saturate(0.9) brightness(1.1) sepia(0.15)';
-    } else if (hasSilver) {
-      bg = '#a08050';
-      imgFilter = 'saturate(0.6) brightness(1.05)';
-    } else {
-      bg = '#c47a3a';           // Bay (base, minimal tint)
-      imgFilter = 'saturate(1.05) brightness(1.0)';
-    }
-  } else {
-    // Black family
-    if (doubleCream) {
-      bg = '#e8d5c0';
-      imgFilter = 'saturate(0.15) brightness(1.6)';
-    } else if (hasCream) {
-      bg = '#505050';           // Smoky black
-      imgFilter = 'saturate(0.1) brightness(0.75)';
-    } else {
-      bg = '#383838';           // Black
-      imgFilter = 'saturate(0.05) brightness(0.5)';
-    }
+  if (isGrey) return '#e0ddd8';
+  if (!isBlack) {
+    if (doubleCream) return '#fff8e7';
+    if (hasCream) return '#f0c060';
+    if (hasChampagne) return '#d4a840';
+    return '#c46030';
   }
-
-  if (hasDun && !isGrey) {
-    imgFilter += ' contrast(1.05)';
+  if (hasAgouti) {
+    if (doubleCream) return '#f0e0b8';
+    if (hasCream) return '#d4b870';
+    if (hasChampagne) return '#c89040';
+    if (hasSilver) return '#a08050';
+    return '#c47a3a';
   }
-
-  return { bg, imgFilter, hasTobiano, hasRoan, hasDun, hasSilver, hasCream, doubleCream };
+  if (doubleCream) return '#e8d5c0';
+  if (hasCream) return '#505050';
+  return '#383838';
 };
 
 const GENE_LABELS = {
@@ -96,18 +49,28 @@ const NEUTRAL = {
   tobiano: 'nn', roan: 'nn', dun: 'dd', champagne: 'nn', silver: 'zz',
 };
 
-export default function HorseVisualizer({ genotype, coatColor, size = 320, showGenotype = true }) {
-  const style = getCoatStyle(genotype);
+export default function HorseVisualizer({ genotype, coatColor, horseId, size = 320, showGenotype = true }) {
+  const [imgError, setImgError] = useState(false);
+  const photoUrl = getHorsePhotoUrl(genotype, horseId);
+  const bg = getCoatBg(genotype);
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Horse with genetic color */}
-      <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ width: size, height: size, background: style.bg }}>
-
-        {/* Horse silhouette — emoji, zero network, instant */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span style={{ fontSize: size * 0.5 }} className="opacity-40 select-none">🐎</span>
-        </div>
+      {/* Horse photo from Unsplash by coat color */}
+      <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ width: size, height: size, background: bg }}>
+        {imgError ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span style={{ fontSize: size * 0.5 }} className="opacity-40 select-none">🐎</span>
+          </div>
+        ) : (
+          <img
+            src={photoUrl}
+            alt={coatColor || 'Cheval'}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+            loading="lazy"
+          />
+        )}
 
         {/* Coat label — hidden in compact mode (card shows it below) */}
         {showGenotype && (

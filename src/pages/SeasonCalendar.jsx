@@ -7,53 +7,53 @@ const SEASON_DETAILS = {
   spring: {
     icon: Flower,
     benefits: [
-      "Fertilité augmentée de 20%",
-      "Risque de maladie faible (12%)",
-      "Compétitions de printemps disponibles"
+      "Fertility increased by 20%",
+      "Low disease risk (12%)",
+      "Spring competitions available"
     ],
     tips: [
-      "Période idéale pour la reproduction",
-      "Les poulains nés au printemps sont plus robustes",
-      "Profitez des compétitions outdoor"
+      "Ideal period for breeding",
+      "Foals born in spring are more robust",
+      "Enjoy outdoor competitions"
     ]
   },
   summer: {
     icon: Sun,
     benefits: [
-      "Fertilité normale (100%)",
-      "Risque de maladie modéré (20%)",
-      "Compétitions d'endurance et vitesse"
+      "Normal fertility (100%)",
+      "Moderate disease risk (20%)",
+      "Endurance and speed competitions"
     ],
     tips: [
-      "Attention aux coups de chaleur",
-      "Hydratation importante",
-      "Compétitions d'endurance favorisées"
+      "Watch for heatstroke",
+      "Hydration is key",
+      "Endurance competitions favored"
     ]
   },
   autumn: {
     icon: CloudRain,
     benefits: [
-      "Fertilité légèrement réduite (90%)",
-      "Risque de maladie modéré (18%)",
-      "Compétitions cross-country"
+      "Slightly reduced fertility (90%)",
+      "Moderate disease risk (18%)",
+      "Cross-country competitions"
     ],
     tips: [
-      "Préparez les chevaux pour l'hiver",
-      "Renforcez les vaccinations",
-      "Compétitions outdoor avant l'hiver"
+      "Prepare horses for winter",
+      "Boost vaccinations",
+      "Outdoor competitions before winter"
     ]
   },
   winter: {
     icon: Snowflake,
     benefits: [
-      "Fertilité réduite de 30%",
-      "Risque élevé de maladie (25%)",
-      "Compétitions indoor uniquement"
+      "Fertility reduced by 30%",
+      "High disease risk (25%)",
+      "Indoor competitions only"
     ],
     tips: [
-      "Surveillance accrue de la santé",
-      "Privilégiez les compétitions indoor",
-      "Maintenez une bonne alimentation"
+      "Increased health monitoring",
+      "Prioritize indoor competitions",
+      "Maintain good nutrition"
     ]
   }
 };
@@ -62,8 +62,8 @@ export default function SeasonCalendar() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Calendrier des Saisons</h1>
-        <p className="text-stone-500 mt-1">Gérez le cycle annuel et adaptez votre stratégie</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Season Calendar</h1>
+        <p className="text-stone-500 mt-1">Manage the annual cycle and adapt your strategy</p>
       </div>
 
       <SeasonManager />
@@ -76,15 +76,15 @@ export default function SeasonCalendar() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Icon className="w-5 h-5" />
-                  {season === 'spring' && 'Printemps'}
-                  {season === 'summer' && 'Été'}
-                  {season === 'autumn' && 'Automne'}
-                  {season === 'winter' && 'Hiver'}
+                  {season === 'spring' && 'Spring'}
+                  {season === 'summer' && 'Summer'}
+                  {season === 'autumn' && 'Autumn'}
+                  {season === 'winter' && 'Winter'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-stone-700 text-sm mb-2">Effets</h4>
+                  <h4 className="font-semibold text-stone-700 text-sm mb-2">Effects</h4>
                   <ul className="space-y-1">
                     {details.benefits.map((b, i) => (
                       <li key={i} className="text-sm text-stone-600 flex items-start gap-2">
@@ -95,7 +95,7 @@ export default function SeasonCalendar() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-stone-700 text-sm mb-2">Conseils</h4>
+                  <h4 className="font-semibold text-stone-700 text-sm mb-2">Tips</h4>
                   <ul className="space-y-1">
                     {details.tips.map((t, i) => (
                       <li key={i} className="text-sm text-stone-600 flex items-start gap-2">

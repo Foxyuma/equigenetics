@@ -28,7 +28,7 @@ function rankMedal(rank) {
 }
 
 export default function ModeleAllures() {
-  const [tab, setTab] = useState('inscriptions');
+  const [tab, setTab] = useState('registrations');
   const [breakdownHorse, setBreakdownHorse] = useState(null);
   const queryClient = useQueryClient();
 
@@ -189,10 +189,10 @@ export default function ModeleAllures() {
       <div>
         <h1 className="text-3xl font-bold text-stone-800 tracking-tight flex items-center gap-2">
           <Sparkles className="w-7 h-7 text-amber-500" />
-          Concours Modèles et Allures
+          Models & Gaits Championships
         </h1>
         <p className="text-stone-500 mt-1">
-          Championnats de race par classe d'âge — réservés aux jeunes chevaux (0-4 ans) inscrits au studbook ou OC
+          Breed championships by age class — reserved for young horses (0-4 yrs) registered in studbook or OC
         </p>
       </div>
 
@@ -202,34 +202,34 @@ export default function ModeleAllures() {
           <div className="text-sm text-stone-600 space-y-1">
             {foalSeasonOpen ? (
               <p className="text-emerald-700 font-semibold">
-                🍂 Les concours de poulains sont ouverts ! Saison : {SEASON_LABELS[currentSeason]} — Année {gameYear}.
+                🍂 Foal competitions are open! Season: {SEASON_LABELS[currentSeason]} — Year {gameYear}.
               </p>
             ) : (
               <p className="text-amber-700 font-semibold">
-                ⏳ Les concours de poulains ont lieu en septembre (automne). Saison actuelle : {SEASON_LABELS[currentSeason]}.
+                ⏳ Foal competitions take place in September (autumn). Current season: {SEASON_LABELS[currentSeason]}.
               </p>
             )}
-            <p>• <strong>1 concours par race et par an</strong> — chaque cheval ne peut participer qu'une fois par an dans sa race.</p>
-            <p>• <strong>Classes d'âge</strong> : de l'année (0), 1 an, 2 ans, 3 ans, 4 ans.</p>
-            <p>• <strong>Éligibilité</strong> : le cheval doit être inscrit au studbook ou avoir des origines connues (OC).</p>
-            <p>• <strong>Notation</strong> : modèle (morphologie), allures (potentiel génétique), type de race, présentation.</p>
+            <p>• <strong>1 competition per breed per year</strong> — each horse may only compete once per year in its breed.</p>
+            <p>• <strong>Age classes</strong>: yearling (0), 1 year, 2 years, 3 years, 4 years.</p>
+            <p>• <strong>Eligibility</strong>: the horse must be registered in the studbook or have known origins (OC).</p>
+            <p>• <strong>Scoring</strong>: model (morphology), gaits (genetic potential), breed type, presentation.</p>
           </div>
         </CardContent>
       </Card>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="bg-stone-100/80">
-          <TabsTrigger value="inscriptions">Inscriptions</TabsTrigger>
-          <TabsTrigger value="resultats">Résultats</TabsTrigger>
+          <TabsTrigger value="registrations">Registrations</TabsTrigger>
+          <TabsTrigger value="results">Results</TabsTrigger>
         </TabsList>
 
-        {/* Inscriptions */}
-        <TabsContent value="inscriptions" className="mt-4 space-y-4">
+        {/* Registrations */}
+        <TabsContent value="registrations" className="mt-4 space-y-4">
           {eligibleHorses.length === 0 ? (
             <div className="text-center py-16 text-stone-400">
               <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Aucun cheval éligible.</p>
-              <p className="text-sm mt-1">Vos chevaux doivent avoir 0-4 ans et être inscrits au studbook ou OC.</p>
+              <p>No eligible horses.</p>
+              <p className="text-sm mt-1">Your horses must be 0-4 yrs old and registered in studbook or OC.</p>
             </div>
           ) : (
             breeds.map((breed) => {

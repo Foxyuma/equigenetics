@@ -499,7 +499,7 @@ export default function StallionInspection() {
           {stallionSeasonOpen ? (
             <div className="space-y-2 text-sm text-stone-700">
               <p className="text-emerald-700 font-semibold">
-                🏆 {getStallionCompetitionName(currentSeason)} — Année {gameYear}
+                🏆 {getStallionCompetitionName(currentSeason)} — Year {gameYear}
               </p>
               <p>Current season: <strong>{SEASON_LABELS[currentSeason]}</strong>. Registrations are open!</p>
               <p className="text-xs text-stone-500 mt-2">2 competitions per year: one in autumn, one in winter.</p>
@@ -545,7 +545,7 @@ export default function StallionInspection() {
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {eligibleStallions.map(stallion => {
-          // Hors saison : les étalons sont affichés mais l'inspection est désactivée
+          // Off-season: stallions shown but inspection disabled
           const criteria = INSPECTION_CRITERIA[stallion.breed];
           const avgStat = Math.round(
             Object.values(stallion.stats || {}).reduce((a, b) => a + b, 0) /
@@ -612,10 +612,10 @@ export default function StallionInspection() {
 
                     <Button className="w-full text-sm" size="sm" disabled={!stallionSeasonOpen}>
                       {stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated'
-                        ? 'Voir résultats'
+                        ? 'View Results'
                         : stallionSeasonOpen
-                        ? 'Inspecter'
-                        : 'Hors saison'}
+                        ? 'Inspect'
+                        : 'Off-Season'}
                     </Button>
                   </CardContent>
                 </Card>

@@ -127,11 +127,18 @@ export default function OnboardingWizard({ onComplete }) {
           }]
         });
       }
+      // Récupérer le mois de jeu courant pour initialiser l'âge
+      let currentMonth = 1;
+      try {
+        const clocks = await base44.entities.GameClock.list();
+        if (clocks?.length > 0) currentMonth = clocks[0].month || 1;
+      } catch (e) { /* fallback */ }
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
         sex,
         age: 0,
+        last_age_update_month: currentMonth,
         owner_email: me.email,
         genotype,
         coat_color,

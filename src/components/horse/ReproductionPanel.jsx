@@ -45,7 +45,15 @@ export default function ReproductionPanel({ mare }) {
   const [breedingDateChoice, setBreedingDateChoice] = useState('immediate');
   const [birthingFoal, setBirthingFoal] = useState(null);
   const [foalName, setFoalName] = useState('');
-  const [selectedAffixe, setSelectedAffixe] = useState(null);
+  const [selectedAffixe, setSelectedAffixe] = useState(() => {
+    const saved = localStorage.getItem('equigenesis_last_affixe');
+    const affixes = JSON.parse(localStorage.getItem('equigenesis_my_affixes') || '[]');
+    if (saved && affixes.length > 0) {
+      const match = affixes.find(a => a.name === saved);
+      if (match) return match;
+    }
+    return null;
+  });
   const [isGeneratingName, setIsGeneratingName] = useState(false);
   const [nameSuggestions, setNameSuggestions] = useState([]);
   const queryClient = useQueryClient();
@@ -309,7 +317,7 @@ export default function ReproductionPanel({ mare }) {
                         <p className="text-xs text-stone-500 font-medium mb-1.5">Affixe d'élevage</p>
                         <div className="flex flex-wrap gap-1.5">
                           <button
-                            onClick={() => setSelectedAffixe(null)}
+                            onClick={() => { setSelectedAffixe(null); localStorage.removeItem('equigenesis_last_affixe'); }}
                             className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!selectedAffixe ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-300 hover:border-stone-400'}`}
                           >
                             Sans affixe
@@ -317,7 +325,7 @@ export default function ReproductionPanel({ mare }) {
                           {(currentUser.affixes ?? []).map((a, i) => (
                             <button
                               key={i}
-                              onClick={() => setSelectedAffixe(a)}
+                              onClick={() => { setSelectedAffixe(a); localStorage.setItem('equigenesis_last_affixe', a.name); localStorage.setItem('equigenesis_my_affixes', JSON.stringify(currentUser.affixes)); }}
                               className={`text-xs px-2.5 py-1 rounded-full border transition-all font-semibold ${selectedAffixe?.name === a.name ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 text-amber-700 border-amber-300 hover:border-amber-500'}`}
                             >
                               {a.position === 'prefix' ? `${a.name} …` : `… ${a.name}`}

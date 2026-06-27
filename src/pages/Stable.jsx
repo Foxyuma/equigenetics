@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter } from 'lucide-react';
 import HorseCard from '../components/horse/HorseCard';
-import { BREEDS } from '../components/genetics/GeneticsEngine';
+import { BREEDS, estimateHorseValue } from '../components/genetics/GeneticsEngine';
 import OnboardingWizard from '../components/onboarding/OnboardingWizard';
 
 const HORSE_NAMES_MALE = ["Tornado", "Eclipse", "Sultan", "Orage", "Apollo", "Zéphyr", "Atlas", "Titan", "Merlin", "Sirius"];
@@ -46,7 +46,7 @@ export default function Stable() {
     if (filterSex !== 'all' && h.sex !== filterSex) return false;
     if (filterAge !== 'all' && h.age !== parseInt(filterAge, 10)) return false;
     if (filterValue !== 'all') {
-      const val = h.estimated_value || 0;
+      const val = h.estimated_value || estimateHorseValue(h);
       if (filterValue === 'lt5k' && !(val < 5000)) return false;
       if (filterValue === '5to15k' && !(val >= 5000 && val < 15000)) return false;
       if (filterValue === '15to50k' && !(val >= 15000 && val < 50000)) return false;

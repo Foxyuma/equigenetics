@@ -204,18 +204,22 @@ Deno.serve(async (req) => {
       );
       for (const horse of agH || []) {
         const lastM = horse.last_age_update_month;
+        const lastY = horse.last_age_update_year;
         if (lastM == null) {
-          await base44.asServiceRole.entities.Horse.update(horse.id, { last_age_update_month: newMonth });
+          await base44.asServiceRole.entities.Horse.update(horse.id, { last_age_update_month: newMonth, last_age_update_year: newYear });
           continue;
         }
         let monthsElapsed = newMonth - lastM;
+        if (lastY != null && newYear > lastY) {
+          monthsElapsed = (newYear - lastY) * MONTHS_PER_YEAR + monthsElapsed;
+        }
         if (monthsElapsed <= 0) continue;
         if (monthsElapsed < 0) monthsElapsed += MONTHS_PER_YEAR;
         const newAge = Math.min(35, (horse.age || 0) + monthsElapsed);
         if (newAge !== (horse.age || 0)) {
-          await base44.asServiceRole.entities.Horse.update(horse.id, { age: newAge, last_age_update_month: newMonth });
+          await base44.asServiceRole.entities.Horse.update(horse.id, { age: newAge, last_age_update_month: newMonth, last_age_update_year: newYear });
         } else {
-          await base44.asServiceRole.entities.Horse.update(horse.id, { last_age_update_month: newMonth });
+          await base44.asServiceRole.entities.Horse.update(horse.id, { last_age_update_month: newMonth, last_age_update_year: newYear });
         }
       }
 

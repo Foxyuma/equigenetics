@@ -129,9 +129,15 @@ export default function OnboardingWizard({ onComplete }) {
       }
       // Récupérer le mois de jeu courant pour initialiser l'âge
       let currentMonth = 1;
+      let currentYear = 1;
       try {
         const clocks = await base44.entities.GameClock.list();
-        if (clocks?.length > 0) currentMonth = clocks[0].month || 1;
+        if (clocks?.length > 0) {
+          // Prendre le GameClock le plus avancé (total_days le plus grand)
+          const best = clocks.reduce((a, b) => (a.total_days || 0) > (b.total_days || 0) ? a : b);
+          currentMonth = best.month || 1;
+          currentYear = best.year || 1;
+        }
       } catch (e) { /* fallback */ }
       await base44.entities.Horse.create({
         name: name.trim(),
@@ -139,6 +145,7 @@ export default function OnboardingWizard({ onComplete }) {
         sex,
         age: 0,
         last_age_update_month: currentMonth,
+        last_age_update_year: currentYear,
         owner_email: me.email,
         genotype,
         coat_color,

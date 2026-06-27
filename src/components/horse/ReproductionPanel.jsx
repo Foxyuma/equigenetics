@@ -16,9 +16,10 @@ function calcDynamicPrice(stallion) {
   const keys = Object.keys(stats);
   const avg = keys.length > 0 ? keys.reduce((s, k) => s + (stats[k] || 0), 0) / keys.length : 50;
   let base = 1000 + Math.max(0, avg - 50) * 200;
-  const rareGenes = ['champagne', 'silver', 'roan'];
+  const rareGenes = ['champagne', 'silver'];
   const geno = stallion.genotype || {};
-  const rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'zz').length;
+  const hasActiveKit = geno.kit && geno.kit !== 'toto' && !['toto'].includes(geno.kit || '');
+  const rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'zz').length + (hasActiveKit ? 1 : 0);
   // Non-dun 1 (marques primitives sans dilution) : modéré
   if (geno.dun && geno.dun !== 'nd2nd2') base += 500;
   base += rareCount * 1500;

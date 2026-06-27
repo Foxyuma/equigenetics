@@ -31,9 +31,12 @@ function calculateStallionPrice(stallion) {
   let base = 1000 + statBonus;
 
   // Bonus gènes rares
-  const rareGenes = ['champagne', 'silver', 'roan', 'mushroom'];
+  const rareGenes = ['champagne', 'silver', 'mushroom'];
   const geno = stallion.genotype || {};
+  // KIT locus actif (Tobiano, Sabino-1 ou Roan) = gène de robe recherché
+  const hasActiveKit = geno.kit && geno.kit !== 'toto' && !['toto'].includes(geno.kit || '');
   let rareCount = rareGenes.filter(g => geno[g] && geno[g] !== 'nn' && geno[g] !== 'zz').length;
+  if (hasActiveKit) rareCount += 1;
   // Perle : présent dans `cream` comme Crprl, nprl ou prlprl
   if (geno.cream && (geno.cream.includes('prl') && geno.cream !== 'nprl')) rareCount++;
   // Non-dun 1 (marques primitives sans dilution) : modéré mais prisé

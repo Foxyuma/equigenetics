@@ -17,7 +17,11 @@ export default function HorseCard({ horse }) {
     <Link to={`/HorseDetail?id=${horse.id}`}>
       <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
         <div className="relative h-48 overflow-hidden flex items-center justify-center">
-          <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} breed={horse.breed} age={horse.age} fill showGenotype={false} />
+          {horse.image_url ? (
+            <img src={horse.image_url} alt={horse.name} className="w-full h-full object-cover" />
+          ) : (
+            <HorseVisualizer genotype={horse.genotype} coatColor={horse.coat_color} horseId={horse.id} breed={horse.breed} age={horse.age} fill showGenotype={false} />
+          )}
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className={`${sexColors[horse.sex]} border-0 text-xs font-medium`}>
               {sexLabels[horse.sex]}

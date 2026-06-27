@@ -16,32 +16,32 @@ const menuGroups = [
     icon: Home,
     items: [
       { path: "/Stable", label: "Mes Chevaux", icon: Home },
-      { path: "/Breeding", label: "Élevage", icon: Heart },
-      { path: "/BreedingBook", label: "Carnet d'élevage", icon: BookOpen },
       { path: "/Training", label: "Entraînement", icon: TrendingUp },
-      { path: "/Pedigree", label: "Lignées", icon: GitBranch },
-      { path: "/SeasonCalendar", label: "Calendrier", icon: Calendar },
       { path: "/Paddocks", label: "Paddocks", icon: LayoutGrid },
       { path: "/Staff", label: "Personnel", icon: Users },
-      { path: "/Profile", label: "Mon Profil", icon: UserCircle },
+      { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },
     ]
   },
   {
-    label: "Classements",
+    label: "Élevage",
+    icon: Heart,
+    items: [
+      { path: "/Breeding", label: "Reproduction", icon: Heart },
+      { path: "/BreedingBook", label: "Carnet d'élevage", icon: BookOpen },
+      { path: "/Pedigree", label: "Lignées & Pedigree", icon: GitBranch },
+      { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
+      { path: "/StallionInspection", label: "Inspection Étalons", icon: Award },
+      { path: "/GeneticTest", label: "Labo Génétique", icon: Dna },
+    ]
+  },
+  {
+    label: "Compétition",
     icon: Trophy,
     items: [
-      { path: "/Competitions", label: "Compétitions", icon: Trophy },
-      { path: "/Rankings", label: "Classement Général", icon: Award },
-      { path: "/StallionInspection", label: "Inspection Étalons", icon: Award },
+      { path: "/Competitions", label: "Concours", icon: Trophy },
       { path: "/ModeleAllures", label: "Modèles & Allures", icon: Sparkles },
-    ]
-  },
-  {
-    label: "Messagerie",
-    icon: Mail,
-    items: [
-      { path: "/Messages", label: "Messages", icon: Mail },
-      { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
+      { path: "/Rankings", label: "Classements", icon: Award },
+      { path: "/SeasonCalendar", label: "Calendrier", icon: Calendar },
     ]
   },
   {
@@ -49,11 +49,11 @@ const menuGroups = [
     icon: MapPin,
     items: [
       { path: "/Market", label: "Marché & Enchères", icon: ShoppingCart },
-      { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
-      { path: "/GeneticTest", label: "Labo Génétique", icon: Dna },
-      { path: "/Inventory", label: "Inventaire", icon: Package },
       { path: "/Shop", label: "Boutique", icon: Store },
-      { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },
+      { path: "/Inventory", label: "Inventaire", icon: Package },
+      { path: "/Messages", label: "Messages", icon: Mail },
+      { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
+      { path: "/Profile", label: "Mon Profil", icon: UserCircle },
     ]
   }
 ];

@@ -122,6 +122,10 @@ export default function ReproductionPanel({ mare }) {
           reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
         });
       }
+      // Consomme 25 d'énergie à la jument
+      const newEnergy = Math.max(0, (mare.energy ?? 100) - 25);
+      await base44.entities.Horse.update(mare.id, { energy: newEnergy });
+
       const breedingDate = getBreedingDate();
       const dueDate = addDays(breedingDate, GESTATION_DAYS);
       await base44.entities.BreedingRecord.create({

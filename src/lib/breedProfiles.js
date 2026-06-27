@@ -8,7 +8,7 @@ export const BREED_PROFILES = {
   "Arabian": {
     heightRange: [145, 160],
     type: "oriental",
-    morphology: "fine, endurant, tête concave, queue portée haute",
+    morphology: "tête fine et concave (profil camus), grands yeux, petites oreilles, encolure arquée, queue portée haute, silhouette élégante et sèche",
     coatWeights: { grey: 0.40, bay: 0.30, chestnut: 0.20, black: 0.05, other: 0.05 },
     forcedGenotype: { tobiano: "nn" }, // Pas de pie
     forbiddenCoats: ["Tobiano", "Overo", "Appaloosa", "Leopard"],
@@ -22,7 +22,7 @@ export const BREED_PROFILES = {
   "Thoroughbred": {
     heightRange: [160, 175],
     type: "racing",
-    morphology: "athlétique et fine, sec, membres longs",
+    morphology: "grand cheval athlétique, corps long et fin, membres longs, poitrine profonde, musculature sèche, tête expressive",
     coatWeights: { bay: 0.50, chestnut: 0.25, black: 0.12, grey: 0.10, other: 0.03 },
     forbiddenCoats: ["Tobiano", "Overo", "Appaloosa"],
     greyFrequency: 0.10,
@@ -35,7 +35,7 @@ export const BREED_PROFILES = {
   "Friesian": {
     heightRange: [155, 170],
     type: "baroque",
-    morphology: "baroque et puissant, encolure très arquée, fanons épais",
+    morphology: "robe noire, longue crinière et queue abondantes, fanons aux membres, encolure puissante et arquée, allures relevées",
     forcedGenotype: { extension: "EE", agouti: "aa", grey: "gg", cream: "nn", champagne: "nn", dun: "dd", silver: "zz", tobiano: "nn", roan: "nn", sabino: "nn", splash: "nn", overo: "nn" },
     forbiddenCoats: ["chestnut", "Palomino", "Buckskin", "Grey", "Roan", "Tobiano", "Overo", "Cremello", "Perlino", "Silver Black"],
     // Le Frison est quasi-exclusivement noir
@@ -49,7 +49,7 @@ export const BREED_PROFILES = {
   "Haflinger": {
     heightRange: [138, 155],
     type: "mountain_pony",
-    morphology: "compacte, dos solide, poitrine large, crins blonds épais",
+    morphology: "petite taille, robe alezane avec crins lavés (blonds), corps compact, poitrine large, membres solides, expression douce",
     // Haflinger = alezan crins lavés UNIQUEMENT
     forcedGenotype: { extension: "ee", cream: "nn", grey: "gg", tobiano: "nn", roan: "nn", champagne: "nn" },
     forbiddenCoats: ["bay", "black", "Grey", "Tobiano", "Overo", "Roan", "Buckskin", "Palomino", "Dun"],
@@ -63,7 +63,7 @@ export const BREED_PROFILES = {
   "Quarter Horse": {
     heightRange: [145, 165],
     type: "western",
-    morphology: "ultra musclé, arrière-main massive, dos court",
+    morphology: "corps compact et très musclé, arrière-main extrêmement développée, poitrine large, tête courte, membres solides",
     coatWeights: { bay: 0.28, chestnut: 0.20, black: 0.08, palomino: 0.12, buckskin: 0.10, dun: 0.08, grey: 0.05, other: 0.09 },
     greyFrequency: 0.05,
     statBonuses: { speed: 8, agility: 12, strength: 10 },
@@ -75,7 +75,7 @@ export const BREED_PROFILES = {
   "Paint Horse": {
     heightRange: [145, 165],
     type: "western",
-    morphology: "proche Quarter Horse, pie obligatoire",
+    morphology: "morphologie proche du Quarter Horse, musculature importante, robe pie (grandes taches blanches et colorées), silhouette compacte",
     // Paint = tobiano ou overo obligatoire
     forcedGenotype: { tobiano: "TOn" },
     greyFrequency: 0.03,
@@ -88,7 +88,7 @@ export const BREED_PROFILES = {
   "Appaloosa": {
     heightRange: [145, 165],
     type: "western",
-    morphology: "sportif, arrière-main puissante, peau mouchetée",
+    morphology: "robe tachetée caractéristique, peau marbrée, sclère blanche visible autour de l'œil, sabots souvent rayés, corps athlétique",
     // Appaloosa = pattern LP obligatoire (simulé par roan/tobiano)
     forcedGenotype: { roan: "RNn" },
     greyFrequency: 0.02,
@@ -101,7 +101,7 @@ export const BREED_PROFILES = {
   "Selle Français": {
     heightRange: [158, 172],
     type: "warmblood_sport",
-    morphology: "athlétique, épaules inclinées, arrière-main musclée",
+    morphology: "grand cheval sportif, silhouette harmonieuse, épaules inclinées, arrière-main puissante, membres solides, tête expressive",
     greyFrequency: 0.12,
     statBonuses: { jumping: 14, speed: 8, agility: 8 },
     statPenalties: { temperament: -4 },
@@ -112,7 +112,7 @@ export const BREED_PROFILES = {
   "KWPN": {
     heightRange: [160, 175],
     type: "warmblood_sport",
-    morphology: "grand, expressif, mécaniques brillantes",
+    morphology: "grand cheval moderne, silhouette élancée, longues jambes, dos solide, encolure bien attachée, musculature développée",
     greyFrequency: 0.15,
     statBonuses: { jumping: 12, dressage: 10, agility: 8 },
     statPenalties: {},
@@ -123,7 +123,7 @@ export const BREED_PROFILES = {
   "Hanoverian": {
     heightRange: [160, 175],
     type: "warmblood_sport",
-    morphology: "noble, grand, impulsion naturelle",
+    morphology: "cheval imposant, poitrine profonde, encolure puissante, dos solide, arrière-main très musclée, membres robustes",
     greyFrequency: 0.15,
     statBonuses: { dressage: 14, jumping: 10, temperament: 6 },
     statPenalties: { speed: -4 },
@@ -134,7 +134,7 @@ export const BREED_PROFILES = {
   "Holsteiner": {
     heightRange: [160, 173],
     type: "warmblood_sport",
-    morphology: "puissant, solide, excellent sauteur",
+    morphology: "grand cheval athlétique, épaules inclinées, dos relativement court, membres longs et puissants, poitrine profonde",
     greyFrequency: 0.12,
     statBonuses: { jumping: 16, strength: 8, agility: 6 },
     statPenalties: { endurance: -4 },
@@ -145,7 +145,7 @@ export const BREED_PROFILES = {
   "Oldenburg": {
     heightRange: [162, 175],
     type: "warmblood_sport",
-    morphology: "grand et noble",
+    morphology: "grande taille, corps massif mais élégant, encolure longue, arrière-main puissante, excellente musculature",
     greyFrequency: 0.14,
     statBonuses: { dressage: 12, jumping: 10, strength: 8 },
     statPenalties: { speed: -5 },
@@ -156,7 +156,7 @@ export const BREED_PROFILES = {
   "Belgian Warmblood": {
     heightRange: [158, 172],
     type: "warmblood_sport",
-    morphology: "sportif et puissant",
+    morphology: "cheval sportif, silhouette équilibrée, dos solide, membres puissants, tête expressive, épaules bien inclinées",
     greyFrequency: 0.12,
     statBonuses: { jumping: 12, agility: 8, strength: 8 },
     statPenalties: {},
@@ -167,7 +167,7 @@ export const BREED_PROFILES = {
   "Anglo-Arabian": {
     heightRange: [155, 168],
     type: "sport",
-    morphology: "fin mais puissant, polyvalent",
+    morphology: "morphologie intermédiaire entre Pur-sang et Arabe : élégant, sportif, tête raffinée, membres fins mais solides, poitrine développée",
     greyFrequency: 0.18,
     statBonuses: { speed: 10, endurance: 8, jumping: 6 },
     statPenalties: {},
@@ -178,7 +178,7 @@ export const BREED_PROFILES = {
   "Connemara": {
     heightRange: [130, 150],
     type: "pony_sport",
-    morphology: "sportif et solide, parfait pour la jeunesse",
+    morphology: "poney robuste et harmonieux, tête expressive, grands yeux, encolure musclée, poitrine profonde, membres solides avec articulations marquées, pieds très résistants",
     coatWeights: { grey: 0.40, bay: 0.25, black: 0.15, chestnut: 0.12, other: 0.08 },
     greyFrequency: 0.40,
     statBonuses: { jumping: 10, agility: 8, temperament: 10 },
@@ -190,7 +190,7 @@ export const BREED_PROFILES = {
   "Shire": {
     heightRange: [170, 195],
     type: "draft",
-    morphology: "géant, massif, fanons énormes",
+    morphology: "très grande taille, corps massif, fanons abondants aux jambes, encolure puissante, poitrine très large, membres imposants",
     coatWeights: { black: 0.35, bay: 0.35, grey: 0.20, other: 0.10 },
     greyFrequency: 0.20,
     statBonuses: { strength: 20, endurance: 8 },
@@ -202,7 +202,7 @@ export const BREED_PROFILES = {
   "Shetland": {
     heightRange: [80, 107],
     type: "miniature_pony",
-    morphology: "ultra compact, crins épais, très résistant",
+    morphology: "très petit poney, corps trapu, encolure courte, poitrine large, membres courts et solides, crinière et queue épaisses",
     greyFrequency: 0.10,
     statBonuses: { temperament: 8, endurance: 6 },
     statPenalties: { speed: -8, jumping: -6, strength: -8 },
@@ -213,7 +213,7 @@ export const BREED_PROFILES = {
   "Lipizzaner": {
     heightRange: [148, 162],
     type: "baroque",
-    morphology: "baroque, musclé, gris presque blanc à l'âge adulte",
+    morphology: "robe grise devenant blanche avec l'âge, tête noble, encolure musclée, dos court, arrière-main puissante, silhouette compacte",
     forcedGenotype: { grey: "Gg" }, // Quasi tous gris
     greyFrequency: 0.80,
     statBonuses: { dressage: 18, temperament: 12, strength: 6 },

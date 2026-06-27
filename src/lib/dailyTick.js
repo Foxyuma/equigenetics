@@ -8,6 +8,7 @@ import {
 } from '@/components/genetics/GeneticsEngine';
 import { calcFoalBirthRepGain } from '@/lib/breedingReputation';
 import { processPendingStudbookRequests } from '@/lib/studbookValidation';
+import { ageHorses } from '@/lib/ageHorses';
 
 const FOAL_NAMES_MALE = ['Tornado', 'Eclipse', 'Sultan', 'Orage', 'Apollo', 'Zéphyr', 'Atlas', 'Titan', 'Merlin', 'Sirius'];
 const FOAL_NAMES_FEMALE = ['Luna', 'Aurore', 'Perle', 'Tempête', 'Étoile', 'Jade', 'Iris', 'Stella', 'Naya', 'Olympe'];
@@ -149,13 +150,14 @@ async function autoBirthMares(userEmail) {
   return repDelta;
 }
 
-export async function runDailyTick(userEmail) {
+export async function runDailyTick(userEmail, gameMonth) {
   if (!userEmail) return { ran: false };
   try {
     const user = await base44.auth.me();
     const compRep = await resolvePendingCompetitions(userEmail);
     const birthRep = await autoBirthMares(userEmail);
     await processPendingStudbookRequests(userEmail, user);
+    const aged = await ageHorses(userEmail, gameMonth);
     const totalRep = compRep + birthRep;
     if (totalRep !== 0) {
       await base44.auth.updateMe({

@@ -62,10 +62,10 @@ export function useGameClock() {
   const clock = clocks[0];
 
   const { mutate: advanceDay } = useMutation({
-    mutationFn: async ({ daysToAdvance, userEmail }) => {
+    mutationFn: async ({ daysToAdvance, userEmail, currentMonth }) => {
       const current = clock || { day: 1, month: 1, year: 1, total_days: 0 };
       let newDay = current.day || 1;
-      let newMonth = current.month || 1;
+      let newMonth = currentMonth || current.month || 1;
       let newYear = current.year || 1;
       let totalDays = current.total_days || 0;
 
@@ -102,7 +102,7 @@ export function useGameClock() {
       queryClient.invalidateQueries({ queryKey: ['game-clock'] });
       // Exécuter le tick quotidien : résoudre les compétitions, faire naître les poulains
       if (variables?.userEmail) {
-        await runDailyTick(variables.userEmail);
+        await runDailyTick(variables.userEmail, variables.currentMonth);
         queryClient.invalidateQueries();
       }
     },
@@ -124,7 +124,7 @@ export function useGameClock() {
     }
     const daysToAdvance = getDaysToAdvance(clock.last_tick_real);
     if (daysToAdvance > 0) {
-      advanceDay({ daysToAdvance, userEmail: currentUser?.email });
+      advanceDay({ daysToAdvance, userEmail: currentUser?.email, currentMonth: clock?.month });
     }
   }, [clock?.id, clocks.length, currentUser?.email]);
 

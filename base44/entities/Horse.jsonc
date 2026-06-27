@@ -213,6 +213,10 @@
         }
       }
     },
+    "last_age_update_month": {
+      "type": "number",
+      "description": "Dernier mois de jeu o\u00f9 l'\u00e2ge a \u00e9t\u00e9 mis \u00e0 jour (permet le vieillissement automatis\u00e9)"
+    },
     "energy": {
       "type": "number",
       "description": "\u00c9nergie physique 0-100",

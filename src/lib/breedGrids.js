@@ -33,92 +33,232 @@ export function getQualification(score) {
   return { label: 'Ajourné', badgeClass: 'bg-red-50 text-red-700' };
 }
 
-// ─── Selle Français 2023 ──────────────────────────────────────────────────
-export const BREED_GRIDS = {
-  "Selle Français": {
-    title: "Grille de Jugement — Selle Français 2023",
-    noteMax: 20,
-    sections: [
-      {
-        name: "Construction",
-        categories: [
-          {
-            name: "Attache de tête - Encolure",
-            weight: 0.10,
-            criteria: ["Orientation", "Longueur", "Attaches"],
-            scoring: { type: "morpho", positive: "encolure_arquee", negative: "encolure_ewe" },
-          },
-          {
-            name: "Profil Avant: Épaule - Avant bras",
-            weight: 0.10,
-            criteria: ["Longueur de l'épaule", "Orientation de l'épaule", "Tombe juste"],
-            scoring: { type: "morpho", positive: "epaules_inclinees", negative: "epaules_droites" },
-          },
-          {
-            name: "Garrot - Dos - Rein",
-            weight: 0.10,
-            criteria: ["Longueur du garrot", "Tension du dos", "Attache du rein"],
-            scoring: { type: "morpho", positive: "dos_court", negative: "dos_long" },
-          },
-          {
-            name: "Croupe - Bassin - Cuisses",
-            weight: 0.10,
-            criteria: ["Longueurs", "Orientation", "Largeur"],
-            scoring: { type: "morpho", positive: "poitrine_large", negative: "poitrine_etroite" },
-          },
-        ],
-      },
-      {
-        name: "Membres et Aplombs",
-        categories: [
-          {
-            name: "Membres",
-            weight: 0.10,
-            criteria: ["Suivi des membres", "Articulations", "Pieds"],
-            scoring: { type: "morpho", positive: "aplombs_parfaits", negative: "aplombs_defectueux" },
-          },
-          {
-            name: "Aplombs - Antérieurs",
-            weight: 0.10,
-            criteria: ["Rectitude", "Piste", "Fonctionnement"],
-            scoring: { type: "morpho", positive: "aplombs_parfaits", negative: "aplombs_defectueux" },
-          },
-          {
-            name: "Aplombs - Postérieurs",
-            weight: 0.10,
-            criteria: ["Rectitude", "Piste", "Fonctionnement"],
-            scoring: { type: "morpho", positive: "jarrets_puissants", negative: "jarrets_droits" },
-          },
-        ],
-      },
-      {
-        name: "Impression d'Ensemble",
-        categories: [
-          {
-            name: "Impression d'Ensemble",
-            weight: 0.20,
-            criteria: ["Orientation générale", "Musculature", "Type Sport"],
-            scoring: { type: "impression" },
-          },
-        ],
-      },
-      {
-        name: "Chic",
-        categories: [
-          {
-            name: "Chic",
-            weight: 0.10,
-            criteria: ["Présence - Expression", "Tissus", "Tête"],
-            scoring: { type: "chic" },
-          },
-        ],
-      },
-    ],
-  },
+// ─── Helpers pour construire les grilles ─────────────────────────────────
+function cat(name, weight, criteria, scoring) {
+  return { name, weight, criteria, scoring };
+}
+const morpho = (positive, negative) => ({ type: 'morpho', positive, negative });
+const IMPRESSION = { type: 'impression' };
+const CHIC = { type: 'chic' };
+
+function grid(title, sections) {
+  return { title, noteMax: 20, sections };
+}
+
+// ─── Configuration par race ─────────────────────────────────────────────
+const BREED_GRID_CONFIG = {
+  "Selle Français":     { type: 'warmblood_sport', typeLabel: 'Type Sport' },
+  "KWPN":               { type: 'warmblood_sport', typeLabel: 'Type Sport' },
+  "Hanoverian":         { type: 'warmblood_sport', typeLabel: 'Type Sport' },
+  "Holsteiner":         { type: 'warmblood_sport', typeLabel: 'Type Sport' },
+  "Oldenburg":         { type: 'warmblood_sport', typeLabel: 'Type Sport' },
+  "Belgian Warmblood":  { type: 'warmblood_sport', typeLabel: 'Type Sport' },
+  "Anglo-Arabian":      { type: 'warmblood_sport', typeLabel: 'Type Sport Polyvalent' },
+  "Friesian":           { type: 'baroque',         typeLabel: 'Type Baroque' },
+  "Lipizzaner":         { type: 'baroque',         typeLabel: 'Type Baroque' },
+  "Quarter Horse":      { type: 'western',         typeLabel: 'Type Western' },
+  "Paint Horse":        { type: 'western',         typeLabel: 'Type Western' },
+  "Appaloosa":          { type: 'western',         typeLabel: 'Type Western' },
+  "Thoroughbred":       { type: 'racing',          typeLabel: 'Type Course' },
+  "Arabian":            { type: 'oriental',        typeLabel: 'Type Oriental' },
+  "Connemara":          { type: 'pony_sport',      typeLabel: 'Type Poney Sport' },
+  "Haflinger":          { type: 'mountain_pony',   typeLabel: 'Type Poney de Montagne' },
+  "Shire":              { type: 'draft',            typeLabel: 'Type Trait' },
+  "Shetland":           { type: 'miniature',        typeLabel: 'Type Poney Miniature' },
+};
+
+// ─── Templates par type morphologique ───────────────────────────────────
+const TEMPLATES = {
+  // Warmbloods de sport (SF, KWPN, Hanoverian, etc.) — grille type concours d'élevage
+  warmblood_sport: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Attache de tête - Encolure", 0.10, ["Orientation", "Longueur", "Attaches"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Profil Avant: Épaule - Avant bras", 0.10, ["Longueur de l'épaule", "Orientation de l'épaule", "Tombe juste"], morpho('epaules_inclinees', 'epaules_droites')),
+      cat("Garrot - Dos - Rein", 0.10, ["Longueur du garrot", "Tension du dos", "Attache du rein"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Bassin - Cuisses", 0.10, ["Longueurs", "Orientation", "Largeur"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Suivi des membres", "Articulations", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Antérieurs", 0.10, ["Rectitude", "Piste", "Fonctionnement"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Postérieurs", 0.10, ["Rectitude", "Piste", "Fonctionnement"], morpho('jarrets_puissants', 'jarrets_droits')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.20, ["Orientation générale", "Musculature", typeLabel], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic", 0.10, ["Présence - Expression", "Tissus", "Tête"], CHIC),
+    ]},
+  ]),
+
+  // Baroques (Friesian, Lipizzaner) — présence, type, encolure, allures
+  baroque: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Encolure - Attache de tête", 0.10, ["Encolure arquée", "Port de tête", "Attaches"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Garrot - Dos - Rein", 0.10, ["Tension du dos", "Ligne de dessus", "Attache du rein"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Bassin - Cuisses", 0.10, ["Rondité", "Orientation", "Puissance"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Articulations", "Tissus", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs", 0.10, ["Rectitude", "Piste", "Fonctionnement"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.35, ["Type Baroque", "Majesté", "Robe", "Allures"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic & Présence", 0.15, ["Présence", "Expression", "Tête noble"], CHIC),
+    ]},
+  ]),
+
+  // Western (Quarter Horse, Paint, Appaloosa) — arrière-main, musculature, cow sense
+  western: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Encolure - Épaule", 0.05, ["Encolure", "Épaule", "Attache"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Garrot - Dos - Rein", 0.10, ["Dos court", "Rein puissant", "Ligne de dessus"], morpho('dos_court', 'dos_long')),
+      cat("Arrière-main - Cuisse - Croupe", 0.20, ["Masse musculaire", "Largeur", "Proportion"], morpho('poitrine_large', 'poitrine_etroite')),
+      cat("Poitrine - Côtés", 0.10, ["Largeur", "Profondeur", "Coffre"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Suivi", "Articulations", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs", 0.10, ["Rectitude", "Piste", "Fonctionnement"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.25, ["Type Western", "Musculature", "Cow sense"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic", 0.10, ["Présence", "Tissus", "Tête"], CHIC),
+    ]},
+  ]),
+
+  // Course (Thoroughbred) — athlétique, sec, léger
+  racing: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Attache de tête - Encolure", 0.10, ["Encolure longue", "Attache", "Gorge"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Épaule - Avant bras", 0.10, ["Épaule longue", "Inclinaison", "Bras"], morpho('epaules_inclinees', 'epaules_droites')),
+      cat("Garrot - Dos - Rein", 0.10, ["Garrot sorti", "Dos tendu", "Rein"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Cuisses", 0.10, ["Longueur", "Puissance", "Orientation"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Sécheresse", "Articulations", "Tendons"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Antérieurs", 0.10, ["Rectitude", "Piste", "Action"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Postérieurs", 0.10, ["Rectitude", "Piste", "Action"], morpho('jarrets_puissants', 'jarrets_droits')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.20, ["Type Course", "Athlétisme", "Légèreté"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic", 0.10, ["Présence", "Tissus", "Tête"], CHIC),
+    ]},
+  ]),
+
+  // Oriental (Arabian) — tête, raffinement, endurance
+  oriental: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Tête - Profil", 0.10, ["Profil concave", "Front large", "Naseaux"], CHIC),
+      cat("Encolure - Attache", 0.05, ["Encolure longue", "Port haut", "Attache fine"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Garrot - Dos - Rein", 0.05, ["Garrot", "Dos", "Rein"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Queue", 0.10, ["Croupe horizontale", "Port de queue", "Proportion"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Sécheresse", "Tissus", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Antérieurs", 0.075, ["Rectitude", "Piste", "Action"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Postérieurs", 0.075, ["Rectitude", "Piste", "Action"], morpho('jarrets_puissants', 'jarrets_droits')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.25, ["Type Oriental", "Raffinement", "Endurance"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic & Raffinement", 0.20, ["Tête (profil concave)", "Expression", "Robe"], CHIC),
+    ]},
+  ]),
+
+  // Poney de sport (Connemara) — type poney, bone, caractère
+  pony_sport: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Attache de tête - Encolure", 0.10, ["Encolure", "Attache", "Gorge"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Épaule - Poitrine", 0.10, ["Épaule", "Poitrine", "Profondeur"], morpho('epaules_inclinees', 'epaules_droites')),
+      cat("Garrot - Dos - Rein", 0.10, ["Dos", "Rein", "Ligne"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Cuisses", 0.10, ["Croupe", "Puissance", "Orientation"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Bone", "Articulations", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Antérieurs", 0.075, ["Rectitude", "Piste", "Action"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Postérieurs", 0.075, ["Rectitude", "Piste", "Action"], morpho('jarrets_puissants', 'jarrets_droits')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.25, ["Type Poney", "Caractère", "Bone"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic", 0.10, ["Présence", "Tissus", "Tête"], CHIC),
+    ]},
+  ]),
+
+  // Poney de montagne (Haflinger) — robustesse, robe alezan crins lavés
+  mountain_pony: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Encolure - Attache", 0.10, ["Encolure", "Port", "Attache"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Poitrine - Côtés", 0.10, ["Largeur", "Profondeur", "Coffre"], morpho('poitrine_large', 'poitrine_etroite')),
+      cat("Garrot - Dos - Rein", 0.10, ["Dos solide", "Rein", "Ligne"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Cuisses", 0.10, ["Croupe", "Puissance", "Proportion"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Bone", "Articulations", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Antérieurs", 0.075, ["Rectitude", "Piste", "Action"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs - Postérieurs", 0.075, ["Rectitude", "Piste", "Action"], morpho('jarrets_puissants', 'jarrets_droits')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.25, ["Type Montagne", "Robe (alezan crins lavés)", "Solidité"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic", 0.10, ["Présence", "Crins", "Tête"], CHIC),
+    ]},
+  ]),
+
+  // Trait (Shire) — masse, puissance, fanons
+  draft: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Encolure - Attache", 0.05, ["Encolure massive", "Port", "Attache"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Poitrine - Côtés", 0.15, ["Largeur", "Profondeur", "Coffre"], morpho('poitrine_large', 'poitrine_etroite')),
+      cat("Garrot - Dos - Rein", 0.10, ["Dos solide", "Rein large", "Ligne"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Cuisses", 0.15, ["Masse", "Largeur", "Puissance"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres & Fanons", 0.10, ["Bone", "Fanons", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs", 0.10, ["Rectitude", "Base large", "Fonctionnement"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.25, ["Type Trait", "Masse", "Puissance"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic", 0.10, ["Présence", "Tissus", "Tête"], CHIC),
+    ]},
+  ]),
+
+  // Poney miniature (Shetland) — proportions, caractère, type
+  miniature: (breed, typeLabel) => grid(`Grille de Jugement — ${breed} 2023`, [
+    { name: "Construction", categories: [
+      cat("Tête - Expression", 0.10, ["Tête", "Expression", "Proportions"], CHIC),
+      cat("Encolure - Corps", 0.10, ["Encolure", "Corps", "Attache"], morpho('encolure_arquee', 'encolure_ewe')),
+      cat("Dos - Rein", 0.10, ["Dos", "Rein", "Ligne"], morpho('dos_court', 'dos_long')),
+      cat("Croupe - Cuisses", 0.05, ["Croupe", "Proportion", "Puissance"], morpho('poitrine_large', 'poitrine_etroite')),
+    ]},
+    { name: "Membres et Aplombs", categories: [
+      cat("Membres", 0.10, ["Bone", "Articulations", "Pieds"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+      cat("Aplombs", 0.10, ["Rectitude", "Piste", "Fonctionnement"], morpho('aplombs_parfaits', 'aplombs_defectueux')),
+    ]},
+    { name: "Impression d'Ensemble", categories: [
+      cat("Impression d'Ensemble", 0.30, ["Type Poney Miniature", "Proportions", "Caractère"], IMPRESSION),
+    ]},
+    { name: "Chic", categories: [
+      cat("Chic & Caractère", 0.15, ["Présence", "Expression", "Tête"], CHIC),
+    ]},
+  ]),
 };
 
 export function getBreedGrid(breed) {
-  return BREED_GRIDS[breed] || null;
+  const config = BREED_GRID_CONFIG[breed];
+  if (!config) return null;
+  const template = TEMPLATES[config.type];
+  return template ? template(breed, config.typeLabel) : null;
 }
 
 // ─── Scoring ───────────────────────────────────────────────────────────

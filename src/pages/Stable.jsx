@@ -15,6 +15,7 @@ export default function Stable() {
   const [search, setSearch] = useState('');
   const [filterBreed, setFilterBreed] = useState('all');
   const [filterSex, setFilterSex] = useState('all');
+  const [filterAge, setFilterAge] = useState('all');
 
   const { data: currentUser } = useQuery({
     queryKey: ['me'],
@@ -42,6 +43,13 @@ export default function Stable() {
     if (search && !h.name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterBreed !== 'all' && h.breed !== filterBreed) return false;
     if (filterSex !== 'all' && h.sex !== filterSex) return false;
+    if (filterAge !== 'all') {
+      const age = h.age ?? 0;
+      if (filterAge === 'foal' && age >= 3) return false;
+      if (filterAge === 'young' && (age < 3 || age > 7)) return false;
+      if (filterAge === 'adult' && (age < 8 || age > 15)) return false;
+      if (filterAge === 'senior' && age <= 15) return false;
+    }
     return true;
   });
 
@@ -89,6 +97,19 @@ export default function Stable() {
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="male">♂ Mâles</SelectItem>
             <SelectItem value="female">♀ Femelles</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterAge} onValueChange={setFilterAge}>
+          <SelectTrigger className="w-full sm:w-40 bg-white/80">
+            <Filter className="w-4 h-4 mr-2 text-stone-400" />
+            <SelectValue placeholder="Âge" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous âges</SelectItem>
+            <SelectItem value="foal">🍼 Poulains (0-2 ans)</SelectItem>
+            <SelectItem value="young">🏇 Jeunes (3-7 ans)</SelectItem>
+            <SelectItem value="adult">🐎 Adultes (8-15 ans)</SelectItem>
+            <SelectItem value="senior">👑 Seniors (16+ ans)</SelectItem>
           </SelectContent>
         </Select>
       </div>

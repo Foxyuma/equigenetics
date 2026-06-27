@@ -46,6 +46,9 @@ const PHENO_IMAGES = {
   foalOvero:     "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/59a3b6c13_generated_image.png",
   foalSplash:    "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/7ed5d2f14_generated_image.png",
   foalRoan:      "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/e18ed4e27_generated_image.png",
+  // === Friesian-specific ===
+  friesian:      "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/1d06dfa1c_generated_image.png",
+  foalFriesian:  "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/fe55f1447_generated_image.png",
 };
 
 // Determine base color category from genotype
@@ -132,8 +135,8 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
   const hasOvero = genotype.overo && genotype.overo !== "nn";
 
   // === Breed-specific overrides (highest priority) ===
-  // Friesian: purebred is ALWAYS black
-  if (breed === "Friesian") return isFoal ? PHENO_IMAGES.foalBlack : PHENO_IMAGES.black;
+  // Friesian: purebred is ALWAYS black — image dédiée avec fanons et crinière abondante
+  if (breed === "Friesian") return isFoal ? PHENO_IMAGES.foalFriesian : PHENO_IMAGES.friesian;
   // Appaloosa: leopard spots are the defining visual trait
   if (breed === "Appaloosa" && !isGrey) return isFoal ? PHENO_IMAGES.foalRoan : PHENO_IMAGES.appaloosa;
   // Haflinger: chestnut with flaxen mane — unique look

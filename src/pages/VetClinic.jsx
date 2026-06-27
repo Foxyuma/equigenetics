@@ -67,10 +67,10 @@ const TEST_TYPES = {
 
 const conditionConfig = {
   excellent: { label: "Excellent", color: "bg-green-100 text-green-700", icon: CheckCircle },
-  good: { label: "Bon", color: "bg-blue-100 text-blue-700", icon: Heart },
-  fair: { label: "Moyen", color: "bg-yellow-100 text-yellow-700", icon: Activity },
-  poor: { label: "Faible", color: "bg-orange-100 text-orange-700", icon: AlertTriangle },
-  critical: { label: "Critique", color: "bg-red-100 text-red-700", icon: XCircle },
+  good: { label: "Good", color: "bg-blue-100 text-blue-700", icon: Heart },
+  fair: { label: "Fair", color: "bg-yellow-100 text-yellow-700", icon: Activity },
+  poor: { label: "Poor", color: "bg-orange-100 text-orange-700", icon: AlertTriangle },
+  critical: { label: "Critical", color: "bg-red-100 text-red-700", icon: XCircle },
 };
 
 export default function VetClinic() {
@@ -152,7 +152,7 @@ export default function VetClinic() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
-      toast.success('Contrôle vétérinaire effectué');
+      toast.success('Veterinary checkup completed');
     },
   });
 
@@ -182,7 +182,7 @@ export default function VetClinic() {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       setTreatmentDialog(false);
-      toast.success('Traitement appliqué avec succès !');
+      toast.success('Treatment applied successfully!');
     },
   });
 
@@ -214,7 +214,7 @@ export default function VetClinic() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
-      toast.success(`${sickHorses.length} cheval(aux) traité(s) !`);
+      toast.success(`${sickHorses.length} horse(s) treated!`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -227,7 +227,7 @@ export default function VetClinic() {
       const balance = currentUser.genesis_balance || 0;
       
       if (balance < testConfig.price) {
-        throw new Error(`Fonds insuffisants. Coût : ${testConfig.price} ₲`);
+        throw new Error(`Insufficient funds. Cost: ${testConfig.price} ₲`);
       }
 
       let results = {};
@@ -271,21 +271,21 @@ export default function VetClinic() {
       queryClient.invalidateQueries({ queryKey: ['genetic-tests-vet', selectedTestHorse.id] });
       setShowTestResults(test);
       setSelectedTest(null);
-      toast.success(`Test ${TEST_TYPES[selectedTest].label} en cours !`);
+      toast.success(`Test ${TEST_TYPES[selectedTest]?.label} in progress!`);
     },
     onError: (err) => toast.error(err.message),
   });
 
   const testAllHorsesMutation = useMutation({
     mutationFn: async () => {
-      if (!currentUser || untestedHorses.length === 0) throw new Error('Aucun cheval non testé à ce type');
+      if (!currentUser || untestedHorses.length === 0)         throw new Error('No untested horses for this type');
 
       const testConfig = TEST_TYPES[bulkTestType];
       const totalCost = testConfig.price * untestedHorses.length;
       const balance = currentUser.genesis_balance || 0;
 
       if (balance < totalCost) {
-        throw new Error(`Fonds insuffisants. Coût total : ${totalCost} ₲ (solde : ${balance} ₲)`);
+        throw new Error(`Insufficient funds. Total cost: ${totalCost} ₲ (balance: ${balance} ₲)`);
       }
 
       for (const horse of untestedHorses) {
@@ -327,18 +327,18 @@ export default function VetClinic() {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['genetic-tests-vet'] });
       queryClient.invalidateQueries({ queryKey: ['all-genetic-tests'] });
-      toast.success(`Tests ${TEST_TYPES[bulkTestType].label} commandés pour ${untestedHorses.length} chevaux !`);
+      toast.success(`${TEST_TYPES[bulkTestType]?.label} tests ordered for ${untestedHorses.length} horses!`);
     },
     onError: (err) => toast.error(err.message),
   });
 
   const bulkCheckupMutation = useMutation({
     mutationFn: async () => {
-      if (!currentUser || horses.length === 0) throw new Error('Aucun cheval à contrôler');
+      if (!currentUser || horses.length === 0)         throw new Error('No horses to check');
 
       const today = new Date().toISOString().split('T')[0];
       if (currentUser.last_bulk_checkup_date === today) {
-        throw new Error('Contrôle groupé déjà effectué aujourd\'hui');
+        throw new Error('Bulk checkup already done today');
       }
 
       for (const horse of horses) {
@@ -372,7 +372,7 @@ export default function VetClinic() {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast.success(`Contrôle vétérinaire effectué pour ${horses.length} chevaux !`);
+      toast.success(`Veterinary checkup done for ${horses.length} horses!`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -406,7 +406,7 @@ export default function VetClinic() {
     },
     onSuccess: (_, vaccine) => {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
-      toast.success(`Vaccination ${vaccine.name} effectuée pour toute l'écurie !`);
+      toast.success(`${vaccine.name} vaccination done for the whole stable!`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -434,7 +434,7 @@ export default function VetClinic() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['health-records'] });
-      toast.success('Vaccination effectuée');
+      toast.success('Vaccination done');
     },
   });
 
@@ -474,9 +474,9 @@ export default function VetClinic() {
                 <Badge variant="outline" className="text-xs">{record.illness_severity}</Badge>
               </div>
               <div className="text-xs space-y-1">
-                <p className="text-stone-600">Symptômes: {record.symptoms?.join(', ')}</p>
+                <p className="text-stone-600">Symptoms: {record.symptoms?.join(', ')}</p>
                 <div className="flex gap-3">
-                  <span className="text-red-600">-{record.energy_penalty}% énergie</span>
+                  <span className="text-red-600">-{record.energy_penalty}% energy</span>
                   <span className="text-orange-600">-{record.performance_penalty}% performance</span>
                 </div>
               </div>
@@ -528,8 +528,8 @@ export default function VetClinic() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Clinique Vétérinaire</h1>
-        <p className="text-stone-500 mt-1">Soignez vos chevaux et maintenez-les en bonne santé</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Veterinary Clinic</h1>
+        <p className="text-stone-500 mt-1">Care for your horses and keep them healthy</p>
       </div>
 
       <SeasonManager compact />
@@ -539,21 +539,21 @@ export default function VetClinic() {
           <CardContent className="p-4 text-center">
             <Heart className="w-6 h-6 mx-auto text-blue-600 mb-2" />
             <p className="text-2xl font-bold text-blue-800">{horses.length}</p>
-            <p className="text-xs text-blue-600">Chevaux total</p>
+            <p className="text-xs text-blue-600">Total horses</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-green-50">
           <CardContent className="p-4 text-center">
             <CheckCircle className="w-6 h-6 mx-auto text-green-600 mb-2" />
             <p className="text-2xl font-bold text-green-800">{horses.length - sickHorses.length}</p>
-            <p className="text-xs text-green-600">En bonne santé</p>
+            <p className="text-xs text-green-600">Healthy</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-red-50">
           <CardContent className="p-4 text-center">
             <AlertTriangle className="w-6 h-6 mx-auto text-red-600 mb-2" />
             <p className="text-2xl font-bold text-red-800">{sickHorses.length}</p>
-            <p className="text-xs text-red-600">Malades</p>
+            <p className="text-xs text-red-600">Sick</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-purple-50">
@@ -562,7 +562,7 @@ export default function VetClinic() {
             <p className="text-2xl font-bold text-purple-800">
               {healthRecords.filter(r => r.vaccination_status).length}
             </p>
-            <p className="text-xs text-purple-600">Vaccinés</p>
+            <p className="text-xs text-purple-600">Vaccinated</p>
           </CardContent>
         </Card>
       </div>
@@ -570,20 +570,20 @@ export default function VetClinic() {
       <Tabs defaultValue="health" className="w-full">
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="health">
-            <Activity className="w-4 h-4 mr-2" />
-            État de Santé
+          <Activity className="w-4 h-4 mr-2" />
+          Health Status
           </TabsTrigger>
           <TabsTrigger value="genetic-tests">
-            <Dna className="w-4 h-4 mr-2" />
-            Tests ADN
+          <Dna className="w-4 h-4 mr-2" />
+          DNA Tests
           </TabsTrigger>
           <TabsTrigger value="medications">
-            <Pill className="w-4 h-4 mr-2" />
-            Médicaments
+          <Pill className="w-4 h-4 mr-2" />
+          Medications
           </TabsTrigger>
           <TabsTrigger value="vaccinations">
-            <Syringe className="w-4 h-4 mr-2" />
-            Vaccinations
+          <Syringe className="w-4 h-4 mr-2" />
+          Vaccinations
           </TabsTrigger>
         </TabsList>
 

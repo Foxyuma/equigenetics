@@ -149,7 +149,7 @@ function generateSingleStallion(breed, name, tier) {
     owner_email: "haras@national.equigenesis",
     is_npc: true,
     breeding_approval_status: tier.approvalStatus,
-    description: `Étalon ${tier.label.toLowerCase()} de race ${breed} approuvé par les Haras Nationaux pour la production en studbook.`,
+    description: `${tier.label.toLowerCase()} ${breed} stallion approved by the National Stud for studbook production.`,
   };
   stallionObj.price = calculateStallionPrice(stallionObj);
   return stallionObj;
@@ -241,15 +241,15 @@ export default function StallionMarket() {
       sex: Math.random() > 0.5 ? 'male' : 'female',
       breed: selectedStallion.breed === selectedMare.breed ? selectedStallion.breed : `${selectedStallion.breed} x ${selectedMare.breed}`,
     });
-    toast.success('Simulation de croisement générée !');
+    toast.success('Breeding simulation generated!');
   };
 
   const createFoalMutation = useMutation({
     mutationFn: async () => {
-      if (!currentUser) throw new Error('Non connecté');
+      if (!currentUser) throw new Error('Not logged in');
        const balance = currentUser.genesis_balance ?? 0;
        const actualPrice = selectedStallion.dynamicPrice || selectedStallion.price;
-       if (balance < actualPrice) throw new Error('Fonds insuffisants');
+       if (balance < actualPrice) throw new Error('Insufficient funds');
        const foalData = { name: foalName, ...foalPreview, age: 0, energy: 100, competition_wins: 0, is_for_sale: false };
        foalData.estimated_value = estimateHorseValue(foalData);
        const foal = await base44.entities.Horse.create(foalData);
@@ -282,7 +282,7 @@ export default function StallionMarket() {
     onSuccess: (repGain) => {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
-      toast.success(`Poulain enregistré ! ${repGain >= 0 ? '+' : ''}${repGain} pts réputation`);
+      toast.success(`Foal registered! ${repGain >= 0 ? '+' : ''}${repGain} rep pts`);
       setFoalPreview(null);
       setFoalName('');
       setSelectedStallion(null);
@@ -479,7 +479,7 @@ export default function StallionMarket() {
                     <div className="flex flex-wrap gap-1">
                       {foalPreview.health_genes.filter(g => g.status !== 'clear').map(g => (
                         <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                          {g.disease}: {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                          {g.disease}: {g.status === 'carrier' ? 'Carrier' : 'Affected'}
                         </Badge>
                       ))}
                     </div>

@@ -139,11 +139,13 @@ export default function OnboardingWizard({ onComplete }) {
           currentYear = best.year || 1;
         }
       } catch (e) { /* fallback */ }
+      const estimatedValue = 1700 + Math.floor(Math.random() * (10000 - 1700 + 1));
       await base44.entities.Horse.create({
         name: name.trim(),
         breed,
         sex,
-        age: 0,
+        age: 4,
+        estimated_value: estimatedValue,
         last_age_update_month: currentMonth,
         last_age_update_year: currentYear,
         owner_email: me.email,

@@ -152,7 +152,7 @@ function randomAllele(locus) {
     agouti: ["A", "a"],
     cream: ["Cr", "n", "prl"],
     grey: ["G", "g"],
-    kit: ["To", "dw", "Sb1", "sb1", "Rn", "rn", "to", "to"],
+    kit: ["To", "dw", "Sb1", "sb1", "Rn", "rn", "to", "nw", "sb1", "rn"],
     dun: ["D", "nd1", "nd2"],
     champagne: ["CH", "n"],
     silver: ["Z", "z"],
@@ -192,7 +192,7 @@ function parseGenotype(locus, genotypeStr) {
     dun: { "DD": ["D","D"], "Dnd1": ["D","nd1"], "Dnd2": ["D","nd2"], "nd1nd1": ["nd1","nd1"], "nd1nd2": ["nd1","nd2"], "nd2nd2": ["nd2","nd2"] },
     champagne: { "CHn": ["CH","n"], "nn": ["n","n"], "CHCH": ["CH","CH"] },
     silver: { "ZZ": ["Z","Z"], "Zz": ["Z","z"], "zz": ["z","z"] },
-    kit: { "ToTo": ["To","To"], "Toto": ["To","to"], "Sb1Sb1": ["Sb1","Sb1"], "Sb1sb1": ["Sb1","sb1"], "RnRn": ["Rn","Rn"], "Rnrn": ["Rn","rn"], "ToSb1": ["To","Sb1"], "ToRn": ["To","Rn"], "Sb1Rn": ["Sb1","Rn"], "dwdw": ["dw","dw"], "dwnw": ["dw","nw"], "dwto": ["dw","to"], "dwsb1": ["dw","sb1"], "dwrn": ["dw","rn"], "toto": ["to","to"], "sb1sb1": ["sb1","sb1"], "rnrn": ["rn","rn"] },
+    kit: { "ToTo": ["To","To"], "Toto": ["To","to"], "Sb1Sb1": ["Sb1","Sb1"], "Sb1sb1": ["Sb1","sb1"], "RnRn": ["Rn","Rn"], "Rnrn": ["Rn","rn"], "ToSb1": ["To","Sb1"], "ToRn": ["To","Rn"], "Sb1Rn": ["Sb1","Rn"], "dwdw": ["dw","dw"], "dwnw": ["dw","nw"], "dwto": ["dw","to"], "dwsb1": ["dw","sb1"], "dwrn": ["dw","rn"], "toto": ["to","to"], "nwnw": ["nw","nw"], "sb1sb1": ["sb1","sb1"], "rnrn": ["rn","rn"] },
     sabino: { "SbSb": ["Sb","Sb"], "Sbn": ["Sb","n"], "nn": ["n","n"] },
     splash: { "SplSpl": ["Spl","Spl"], "Spln": ["Spl","n"], "nn": ["n","n"] },
     overo: { "FrFr": ["Fr","Fr"], "Frn": ["Fr","n"], "nn": ["n","n"] },
@@ -220,7 +220,7 @@ function sortThreeAlleles(locus, a1, a2) {
 }
 // Locus KIT : 7 allèles (To>DW>Sb1>Rn>to>sb1>rn)
 // DW = Dominant White (multiples mutations sur KIT, patron blanc allant de balzanes à robe entièrement blanche)
-const KIT_DOM = ["To","dw","Sb1","Rn"], KIT_REC = ["to","sb1","rn"];
+const KIT_DOM = ["To","dw","Sb1","Rn"], KIT_REC = ["to","nw","sb1","rn"];
 const KIT_ALL = [...KIT_DOM, ...KIT_REC];
 // Convertisseur ancien format (3 locus) → nouveau format "kit"
 // Priorité : To > Sb1 > Rn (un seul actif par cheval)
@@ -416,6 +416,12 @@ function generateGenotypeFromCoatCategory(category, breed) {
     case 'overo':
       g.overo = 'Frn';
       break;
+    case 'rabicano':
+      g.rabicano = Math.random() < 0.3 ? 'RbRb' : 'Rbrb';
+      break;
+    case 'dominant_white':
+      g.kit = Math.random() < 0.3 ? 'dwdw' : 'dwnw';
+      break;
     case 'appaloosa':
       g.leopard = Math.random() < 0.3 ? 'LpLp' : 'Lplp';
       g.pattern1 = Math.random() < 0.6 ? 'PATN1patn1' : 'patn1patn1';
@@ -453,12 +459,12 @@ function applyBreedPatterns(genotype, breed, roll) {
     genotype.splash = "nn";
     genotype.overo = "nn";
     genotype.frame = "nn";
-  } else if (roll === 'roan') {
-    // Déjà géré par la catégorie roan
-  } else if (roll === 'tobiano') {
-    // Déjà géré par la catégorie tobiano
+  } else if (roll === 'roan' || roll === 'tobiano' || roll === 'dominant_white') {
+    // Déjà géré par la catégorie via KIT dans generateGenotypeFromCoatCategory
   } else if (roll === 'overo') {
     // Déjà géré par la catégorie overo
+  } else if (roll === 'rabicano') {
+    // Déjà géré par la catégorie rabicano
   } else if (roll === 'appaloosa') {
     // Déjà géré par la catégorie appaloosa
   } else if (!kitActive) {

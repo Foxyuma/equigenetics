@@ -34,6 +34,14 @@ const BASE_CATS = {
  * Format : { race, fréquences: { baseCat: poids } }
  * Les races non listées utilisent la génération libre existante.
  */
+// Rabicano (Rb) : poils blancs en racine de queue, stries sur les flancs
+// Dominant White (DW) : robe presque entièrement blanche, parfois avec petites zones pigmentées
+// Ces catégories sont rares et spécifiques à certaines races
+const RARE_COAT_FREQ_ADDONS = {
+  rabicano: 5,   // ~5% dans les races qui l'acceptent
+  dominant_white: 3, // ~3% chez Quarter Horse / Paint Horse / Shetland
+};
+
 export const BREED_COAT_FREQUENCIES = {
   Arabian: {
     bay: 60,
@@ -267,6 +275,8 @@ export const BREED_COAT_FREQUENCIES = {
     dun: 20,
     grullo: 20,
     roan: 5,
+    rabicano: 5,
+    dominant_white: 3,
     tobiano: 0,
     overo: 0,
     appaloosa: 0,
@@ -284,6 +294,8 @@ export const BREED_COAT_FREQUENCIES = {
     dun: 20,
     grullo: 20,
     roan: 5,
+    rabicano: 10,
+    dominant_white: 5,
     tobiano: 60,
     overo: 60,
     appaloosa: 0,
@@ -335,6 +347,8 @@ export const BREED_COAT_FREQUENCIES = {
     dun: 20,
     grullo: 5,
     roan: 5,
+    rabicano: 5,
+    dominant_white: 3,
     tobiano: 20,
     overo: 20,
     appaloosa: 5,

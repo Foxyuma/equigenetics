@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GridBreakdownDialog from '@/components/modeleallures/GridBreakdownDialog';
-import ModeleAlluresCalendar from '@/components/modeleallures/ModeleAlluresCalendar';
 import { Sparkles, Trophy, ShieldAlert, Info, Calendar, ClipboardList } from 'lucide-react';
 import {
   getModeleAlluresScore,
@@ -28,7 +27,7 @@ function rankMedal(rank) {
 }
 
 export default function ModeleAllures() {
-  const [tab, setTab] = useState('calendrier');
+  const [tab, setTab] = useState('inscriptions');
   const [breakdownHorse, setBreakdownHorse] = useState(null);
   const queryClient = useQueryClient();
 
@@ -208,19 +207,9 @@ export default function ModeleAllures() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="bg-stone-100/80">
-          <TabsTrigger value="calendrier">Calendrier</TabsTrigger>
           <TabsTrigger value="inscriptions">Inscriptions</TabsTrigger>
           <TabsTrigger value="resultats">Résultats</TabsTrigger>
         </TabsList>
-
-        {/* Calendrier */}
-        <TabsContent value="calendrier" className="mt-4">
-          <ModeleAlluresCalendar
-            competitions={allModeleComps}
-            gameYear={gameYear}
-            breeds={breeds}
-          />
-        </TabsContent>
 
         {/* Inscriptions */}
         <TabsContent value="inscriptions" className="mt-4 space-y-4">

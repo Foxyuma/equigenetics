@@ -492,22 +492,24 @@ export default function ReproductionPanel({ mare }) {
                              ))}
                            </div>
                          )}
-                         {/* Statut d'approbation */}
-                         <div className="text-xs text-stone-600 mt-1.5 p-2 rounded bg-stone-50">
-                           <div className="flex items-center gap-2 mb-1">
-                             <Badge className={`border-0 text-[10px] ${approvalConfig.color}`}>{approvalConfig.label}</Badge>
+                         {/* Statut d'approbation — visible seulement si restriction ou non évalué */}
+                         {(approvalStatus === 'not_evaluated' || breedingImpact.restrictions.length > 0) && (
+                           <div className="text-xs text-stone-600 mt-1.5 p-2 rounded bg-stone-50">
+                             <div className="flex items-center gap-2 mb-1">
+                               <Badge className={`border-0 text-[10px] ${approvalConfig.color}`}>{approvalConfig.label}</Badge>
+                             </div>
+                             <p className="text-stone-500">{breedingImpact.description}</p>
+                             {breedingImpact.restrictions.length > 0 && (
+                               <ul className="space-y-0.5 mt-1">
+                                 {breedingImpact.restrictions.map((r, i) => (
+                                   <li key={i} className="text-stone-500 flex items-start gap-1">
+                                     <span>•</span> {r}
+                                   </li>
+                                 ))}
+                               </ul>
+                             )}
                            </div>
-                           <p className="text-stone-500">{breedingImpact.description}</p>
-                           {breedingImpact.restrictions.length > 0 && (
-                             <ul className="space-y-0.5 mt-1">
-                               {breedingImpact.restrictions.map((r, i) => (
-                                 <li key={i} className="text-stone-500 flex items-start gap-1">
-                                   <span>•</span> {r}
-                                 </li>
-                               ))}
-                             </ul>
-                           )}
-                         </div>
+                         )}
                           {incestBlocked && (
                             <p className="text-xs text-red-600 mt-1">Ce cheval est le parent ou l'enfant de {mare.name} — reproduction impossible.</p>
                           )}

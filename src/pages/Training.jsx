@@ -25,7 +25,7 @@ export default function Training() {
     enabled: !!selectedHorseId,
   });
 
-  const myHorses = horses.filter(h => h.created_by_id === currentUser?.id && (h.age || 0) >= 0);
+  const myHorses = horses.filter(h => (h.owner_email || h.created_by_id) === (currentUser?.email || currentUser?.id) && (h.age || 0) >= 0);
   const selectedHorse = myHorses.find(h => h.id === selectedHorseId);
   const recentTypes = recentTrainings.map(t => t.training_type);
 

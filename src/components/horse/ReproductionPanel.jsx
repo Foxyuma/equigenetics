@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
@@ -62,10 +62,17 @@ export default function ReproductionPanel({ mare }) {
     queryFn: () => base44.entities.BreedingRecord.filter({ mother_id: mare.id, status: 'pending' }, '-created_date', 20),
   });
 
+  const [breedFilter, setBreedFilter] = useState('');
   const ownMales = ownHorses.filter(h => h.sex === 'male');
-  const stallionsToShow = stallionSource === 'own'
+  const allStallions = stallionSource === 'own'
     ? ownMales.map(h => ({ ...h, stallion_name: h.name, price: 0, owner_name: 'Mon écurie', is_own: true }))
     : stallionOffers;
+  const stallionsToShow = breedFilter
+    ? allStallions.filter(s => s.breed === breedFilter)
+    : allStallions;
+  const availableBreeds = [...new Set(allStallions.map(s => s.breed))].sort();
+  // Pre-fill breed filter with mare's breed by default
+  React.useEffect(() => { if (mare?.breed && !breedFilter) setBreedFilter(mare.breed); }, [mare?.breed]);
 
   const getBreedingDate = () => {
     const now = new Date();
@@ -429,8 +436,30 @@ export default function ReproductionPanel({ mare }) {
           </TabsList>
 
           <TabsContent value={stallionSource} className="mt-4">
+            {availableBreeds.length > 1 && (
+              <div className="mb-3">
+                <p className="text-xs text-stone-500 font-medium mb-1.5">Filtrer par race</p>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setBreedFilter('')}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!breedFilter ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-200 hover:border-stone-400'}`}
+                  >
+                    Toutes
+                  </button>
+                  {availableBreeds.map(b => (
+                    <button
+                      key={b}
+                      onClick={() => setBreedFilter(b)}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-all ${breedFilter === b ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-stone-500 border-stone-200 hover:border-stone-400'}`}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {stallionsToShow.length === 0 ? (
-              <p className="text-stone-400 text-sm py-6 text-center">Aucun étalon disponible</p>
+              <p className="text-stone-400 text-sm py-6 text-center">Aucun étalon disponible pour cette race</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {stallionsToShow.map(s => {

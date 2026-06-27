@@ -119,11 +119,11 @@ export default function Stable() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes valeurs</SelectItem>
-            <SelectItem value="lt5k">&lt; 5 000 pts</SelectItem>
-            <SelectItem value="5to15k">5 000 – 15 000 pts</SelectItem>
-            <SelectItem value="15to50k">15 000 – 50 000 pts</SelectItem>
-            <SelectItem value="50to100k">50 000 – 100 000 pts</SelectItem>
-            <SelectItem value="gt100k">&gt; 100 000 pts</SelectItem>
+            <SelectItem value="lt5k">&lt; 5 000 ₲</SelectItem>
+            <SelectItem value="5to15k">5 000 – 15 000 ₲</SelectItem>
+            <SelectItem value="15to50k">15 000 – 50 000 ₲</SelectItem>
+            <SelectItem value="50to100k">50 000 – 100 000 ₲</SelectItem>
+            <SelectItem value="gt100k">&gt; 100 000 ₲</SelectItem>
           </SelectContent>
         </Select>
       </div>

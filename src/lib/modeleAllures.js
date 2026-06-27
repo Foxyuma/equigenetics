@@ -1,13 +1,13 @@
 import { getBreedProfile } from './breedProfiles';
+import {
+  POSITIVE_MORPHO,
+  NEGATIVE_MORPHO,
+  getQualification,
+  getBreedGrid,
+  scoreBreedGrid,
+} from './breedGrids';
 
-export const POSITIVE_MORPHO = [
-  'epaules_inclinees', 'dos_court', 'jarrets_puissants',
-  'encolure_arquee', 'poitrine_large', 'aplombs_parfaits',
-];
-export const NEGATIVE_MORPHO = [
-  'epaules_droites', 'dos_long', 'jarrets_droits',
-  'encolure_ewe', 'poitrine_etroite', 'aplombs_defectueux',
-];
+export { POSITIVE_MORPHO, NEGATIVE_MORPHO, getQualification };
 
 export const AGE_CLASSES = [
   { age: 0, label: "De l'année", icon: '🍼' },
@@ -40,7 +40,11 @@ function getCoatBonus(coatColor) {
   return 0;
 }
 
-// Score a morphological criterion /10 from a positive/negative trait pair
+function clampScore(v) {
+  return Math.max(0, Math.min(100, Math.round(v * 10) / 10));
+}
+
+// ─── FCT generic grid (fallback for breeds without a specific grid) ────
 function scoreMorphoCriterion(morphology, positiveTrait, negativeTrait) {
   let score = 5.5;
   if (morphology.includes(positiveTrait)) score += 2.5;
@@ -49,19 +53,32 @@ function scoreMorphoCriterion(morphology, positiveTrait, negativeTrait) {
   return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
 }
 
-// Score a stat-based criterion /10
 function scoreStatCriterion(value) {
   const v = value ?? 30;
-  let score = 3 + (v / 100) * 6; // 3→9 range
+  let score = 3 + (v / 100) * 6;
   score += (Math.random() - 0.5) * 1.5;
   return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
 }
 
-function clampScore(v) {
-  return Math.max(0, Math.min(100, Math.round(v * 10) / 10));
+function getImpressionScore(horse) {
+  const profile = getBreedProfile(horse.breed);
+  let score = 6.5;
+  if (profile?.forbiddenCoats) {
+    const coatLower = (horse.coat_color || '').toLowerCase();
+    if (profile.forbiddenCoats.some(fc => coatLower.includes(fc.toLowerCase()))) {
+      score -= 2;
+    }
+  }
+  score += getCoatBonus(horse.coat_color) * 0.2;
+  score += (Math.random() - 0.5) * 1.5;
+  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
 }
 
-// Grille FCT — note adulte (A), 10 critères /10 = /100, poids 60%
+function clampCriterion(v) {
+  const score = v + (Math.random() - 0.5) * 1.5;
+  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
+}
+
 function getAdultGridScore(horse) {
   const morphology = horse.morphology || [];
   const potential = horse.genetic_potential || {};
@@ -80,31 +97,16 @@ function getAdultGridScore(horse) {
     'Impression générale & Type': getImpressionScore(horse),
   };
 
-  const total = Object.values(criteria).reduce((sum, v) => sum + v, 0); // /100
+  const total = Object.values(criteria).reduce((sum, v) => sum + v, 0);
   return { criteria, total: clampScore(total) };
 }
 
-function getImpressionScore(horse) {
-  const profile = getBreedProfile(horse.breed);
-  let score = 6.5;
-  if (profile?.forbiddenCoats) {
-    const coatLower = (horse.coat_color || '').toLowerCase();
-    if (profile.forbiddenCoats.some((fc) => coatLower.includes(fc.toLowerCase()))) {
-      score -= 2;
-    }
-  }
-  score += getCoatBonus(horse.coat_color) * 0.2;
-  score += (Math.random() - 0.5) * 1.5;
-  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
-}
-
-// Grille poulain (B), 4 critères /10 = /40 → /100, poids 40%
 function getFoalGridScore(horse) {
   const morphology = horse.morphology || [];
   const potential = horse.genetic_potential || {};
 
-  const positives = morphology.filter((t) => POSITIVE_MORPHO.includes(t)).length;
-  const negatives = morphology.filter((t) => NEGATIVE_MORPHO.includes(t)).length;
+  const positives = morphology.filter(t => POSITIVE_MORPHO.includes(t)).length;
+  const negatives = morphology.filter(t => NEGATIVE_MORPHO.includes(t)).length;
 
   const criteria = {
     'Type dans la race': getImpressionScore(horse),
@@ -117,43 +119,50 @@ function getFoalGridScore(horse) {
     'Aplombs': scoreMorphoCriterion(morphology, 'aplombs_parfaits', 'aplombs_defectueux'),
   };
 
-  const total = (Object.values(criteria).reduce((sum, v) => sum + v, 0) / 40) * 100; // /100
+  const total = (Object.values(criteria).reduce((sum, v) => sum + v, 0) / 40) * 100;
   return { criteria, total: clampScore(total) };
 }
 
-function clampCriterion(v) {
-  const score = v + (Math.random() - 0.5) * 1.5;
-  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
-}
-
-// Note de présentation (C) /20
 function getPresentationScore(horse) {
   const energy = horse.energy ?? 100;
   const cheval = Math.min(10, 5 + (energy / 100) * 4 + getCoatBonus(horse.coat_color) * 0.2);
   const presentateur = 6 + Math.random() * 2;
   const total = Math.min(20, cheval + presentateur);
-  return { cheval: Math.round(cheval * 10) / 10, presentateur: Math.round(presentateur * 10) / 10, total: Math.round(total * 10) / 10 };
+  return {
+    cheval: Math.round(cheval * 10) / 10,
+    presentateur: Math.round(presentateur * 10) / 10,
+    total: Math.round(total * 10) / 10,
+  };
 }
 
 export function getModeleAlluresBreakdown(horse) {
   if (!horse) return null;
+
+  // Breed-specific grid (e.g. Selle Français 2023)
+  const breedGrid = getBreedGrid(horse.breed);
+  if (breedGrid) {
+    return scoreBreedGrid(horse, breedGrid);
+  }
+
+  // FCT generic grid (Camargue-style)
   const adult = getAdultGridScore(horse);
   const foal = getFoalGridScore(horse);
   const presentation = getPresentationScore(horse);
 
   const adultContribution = adult.total * 0.60;
   const foalContribution = foal.total * 0.40;
-  const presentationBonus = (presentation.total / 20) * 5; // max +5
+  const presentationBonus = (presentation.total / 20) * 5;
 
   let total = adultContribution + foalContribution + presentationBonus;
 
-  const affected = horse.health_genes?.filter((h) => h.status === 'affected') || [];
+  const affected = horse.health_genes?.filter(h => h.status === 'affected') || [];
   total -= affected.length * 4;
   if (horse.doping_risk_until && new Date(horse.doping_risk_until) > new Date()) {
     total -= 3;
   }
 
   return {
+    type: 'fct',
     adult,
     foal,
     presentation,
@@ -161,20 +170,13 @@ export function getModeleAlluresBreakdown(horse) {
     foalContribution: clampScore(foalContribution),
     presentationBonus: Math.round(presentationBonus * 10) / 10,
     total: clampScore(total),
-    qualification: getQualification(total),
+    qualification: getQualification(clampScore(total)),
   };
 }
 
 export function getModeleAlluresScore(horse) {
   const breakdown = getModeleAlluresBreakdown(horse);
   return breakdown ? breakdown.total : 0;
-}
-
-export function getQualification(score) {
-  if (score >= 70) return { label: 'Qualifié Excellent', badgeClass: 'bg-emerald-50 text-emerald-700' };
-  if (score >= 60) return { label: 'Qualifié Bon', badgeClass: 'bg-blue-50 text-blue-700' };
-  if (score >= 50) return { label: 'Qualifié', badgeClass: 'bg-amber-50 text-amber-700' };
-  return { label: 'Ajourné', badgeClass: 'bg-red-50 text-red-700' };
 }
 
 export function isEligibleForModeleAllures(horse) {
@@ -187,5 +189,5 @@ export function isEligibleForModeleAllures(horse) {
 }
 
 export function getAgeClassLabel(age) {
-  return AGE_CLASSES.find((a) => a.age === age)?.label || `${age} ans`;
+  return AGE_CLASSES.find(a => a.age === age)?.label || `${age} ans`;
 }

@@ -16,6 +16,7 @@ import {
   AGE_CLASSES,
   PRIZE_TABLE,
 } from '../lib/modeleAllures';
+import { isFoalCompetitionOpen, SEASON_LABELS } from '../lib/competitionCalendar';
 
 const DOPING_CHECK_PROB = 0.10;
 
@@ -47,6 +48,8 @@ export default function ModeleAllures() {
     queryFn: () => base44.entities.GameClock.list('-created_date', 1),
   });
   const gameYear = clocks[0]?.year || 1;
+  const currentSeason = clocks[0]?.season || 'spring';
+  const foalSeasonOpen = isFoalCompetitionOpen(currentSeason);
 
   const { data: allModeleComps = [] } = useQuery({
     queryKey: ['modele-allures-comps', currentUser?.email],
@@ -193,10 +196,19 @@ export default function ModeleAllures() {
         </p>
       </div>
 
-      <Card className="border-amber-200 bg-amber-50/60">
+      <Card className={`border-0 ${foalSeasonOpen ? 'bg-emerald-50/60' : 'bg-amber-50/60'}`}>
         <CardContent className="p-4 flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <Calendar className={`w-5 h-5 flex-shrink-0 mt-0.5 ${foalSeasonOpen ? 'text-emerald-600' : 'text-amber-600'}`} />
           <div className="text-sm text-stone-600 space-y-1">
+            {foalSeasonOpen ? (
+              <p className="text-emerald-700 font-semibold">
+                🍂 Les concours de poulains sont ouverts ! Saison : {SEASON_LABELS[currentSeason]} — Année {gameYear}.
+              </p>
+            ) : (
+              <p className="text-amber-700 font-semibold">
+                ⏳ Les concours de poulains ont lieu en septembre (automne). Saison actuelle : {SEASON_LABELS[currentSeason]}.
+              </p>
+            )}
             <p>• <strong>1 concours par race et par an</strong> — chaque cheval ne peut participer qu'une fois par an dans sa race.</p>
             <p>• <strong>Classes d'âge</strong> : de l'année (0), 1 an, 2 ans, 3 ans, 4 ans.</p>
             <p>• <strong>Éligibilité</strong> : le cheval doit être inscrit au studbook ou avoir des origines connues (OC).</p>
@@ -296,10 +308,10 @@ export default function ModeleAllures() {
                                     <Button
                                       size="sm"
                                       onClick={() => registerMutation.mutate(horse)}
-                                      disabled={alreadyReg || registerMutation.isPending}
+                                      disabled={alreadyReg || registerMutation.isPending || !foalSeasonOpen}
                                       className="bg-amber-600 hover:bg-amber-700 text-white"
                                     >
-                                      {alreadyReg ? '✓ Inscrit' : 'Inscrire'}
+                                      {alreadyReg ? '✓ Inscrit' : foalSeasonOpen ? 'Inscrire' : 'Hors saison'}
                                     </Button>
                                   </div>
                                 </div>

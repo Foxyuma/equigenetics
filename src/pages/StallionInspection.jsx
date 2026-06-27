@@ -4,9 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle2, Award, Zap, TrendingUp, Gift, Frown } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Award, Zap, TrendingUp, Gift, Frown, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculateInspectionScore, getApprovalStatus, getScoreColor, SCORING_CRITERIA } from '../components/breeding/InspectionScoring';
+import { isStallionCompetitionOpen, SEASON_LABELS, getStallionCompetitionName, getNextStallionSeason } from '../lib/competitionCalendar';
 
 const INSPECTION_CRITERIA = {
   'Arabian': {
@@ -195,6 +196,14 @@ export default function StallionInspection() {
     queryKey: ['genetic-tests'],
     queryFn: () => base44.entities.GeneticTest.list('-created_date', 500),
   });
+
+  const { data: clocks = [] } = useQuery({
+    queryKey: ['game-clock-stallion'],
+    queryFn: () => base44.entities.GameClock.list('-created_date', 1),
+  });
+  const currentSeason = clocks[0]?.season || 'spring';
+  const gameYear = clocks[0]?.year || 1;
+  const stallionSeasonOpen = isStallionCompetitionOpen(currentSeason);
 
   // Filter eligible stallions — âge minimum selon la race
   const eligibleStallions = horses.filter(h => {
@@ -481,6 +490,31 @@ export default function StallionInspection() {
         <p className="text-stone-500 mt-1">Evaluez et certifiez vos étalons pour les saillies approuvées</p>
       </div>
 
+      <Card className={`border-0 bg-gradient-to-r ${stallionSeasonOpen ? 'from-emerald-50 to-green-50' : 'from-amber-50 to-orange-50'}`}>
+        <CardContent className="p-6">
+          <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-blue-600" />
+            Calendrier des concours
+          </h3>
+          {stallionSeasonOpen ? (
+            <div className="space-y-2 text-sm text-stone-700">
+              <p className="text-emerald-700 font-semibold">
+                🏆 {getStallionCompetitionName(currentSeason)} — Année {gameYear}
+              </p>
+              <p>Saison actuelle : <strong>{SEASON_LABELS[currentSeason]}</strong>. Les inscriptions sont ouvertes !</p>
+              <p className="text-xs text-stone-500 mt-2">2 concours par an : un en automne, un en hiver.</p>
+            </div>
+          ) : (
+            <div className="space-y-2 text-sm text-stone-700">
+              <p className="text-amber-700 font-semibold">
+                ⏳ Les concours d'étalons ont lieu en automne et en hiver.
+              </p>
+              <p>Saison actuelle : <strong>{SEASON_LABELS[currentSeason]}</strong>. Revenez en automne pour le prochain concours.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card className="border-0 bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardContent className="p-6">
           <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
@@ -511,6 +545,7 @@ export default function StallionInspection() {
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {eligibleStallions.map(stallion => {
+          // Hors saison : les étalons sont affichés mais l'inspection est désactivée
           const criteria = INSPECTION_CRITERIA[stallion.breed];
           const avgStat = Math.round(
             Object.values(stallion.stats || {}).reduce((a, b) => a + b, 0) /
@@ -522,14 +557,16 @@ export default function StallionInspection() {
           return (
             <Card
               key={stallion.id}
-              className={`border-2 cursor-pointer transition-all ${
+              className={`border-2 transition-all ${
+                !stallionSeasonOpen ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+              } ${
                 isApproved
                   ? 'border-green-300 bg-green-50/50'
                   : stallion.breeding_approval_status === 'rejected'
                   ? 'border-red-300 bg-red-50/50'
                   : 'border-stone-200 hover:border-amber-300'
               }`}
-                  onClick={() => setSelectedStallion(stallion)}
+                  onClick={() => stallionSeasonOpen && setSelectedStallion(stallion)}
                 >
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
@@ -573,8 +610,12 @@ export default function StallionInspection() {
                       </div>
                     )}
 
-                    <Button className="w-full text-sm" size="sm">
-                      {stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated' ? 'Voir résultats' : 'Inspecter'}
+                    <Button className="w-full text-sm" size="sm" disabled={!stallionSeasonOpen}>
+                      {stallion.breeding_approval_status && stallion.breeding_approval_status !== 'not_evaluated'
+                        ? 'Voir résultats'
+                        : stallionSeasonOpen
+                        ? 'Inspecter'
+                        : 'Hors saison'}
                     </Button>
                   </CardContent>
                 </Card>

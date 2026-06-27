@@ -154,16 +154,21 @@ export default function HorseDetail() {
         <div className="lg:w-1/3">
           <Card className="border-0 bg-gradient-to-br from-amber-50 to-stone-100 overflow-hidden">
             <CardContent className="p-0 relative">
-              {horse.image_url && !generatingImage ? (
+              {horse.image_url ? (
                 <img
                   src={horse.image_url}
                   alt={horse.name}
                   className="w-full aspect-square object-cover rounded-xl"
                 />
-              ) : (
+              ) : generatingImage ? (
                 <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
                   <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin" />
-                  <p className="text-sm text-stone-400">Génération de la photo...</p>
+                  <p className="text-sm text-stone-400">Génération du dessin...</p>
+                </div>
+              ) : (
+                <div className="w-full aspect-square flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 rounded-xl gap-3">
+                  <span className="text-6xl opacity-30">🎨</span>
+                  <p className="text-sm text-stone-400">Dessin en attente</p>
                 </div>
               )}
               <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-black/40 text-white text-xs backdrop-blur-sm">

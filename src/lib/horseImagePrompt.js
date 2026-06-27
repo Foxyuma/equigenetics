@@ -302,7 +302,7 @@ export function buildHorseImagePrompt({ breed, coat_color, sex, age = null, isFo
     if (hints.length > 0) morphologyHints = `Individual physical traits to highlight: ${hints.join(', ')}.`;
   }
 
-  return `Professional equine photography of a ${colorDesc} ${sexLabel}. ${breedLabel}. ${breedDesc}. ${ageStage.desc}. ${markingsDesc} ${morphologyHints} Full body side view showing the complete horse from head to tail, natural outdoor lighting, green meadow or pasture background, sharp focus, high resolution realistic equine photography, no text, no watermark, no humans. The coat color must be exactly ${colorDesc}.`.trim();
+  return `Beautiful hand-drawn digital illustration of a ${colorDesc} ${sexLabel}. ${breedLabel}. ${breedDesc}. ${ageStage.desc}. ${markingsDesc} ${morphologyHints} Full body side view showing the complete horse from head to tail. Artistic watercolor and ink illustration style, soft painterly brushstrokes, warm natural color palette, clean simple meadow background with soft green tones, elegant equine art, storybook illustration aesthetic, delicate line work with watercolor washes, no text, no watermark, no humans. The coat color must be exactly ${colorDesc}.`.trim();
 }
 
 /**

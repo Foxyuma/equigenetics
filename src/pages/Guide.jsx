@@ -1,465 +1,637 @@
-import React, { useState } from 'react';
-import { Book, Clock, Heart, Dna, ShoppingCart, TrendingUp, Trophy, Home, MapPin, AlertTriangle, Star, Calendar, GitBranch, Baby, Activity, Sparkles, Award, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Book, Clock, Heart, Dna, TrendingUp, Trophy, Baby, Sparkles, Gift, CheckCircle, ArrowRight, Star, ChevronRight, Info, Zap, Calendar, Award, Activity, ShoppingCart, AlertTriangle, MapPin, GitBranch } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
-const sections = [
+const STEPS = [
   {
-    id: 'bienvenue',
+    id: 'intro',
     icon: Star,
-    label: 'Bienvenue',
+    title: 'Bienvenue dans EquiGenesis !',
+    description: 'Le guide interactif va te faire découvrir les bases du jeu. À chaque étape, tu gagneras des récompenses !',
     color: 'from-amber-500 to-yellow-500',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-700 leading-relaxed">
-          Bienvenue dans <strong>EquiGenesis</strong>&nbsp;! Tu es a la tete d'un haras et ton objectif est de <strong>selectionner, elever, entrainer</strong> et <strong>faire concourir</strong> les meilleurs chevaux possible.
-        </p>
-        <p className="text-stone-700 leading-relaxed">
-          Chaque cheval est unique, avec son propre <strong>patrimoine genetique</strong>, son <strong>caractere</strong> et son <strong>potentiel</strong>. A toi de faire les bons croisements pour creer la lignee parfaite.
-        </p>
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="bg-stone-50 rounded-xl p-3 text-center">
-            <Zap className="w-5 h-5 text-amber-500 mx-auto mb-1" />
-            <p className="text-xs font-semibold text-stone-700">Commence avec un cheval</p>
-            <p className="text-[10px] text-stone-400">Cree ton premier cheval dans l&apos;ecran d&apos;accueil</p>
-          </div>
-          <div className="bg-stone-50 rounded-xl p-3 text-center">
-            <Heart className="w-5 h-5 text-pink-500 mx-auto mb-1" />
-            <p className="text-xs font-semibold text-stone-700">Eleve et progresse</p>
-            <p className="text-[10px] text-stone-400">Reproduction, entrainement, concours</p>
-          </div>
-          <div className="bg-stone-50 rounded-xl p-3 text-center">
-            <TrendingUp className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-            <p className="text-xs font-semibold text-stone-700">Ameliore tes stats</p>
-            <p className="text-[10px] text-stone-400">Entraine-toi et gagne des concours</p>
-          </div>
-          <div className="bg-stone-50 rounded-xl p-3 text-center">
-            <Dna className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-            <p className="text-xs font-semibold text-stone-700">Maitrise la genetique</p>
-            <p className="text-[10px] text-stone-400">Choisis les bons croisements</p>
-          </div>
-        </div>
-      </div>
-    )
+    content: `
+      Bienvenue, jeune éleveur ! Tu vas découvrir tout ce qu'il faut savoir pour gérer ton haras,
+      comprendre la génétique équine, réaliser des croisements, entraîner tes chevaux et les faire concourir.
+      
+      Ce tutoriel te guidera pas à pas. Termine chaque étape pour débloquer des récompenses :
+      points de réputation, argent, objets... et un cheval à la fin !
+    `
   },
   {
-    id: 'navigation',
-    icon: MapPin,
-    label: 'Navigation & Pages',
-    color: 'from-stone-600 to-stone-700',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-600 text-sm">Le jeu est organise en 4 categories dans le menu du haut&nbsp;:</p>
-        <div className="space-y-3">
-          <div className="bg-lime-50/60 rounded-xl p-4 border border-lime-200">
-            <h4 className="font-bold text-stone-800 flex items-center gap-2 text-sm"><Home className="w-4 h-4 text-lime-600" /> Ecurie</h4>
-            <ul className="mt-2 space-y-1.5 text-xs text-stone-600">
-              <li><strong>Mes Chevaux</strong> — la liste de tous tes chevaux. Clique sur un cheval pour voir sa fiche detaillee.</li>
-              <li><strong>Entrainement</strong> — ameliore les competences de tes chevaux. Chaque seance consomme de l&apos;energie.</li>
-              <li><strong>Paddocks</strong> — gere les enclos et le bien-etre de tes chevaux.</li>
-              <li><strong>Personnel</strong> — embauche des employes (palefreniers, veterinaires, entraineurs) pour des bonus passifs.</li>
-              <li><strong>Clinique Veterinaire</strong> — soigne tes chevaux malades et suis leur sante.</li>
-            </ul>
-          </div>
-
-          <div className="bg-pink-50/60 rounded-xl p-4 border border-pink-200">
-            <h4 className="font-bold text-stone-800 flex items-center gap-2 text-sm"><Heart className="w-4 h-4 text-pink-500" /> Elevage</h4>
-            <ul className="mt-2 space-y-1.5 text-xs text-stone-600">
-              <li><strong>Reproduction</strong> — choisis un etalon pour saillir ta jument. Voir section dediee ci-dessous.</li>
-              <li><strong>Carnet d&apos;elevage</strong> — historique de toutes tes naissances et croisements.</li>
-              <li><strong>Lignees &amp; Pedigree</strong> — explore l&apos;arbre genealogique de tes chevaux.</li>
-              <li><strong>Marche des Saillies</strong> — consulte les etalons des Haras Nationaux avec leurs niveaux d&apos;approbation.</li>
-              <li><strong>Inspection Etalons</strong> — fais inspecter tes males pour obtenir une approbation a la monte.</li>
-              <li><strong>Labo Genetique</strong> — teste le genome de tes chevaux (sante, robe, panel complet).</li>
-            </ul>
-          </div>
-
-          <div className="bg-amber-50/60 rounded-xl p-4 border border-amber-200">
-            <h4 className="font-bold text-stone-800 flex items-center gap-2 text-sm"><Trophy className="w-4 h-4 text-amber-500" /> Competition</h4>
-            <ul className="mt-2 space-y-1.5 text-xs text-stone-600">
-              <li><strong>Concours</strong> — inscris tes chevaux dans differentes disciplines (dressage, CSO, cross, etc.).</li>
-              <li><strong>Modeles &amp; Allures</strong> — concours de beaute et de conformation, par race.</li>
-              <li><strong>Classements</strong> — consulte les meilleurs chevaux et eleveurs.</li>
-              <li><strong>Calendrier</strong> — saisons et evenements a venir.</li>
-            </ul>
-          </div>
-
-          <div className="bg-blue-50/60 rounded-xl p-4 border border-blue-200">
-            <h4 className="font-bold text-stone-800 flex items-center gap-2 text-sm"><ShoppingCart className="w-4 h-4 text-blue-500" /> Ville</h4>
-            <ul className="mt-2 space-y-1.5 text-xs text-stone-600">
-              <li><strong>Marche &amp; Encheres</strong> — achete et vends des chevaux aux encheres.</li>
-              <li><strong>Boutique</strong> — achete des objets (soins, aliments, medicaments).</li>
-              <li><strong>Inventaire</strong> — consulte et utilise tes objets.</li>
-              <li><strong>Messages</strong> — recois des notifications et messages des autres joueurs.</li>
-              <li><strong>Echanges</strong> — propose des echanges de chevaux avec d&apos;autres joueurs.</li>
-              <li><strong>Mon Profil</strong> — gere ton affixe d&apos;elevage, tes preferences.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 'temps',
+    id: 'cycle',
     icon: Clock,
-    label: 'Le Temps dans le Jeu',
+    title: 'Le cycle de vie des chevaux',
+    description: 'Comprends comment les chevaux naissent, grandissent, et vieillissent.',
     color: 'from-sky-500 to-blue-500',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-700 leading-relaxed">
-          EquiGenesis a son propre <strong>calendrier</strong> independant du temps reel. Comprendre son fonctionnement est essentiel pour planifier elevage et competitions.
-        </p>
-        <div className="grid gap-3">
-          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-            <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2"><Calendar className="w-4 h-4 text-blue-500" /> Le rythme du jeu</h4>
-            <ul className="mt-2 space-y-1.5 text-xs text-stone-600">
-              <li><strong>1 jour reel = 1 jour de jeu</strong> (synchronise avec l&apos;horloge reelle)</li>
-              <li><strong>1 mois de jeu = 14 jours reels</strong> (2 semaines)</li>
-              <li><strong>1 annee de jeu = 168 jours reels</strong> (12 mois × 14 jours)</li>
-              <li>Un <strong>tick automatique</strong> a lieu chaque jour a <strong>3h30 UTC</strong> (heure serveur) pour faire vieillir les chevaux, avancer les saisons et traiter les concours.</li>
-            </ul>
-          </div>
-
-          <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-            <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2"><Sparkles className="w-4 h-4 text-emerald-500" /> Les saisons</h4>
-            <p className="mt-1 text-xs text-stone-600">
-              Le jeu alterne <strong>printemps</strong>, <strong>ete</strong>, <strong>automne</strong> et <strong>hiver</strong>. Chaque saison dure <strong>3 mois de jeu</strong> (42 jours reels). La saison en cours est affichee dans le header en haut a droite. Certains evenements et concours peuvent varier selon la saison.
-            </p>
-          </div>
-
-          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-            <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2"><Activity className="w-4 h-4 text-amber-500" /> Vieillissement</h4>
-            <p className="mt-1 text-xs text-stone-600">
-              Les chevaux <strong>vieillissent de 1 an a chaque debut d&apos;annee</strong> de jeu. Ils commencent a <strong>0 an</strong> (poulain) et deviennent adultes visuellement a <strong>3-4 ans</strong>. Un cheval peut vivre jusqu&apos;a environ <strong>30 ans</strong> selon sa sante genetique.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    content: `
+      Dans EquiGenesis, le temps passe en continu. Les chevaux naissent à 0 an (poulains), 
+      deviennent adultes à 3-4 ans, et peuvent vivre jusqu'à environ 30 ans selon leur santé génétique.
+      
+      Le jeu a son propre calendrier : 1 mois de jeu = 14 jours réels, 
+      1 année de jeu = 168 jours réels. Chaque jour à 3h30, un tick automatique 
+      fait vieillir les chevaux, avance les saisons et traite les concours.
+      
+      Les saisons (printemps, été, automne, hiver) durent 3 mois de jeu chacune.
+      Certains événements et compétitions varient selon la saison.
+    `
   },
   {
-    id: 'genetique',
+    id: 'genetics',
     icon: Dna,
-    label: 'Genetique & Robes',
+    title: 'Les bases de la génétique',
+    description: 'Comprends comment fonctionnent les gènes, les robes et l\'hérédité.',
     color: 'from-purple-500 to-violet-500',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-700 leading-relaxed">
-          Le c&rsquo;ur d&apos;EquiGenesis, c&apos;est la <strong>genetique</strong>. Chaque cheval possede un genome complet avec des locus qui determinent sa robe, ses motifs et sa sante.
-        </p>
-
-        <div className="bg-stone-50 rounded-xl p-4">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Les bases&nbsp;: alleles et dominance</h4>
-          <p className="text-xs text-stone-600 leading-relaxed">
-            Chaque gene existe en deux copies (alleles), une heritee du pere et une de la mere. Si les deux alleles sont identiques, on parle d&apos;<strong>homozygote</strong> (ex&nbsp;: EE ou ee). S&apos;ils sont differents, c&apos;est un <strong>heterozygote</strong> (ex&nbsp;: Ee).
-          </p>
-          <p className="text-xs text-stone-600 leading-relaxed mt-2">
-            Un allele <strong>dominant</strong> (lettre majuscule, ex&nbsp;: <strong>E</strong>, <strong>A</strong>, <strong>G</strong>) s&apos;exprime meme en un seul exemplaire. Un allele <strong>recessif</strong> (minuscule, ex&nbsp;: <strong>e</strong>, <strong>a</strong>) ne s&apos;exprime que s&apos;il est present en deux copies.
-          </p>
-          <div className="mt-3 p-3 bg-white rounded-lg border">
-            <p className="text-xs font-semibold text-stone-700 mb-1">Exemple — Le gene Extension (controle la couleur de base)&nbsp;:</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-stone-50 p-2 rounded"><strong>EE</strong> — Noir (homozygote dominant)</div>
-              <div className="bg-stone-50 p-2 rounded"><strong>Ee</strong> — Noir (heterozygote, E domine)</div>
-              <div className="bg-stone-50 p-2 rounded"><strong>ee</strong> — Alezan (homozygote recessif)</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-stone-50 rounded-xl p-4">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Les robes de base</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-amber-100 p-2 rounded flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-amber-800 shrink-0" />
-              <span><strong>Bai</strong> — E_ + A_ — Corps brun, crins noirs</span>
-            </div>
-            <div className="bg-red-100 p-2 rounded flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-700 shrink-0" />
-              <span><strong>Alezan</strong> — ee — Corps et crins roux</span>
-            </div>
-            <div className="bg-stone-800 p-2 rounded flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-stone-900 shrink-0" />
-              <span className="text-white"><strong>Noir</strong> — E_ + aa — Corps et crins noirs</span>
-            </div>
-            <div className="bg-stone-100 p-2 rounded flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-stone-400 shrink-0" />
-              <span><strong>Gris</strong> — G_ — Robe qui grisonne avec l&apos;age</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-stone-50 rounded-xl p-4">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Les dilutions</h4>
-          <p className="text-xs text-stone-600 mb-2">Ces genes modifient la couleur de base&nbsp;:</p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-yellow-50 p-2 rounded"><strong>Creme (Cr)</strong> — Palomino, Isabelle, Cremello</div>
-            <div className="bg-amber-50 p-2 rounded"><strong>Dun (D)</strong> — Robe dun, Grullo, marques primitives</div>
-            <div className="bg-orange-50 p-2 rounded"><strong>Champagne (CH)</strong> — Reflets dore, yeux ambre</div>
-            <div className="bg-blue-50 p-2 rounded"><strong>Silver (Z)</strong> — Eclaircit les crins des noirs et bais</div>
-            <div className="bg-green-50 p-2 rounded"><strong>Mushroom (Mu)</strong> — Dilution recessive, alourdit l&apos;alezan</div>
-            <div className="bg-pink-50 p-2 rounded"><strong>Perle (prl)</strong> — Dilution forte sur alezan/bai/noir</div>
-          </div>
-          <p className="text-[10px] text-stone-400 mt-2">Exemple&nbsp;: Alezan (ee) + Creme (Crn) = Palomino. Bai (E_ A_) + Creme (Crn) = Isabelle (Buckskin).</p>
-        </div>
-
-        <div className="bg-stone-50 rounded-xl p-4">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Les motifs et patterns blancs</h4>
-          <p className="text-xs text-stone-600 mb-2">Ces genes ajoutent du blanc sur la robe, des petites marques aux robes entierement blanches&nbsp;:</p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-white p-2 rounded border"><strong>Tobiano (To)</strong> — Grandes taches blanches rondes, dos traverse</div>
-            <div className="bg-white p-2 rounded border"><strong>Sabino (Sb1)</strong> — Balzanes hautes, liste, ventre blanc</div>
-            <div className="bg-white p-2 rounded border"><strong>Roan (Rn)</strong> — Poils blancs melanges, robe fleurie</div>
-            <div className="bg-white p-2 rounded border"><strong>Dominant White (DW)</strong> — Robe blanche quasi-integrale</div>
-            <div className="bg-white p-2 rounded border"><strong>Frame Overo (Fr)</strong> — Taches blanches dentelees sur les flancs</div>
-            <div className="bg-white p-2 rounded border"><strong>Splash (Spl)</strong> — Extremites blanches, tache de peinture</div>
-            <div className="bg-white p-2 rounded border"><strong>Rabicano (Rb)</strong> — Stries blanches sur les flancs et la queue</div>
-            <div className="bg-white p-2 rounded border"><strong>Leopard (Lp)</strong> — Taches sur fond clair (Appaloosa)</div>
-          </div>
-        </div>
-
-        <div className="bg-stone-50 rounded-xl p-4">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Les modificateurs</h4>
-          <p className="text-xs text-stone-600">
-            Des genes qui ajoutent des nuances&nbsp;: <strong>Sooty (So)</strong> — poils noirs dissemines (fonce la robe)&nbsp;;
-            <strong>Flaxen (f)</strong> — crins blonds sur alezan&nbsp;;
-            <strong>Pangare (P)</strong> — zones eclaircies (ventre, museau)&nbsp;;
-            <strong>Bringe (BR1)</strong> — stries verticales (tres rare, moins de 1%).
-          </p>
-        </div>
-      </div>
-    )
+    content: `
+      Chaque cheval possède un génome complet qui détermine sa robe, ses motifs et sa santé.
+      
+      Les bases : chaque gène existe en deux copies (allèles), une du père et une de la mère.
+      - Homozygote : les deux allèles sont identiques (ex: EE ou ee)
+      - Hétérozygote : les deux allèles sont différents (ex: Ee)
+      
+      Un allèle DOMINANT (majuscule) s'exprime même en un seul exemplaire.
+      Un allèle RÉCESSIF (minuscule) ne s'exprime qu'en deux copies.
+      
+      Couleurs de base :
+      • Bai (E_ + A_) — corps brun, crins noirs
+      • Alezan (ee) — corps et crins roux
+      • Noir (E_ + aa) — corps et crins noirs
+      • Gris (G_) — robe qui grisonne avec l'âge
+      
+      Dilutions : Crème (Palomino, Isabelle), Dun (marques primitives),
+      Champagne (reflets dorés), Silver (crins clairs).
+      
+      Motifs : Tobiano (grandes taches blanches), Sabino (balzanes hautes),
+      Roan (poils blancs mélangés), Léopard (taches Appaloosa).
+    `
   },
   {
     id: 'reproduction',
     icon: Heart,
-    label: 'Reproduction & Saillies',
+    title: 'Les saillies',
+    description: 'Comment faire reproduire tes chevaux pour créer la génération suivante.',
     color: 'from-rose-500 to-pink-500',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-700 leading-relaxed">
-          La reproduction est le pilier du jeu. Voici comment ca fonctionne pas a pas.
-        </p>
-
-        <div className="bg-pink-50/80 rounded-xl p-4 border border-pink-200">
-          <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2 mb-2"><Heart className="w-4 h-4 text-pink-500" /> Comment faire une saillie</h4>
-          <ol className="space-y-2 text-xs text-stone-600 list-decimal list-inside">
-            <li>Va dans la fiche d&apos;une <strong>jument (femelle)</strong> de 3 ans ou plus</li>
-            <li>Onglet <strong>Reproduction</strong></li>
-            <li>Choisis un etalon&nbsp;: <strong>tes propres etalons</strong> (gratuit) ou via le <strong>Marche des Saillies</strong> (payant en Genesis)</li>
-            <li>Simule le croisement pour voir les <strong>previsions genetiques</strong></li>
-            <li>Confirme la saillie — elle coute <strong>25 d&apos;energie</strong> a la jument</li>
-            <li>La naissance a lieu apres <strong>11 mois de jeu</strong> (soit 158 jours reels)</li>
-          </ol>
-        </div>
-
-        <div className="bg-amber-50/80 rounded-xl p-4 border border-amber-200">
-          <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2 mb-2"><Award className="w-4 h-4 text-amber-500" /> L&apos;approbation des etalons</h4>
-          <p className="text-xs text-stone-600 mb-2">Les etalons doivent etre <strong>inspectes et approuves</strong> pour que leurs poulains soient inscrits au studbook (plein registre). Le niveau d&apos;approbation impacte aussi le <strong>prix de la saillie</strong>&nbsp;:</p>
-          <div className="grid grid-cols-2 gap-1.5 text-xs">
-            <div className="bg-yellow-100 text-yellow-800 p-2 rounded-lg font-medium">Élite — ×2.5</div>
-            <div className="bg-green-100 text-green-800 p-2 rounded-lg font-medium">Sport — ×1.8</div>
-            <div className="bg-blue-100 text-blue-800 p-2 rounded-lg font-medium">Approuve — ×1.4</div>
-            <div className="bg-red-100 text-red-800 p-2 rounded-lg font-medium">Refuse — ×0.7</div>
-          </div>
-          <p className="text-[10px] text-stone-400 mt-2">Un etalon non approuve produit un poulain OC (Origines Constatees), qui ne peut pas etre inscrit au studbook.</p>
-        </div>
-
-        <div className="bg-emerald-50/80 rounded-xl p-4 border border-emerald-200">
-          <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2 mb-2"><GitBranch className="w-4 h-4 text-emerald-500" /> Heritage genetique</h4>
-          <p className="text-xs text-stone-600 leading-relaxed">
-            Le poulain herite <strong>aleatoirement un allele de chaque parent</strong> pour chaque gene. C&apos;est la <strong>loi de Mendel</strong>&nbsp;: 50% du pere, 50% de la mere. Les combinaisons possibles suivent les regles de dominance expliquees plus haut.
-          </p>
-          <p className="text-xs text-stone-600 leading-relaxed mt-2">
-            Les <strong>stats</strong> (vitesse, endurance, agilite, force, temperament, saut, dressage) sont une moyenne des parents avec une variation aleatoire. Le <strong>potentiel genetique</strong> maximum est herite et ne peut pas etre depasse, meme avec l&apos;entrainement.
-          </p>
-        </div>
-
-        <div className="bg-orange-50/80 rounded-xl p-4 border border-orange-200">
-          <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2 mb-2"><AlertTriangle className="w-4 h-4 text-orange-500" /> Maladies genetiques et risques</h4>
-          <p className="text-xs text-stone-600 leading-relaxed">
-            Certaines races sont porteuses de <strong>maladies hereditaires</strong>. Avant d&apos;accoupler deux chevaux, verifie leurs genes de sante via le <strong>Labo Genetique</strong> ou la <strong>fiche du cheval</strong>.
-          </p>
-          <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">HYPP</strong> — Dominant (Quarter Horse)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">PSSM1</strong> — Dominant (Warmbloods, QH)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">HERDA</strong> — Recessif (Quarter Horse)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">GBED</strong> — Recessif, letal (Quarter Horse)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">OLWS</strong> — Recessif, letal (Paint Horse)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">SCID</strong> — Recessif, letal (Arabe)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">LFS</strong> — Recessif, letal (Arabe)</div>
-            <div className="bg-white rounded-lg p-2 border"><strong className="text-red-700">WFFS</strong> — Recessif, letal (Warmbloods)</div>
-          </div>
-          <p className="text-[10px] text-stone-400 mt-2">Deux parents porteurs d&apos;une maladie recessive letale risquent de produire un poulain mort-ne&nbsp;!</p>
-        </div>
-
-        <div className="bg-indigo-50/80 rounded-xl p-4 border border-indigo-200">
-          <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2 mb-2"><Book className="w-4 h-4 text-indigo-500" /> Studbook et croisements</h4>
-          <p className="text-xs text-stone-600">
-            Les <strong>studbooks fermes</strong> (Arabe, Pur-Sang, Friesian, Lipizzaner) n&apos;acceptent que les croisements entre deux parents de la meme race. Les <strong>studbooks ouverts</strong> (Selle Francais, KWPN, etc.) acceptent des croisements avec Pur-Sang, Anglo-Arabe, et d&apos;autres Warmbloods. Les <strong>croisements non reconnus</strong> produisent un poulain <strong>OC</strong> (Origines Constatees).
-          </p>
-          <div className="mt-2 p-2 bg-white rounded-lg border text-xs">
-            <p className="font-semibold text-stone-700 mb-1">Races pures (studbook ferme)&nbsp;:</p>
-            <p className="text-stone-500">Arabian, Thoroughbred, Friesian, Lipizzaner</p>
-            <p className="font-semibold text-stone-700 mt-2 mb-1">Conseil&nbsp;:</p>
-            <p className="text-stone-500">Croiser avec un Pur-Sang (Thoroughbred) est un bon moyen d&apos;ameliorer les performances de n&apos;importe quelle race sportive.</p>
-          </div>
-        </div>
-
-        <div className="bg-cyan-50/80 rounded-xl p-4 border border-cyan-200">
-          <h4 className="font-bold text-stone-800 text-sm flex items-center gap-2 mb-2"><Baby className="w-4 h-4 text-cyan-500" /> La naissance</h4>
-          <p className="text-xs text-stone-600">
-            Apres 11 mois de gestation, le poulain nait. Tu devras lui donner un nom (avec ou sans affixe d&apos;elevage). Le <strong>sexe</strong>, la <strong>robe exacte</strong> et les <strong>stats</strong> sont une surprise jusqu&apos;a la naissance&nbsp;! Le poulain demarre a 0 an et pourra etre entraine a partir de 3 ans.
-          </p>
-        </div>
-      </div>
-    )
+    content: `
+      La reproduction est au cœur du jeu. Voici le processus complet :
+      
+      1. La jument doit avoir au moins 3 ans
+      2. Va dans sa fiche détaillée → onglet "Reproduction"
+      3. Choisis un étalon : tes propres mâles (gratuit) ou via le Marché des Saillies (payant)
+      4. Simule le croisement pour voir les prévisions génétiques
+      5. Confirme la saillie — elle coûte 25 d'énergie à la jument
+      6. La naissance a lieu après 11 mois de jeu (158 jours réels)
+      
+      Le poulain hérite aléatoirement un allèle de chaque parent pour chaque gène 
+      (loi de Mendel : 50% du père, 50% de la mère). Les stats sont une moyenne 
+      des parents avec une variation aléatoire.
+      
+      Attention : les étalons doivent être approuvés pour que leurs poulains soient
+      inscrits au studbook. Un étalon non approuvé produit un poulain OC 
+      (Origines Constatées).
+      
+      Niveau d'approbation :
+      • Élite (×2.5) • Sport (×1.8) • Approuvé (×1.4) • Refusé (×0.7)
+    `
   },
   {
-    id: 'entrainement',
+    id: 'training',
     icon: TrendingUp,
-    label: 'Entrainement',
+    title: 'L\'entraînement',
+    description: 'Améliore les compétences de tes chevaux pour les préparer aux concours.',
     color: 'from-emerald-500 to-green-500',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-700 leading-relaxed">
-          L&apos;entrainement ameliore les <strong>competences</strong> de tes chevaux (vitesse, endurance, agilite, force, temperament, saut, dressage). <strong>Attention&nbsp;: les stats ne peuvent pas depasser le potentiel genetique</strong> maximum du cheval.
-        </p>
-        <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Points importants</h4>
-          <ul className="space-y-1.5 text-xs text-stone-600">
-            <li>Chaque seance d&apos;entrainement consomme de l&apos;<strong>energie</strong> et de l&apos;<strong>energie mentale</strong></li>
-            <li>Un cheval fatigue (<strong>energie basse</strong>) a des performances reduites</li>
-            <li>L&apos;energie se regenere avec le temps ou avec des <strong>objets</strong> (aliments, supplements)</li>
-            <li>Les poulains (<strong>moins de 3 ans</strong>) ont un entrainement special (manipulation, desensibilisation)</li>
-            <li>Le <strong>caractere</strong> du cheval influence l&apos;efficacite de l&apos;entrainement</li>
-          </ul>
-        </div>
-        <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Disciplines de concours</h4>
-          <p className="text-xs text-stone-600">Chaque discipline sollicite des stats differentes. Par exemple&nbsp;:</p>
-          <div className="grid grid-cols-2 gap-1.5 mt-2 text-xs">
-            <div className="bg-white p-2 rounded border"><strong>Dressage</strong> — dressage + temperament</div>
-            <div className="bg-white p-2 rounded border"><strong>CSO</strong> — saut + agilite + vitesse</div>
-            <div className="bg-white p-2 rounded border"><strong>Cross</strong> — endurance + saut + vitesse</div>
-            <div className="bg-white p-2 rounded border"><strong>Endurance</strong> — endurance +++</div>
-            <div className="bg-white p-2 rounded border"><strong>Barrel Racing</strong> — vitesse + agilite</div>
-            <div className="bg-white p-2 rounded border"><strong>Racing</strong> — vitesse + endurance</div>
-          </div>
-          <p className="text-[10px] text-stone-400 mt-2">Certaines races ont des bonus naturels dans certaines disciplines (ex&nbsp;: Pur-Sang en course, Selle Francais en CSO).</p>
-        </div>
-      </div>
-    )
+    content: `
+      L'entraînement permet d'améliorer les 7 compétences : vitesse, endurance, agilité,
+      force, tempérament, saut et dressage.
+      
+      Points clés :
+      • Chaque séance consomme de l'énergie physique ET mentale
+      • Un cheval fatigué a des performances réduites
+      • L'énergie se régénère avec le temps ou avec des objets
+      • Les stats ne peuvent PAS dépasser le potentiel génétique maximum
+      • Le caractère du cheval influence l'efficacité de l'entraînement
+      • Les poulains (<3 ans) ont un entraînement spécial (manipulation, désensibilisation)
+    `
   },
   {
-    id: 'economie',
+    id: 'competitions',
+    icon: Trophy,
+    title: 'Les concours',
+    description: 'Inscris tes chevaux dans des compétitions pour gagner prestige et argent.',
+    color: 'from-amber-500 to-orange-500',
+    content: `
+      Les concours sont la principale source de revenus et de prestige.
+      
+      Disciplines disponibles :
+      • Dressage — dressage + tempérament
+      • CSO (Saut d'obstacles) — saut + agilité + vitesse
+      • Cross — endurance + saut + vitesse
+      • Endurance — endurance +++
+      • Barrel Racing — vitesse + agilité
+      • Reining — agilité + force
+      • Modèles & Allures — beauté et conformation par race
+      
+      Les gains augmentent avec le niveau de difficulté. Les victoires améliorent
+      la réputation de ton élevage ! Inscris-toi depuis l'onglet Concours.
+    `
+  },
+  {
+    id: 'economy',
     icon: ShoppingCart,
-    label: 'Economie & Progression',
+    title: 'Économie et progression',
+    description: 'Gère tes finances, achète et vends des chevaux.',
     color: 'from-yellow-500 to-amber-500',
-    content: (
-      <div className="space-y-4">
-        <p className="text-stone-700 leading-relaxed">
-          Le jeu utilise deux monnaies&nbsp;: les <strong>Genesis</strong> (monnaie principale, gagnee en concours et en ventes) et les <strong>Credits</strong> (monnaie premium, pour accelerer certaines actions).
-        </p>
-        <div className="grid gap-3">
-          <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-            <h4 className="font-bold text-stone-800 text-sm mb-2">Comment gagner des Genesis</h4>
-            <ul className="space-y-1.5 text-xs text-stone-600">
-              <li><strong>Concours</strong> — gains selon le niveau et le classement</li>
-              <li><strong>Vente de chevaux</strong> — aux encheres ou via le marche</li>
-              <li><strong>Naissances</strong> — bonus de reputation</li>
-              <li><strong>Evenements</strong> — recompenses saisonnieres</li>
-            </ul>
-          </div>
-          <div className="bg-stone-50 rounded-xl p-4 border border-stone-200">
-            <h4 className="font-bold text-stone-800 text-sm mb-2">La progression</h4>
-            <p className="text-xs text-stone-600">
-              Ton objectif a long terme est d&apos;ameliorer la <strong>qualite genetique</strong> de ton elevage. Chaque generation doit etre meilleure que la precedente. Commence petit, achete des etalons de qualite au Marche des Saillies, et construis patiemment ta reputation d&apos;eleveur.
-            </p>
-            <p className="text-xs text-stone-600 mt-2">
-              <strong>Conseil debutant</strong>&nbsp;: commence avec une race <strong>warmblood</strong> comme le Selle Francais ou le KWPN qui tolerant les croisements avec Pur-Sang pour ameliorer les performances.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    content: `
+      Le jeu utilise deux monnaies :
+      
+      • GENESIS (₲) — monnaie principale, gagnée en concours et ventes
+      • CREDITS — monnaie premium pour accélérer certaines actions
+      
+      Où dépenser ?
+      • Acheter des chevaux aux enchères (Marché)
+      • Payer des saillies au Marché des Saillies
+      • Acheter des objets à la Boutique (soins, aliments)
+      • Embaucher du personnel (palefreniers, vétérinaires, entraîneurs)
+      • Tests génétiques au Labo Génétique
+      
+      Conseil : commence avec une race polyvalente comme le Selle Français
+      ou le KWPN, entraîne-toi, participe à des concours, puis investis
+      dans la reproduction pour améliorer ta lignée génération après génération.
+    `
   },
   {
-    id: 'conseils',
-    icon: Sparkles,
-    label: 'Conseils aux Debutants',
-    color: 'from-orange-500 to-red-500',
-    content: (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-5 border border-orange-200">
-          <h4 className="font-bold text-stone-800 text-sm mb-3">Top 10 pour bien demarrer</h4>
-          <ol className="space-y-2 text-xs text-stone-600 list-decimal list-inside">
-            <li><strong>Cree ton premier cheval</strong> — choisis une race polyvalente (Selle Francais, Quarter Horse, KWPN)</li>
-            <li><strong>Entraine-toi</strong> — ameliore les stats de ton cheval de depart</li>
-            <li><strong>Participe a des concours</strong> — meme en novice, les gains aident a financer l&apos;elevage</li>
-            <li><strong>Achete une jument</strong> — au marche ou aux encheres</li>
-            <li><strong>Fais inspecter ton etalon</strong> — l&apos;approbation augmente la valeur des poulains</li>
-            <li><strong>Choisis bien tes croisements</strong> — verifie la compatibilite des studbooks</li>
-            <li><strong>Teste la genetique</strong> — le labo genetique revele les maladies cachees</li>
-            <li><strong>Gere l&apos;energie</strong> — ne surmene pas tes chevaux, utilise des objets de soin</li>
-            <li><strong>Embauche du personnel</strong> — palefreniers et entraineurs donnent des bonus passifs</li>
-            <li><strong>Patiente</strong> — la gestation dure 11 mois, l&apos;elevage est un investissement long terme&nbsp;!</li>
-          </ol>
-        </div>
+    id: 'final',
+    icon: Gift,
+    title: 'Récompenses !',
+    description: 'Félicitations ! Tu as terminé le guide. Reçois tes récompenses.',
+    color: 'from-amber-500 to-rose-500',
+    content: `
+      Tu as parcouru toutes les bases d'EquiGenesis ! Tu connais maintenant :
+      ✓ Le cycle de vie des chevaux
+      ✓ Les fondamentaux de la génétique
+      ✓ Le fonctionnement des saillies
+      ✓ L'entraînement et les concours
+      ✓ La gestion économique de ton haras
+      
+      Il est temps de mettre tout ça en pratique. Bonne chance, éleveur !
+    `
+  }
+];
 
-        <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-          <h4 className="font-bold text-stone-800 text-sm mb-2">Erreurs courantes a eviter</h4>
-          <ul className="space-y-1.5 text-xs text-stone-600">
-            <li><strong>Croiser pere-fille ou mere-fils</strong> — la consanguinite directe n&apos;est pas autorisee</li>
-            <li><strong>Accoupler deux porteurs d&apos;une maladie letale</strong> — risque de poulain mort-ne</li>
-            <li><strong>Negliger l&apos;energie</strong> — un cheval fatigue performe mal et peut se blesser</li>
-            <li><strong>Croiser sans verifier le studbook</strong> — un poulain OC est moins precieux</li>
-          </ul>
-        </div>
-      </div>
-    )
-  },
+const GIFT_ITEMS = [
+  { name: 'Aliment énergétique', icon: '🥩', type: 'food', description: 'Restaure 30 points d\'énergie' },
+  { name: 'Baume réparateur', icon: '🧴', type: 'care', description: 'Soigne les blessures légères' },
 ];
 
 export default function Guide() {
-  const [activeSection, setActiveSection] = useState('bienvenue');
+  const [currentStep, setCurrentStep] = useState(-1); // -1 = not started
+  const [completedSteps, setCompletedSteps] = useState(new Set());
+  const [isCollectingGift, setIsCollectingGift] = useState(false);
+  const [rewardsCollected, setRewardsCollected] = useState(false);
+  const [rewardData, setRewardData] = useState(null);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-  return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-200/50">
-          <Book className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-stone-800">Guide du Debutant</h1>
-          <p className="text-sm text-stone-500">Tout ce qu&apos;il faut savoir pour bien commencer</p>
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Check if tutorial already completed
+  const { data: tutorialCompleted } = useQuery({
+    queryKey: ['tutorial-completed'],
+    queryFn: async () => {
+      try {
+        const val = localStorage.getItem('equigenesis_tutorial_completed');
+        return val === 'true';
+      } catch { return false; }
+    },
+  });
+
+  // Bonus reputation et argent par étape
+  const stepRewards = [
+    { rep: 5, genesis: 50 },     // intro
+    { rep: 5, genesis: 100 },    // cycle
+    { rep: 10, genesis: 150 },   // genetics
+    { rep: 10, genesis: 200 },   // reproduction
+    { rep: 5, genesis: 100 },    // training
+    { rep: 10, genesis: 250 },   // competitions
+    { rep: 5, genesis: 150 },    // economy
+  ];
+
+  const completeStep = async (stepIndex) => {
+    if (!currentUser || completedSteps.has(stepIndex)) return;
+    
+    const newCompleted = new Set(completedSteps);
+    newCompleted.add(stepIndex);
+    setCompletedSteps(newCompleted);
+
+    // Grant step reward
+    const reward = stepRewards[stepIndex] || { rep: 5, genesis: 50 };
+    try {
+      const currentRep = currentUser.breeding_reputation ?? 0;
+      const currentBal = currentUser.genesis_balance ?? 0;
+      await base44.auth.updateMe({
+        breeding_reputation: currentRep + reward.rep,
+        genesis_balance: currentBal + reward.genesis,
+      });
+      await base44.entities.Transaction.create({
+        user_email: currentUser.email,
+        currency: 'genesis',
+        amount: reward.genesis,
+        balance_after: currentBal + reward.genesis,
+        reason: `Guide étape ${stepIndex + 1} - ${STEPS[stepIndex].title}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    } catch (e) {
+      // continue
+    }
+
+    // Move to next step
+    if (stepIndex < STEPS.length - 1) {
+      setCurrentStep(stepIndex + 1);
+    } else {
+      // Completed all steps
+      setCurrentStep(STEPS.length);
+    }
+  };
+
+  const collectFinalRewards = async () => {
+    if (!currentUser || isCollectingGift || rewardsCollected) return;
+    setIsCollectingGift(true);
+
+    try {
+      const userEmail = currentUser.email;
+
+      // 1. Reputation bonus
+      const currentRep = currentUser.breeding_reputation ?? 0;
+      await base44.auth.updateMe({ breeding_reputation: currentRep + 30 });
+
+      // 2. Genesis bonus
+      const currentBal = currentUser.genesis_balance ?? 0;
+      await base44.auth.updateMe({ genesis_balance: currentBal + 5000 });
+      await base44.entities.Transaction.create({
+        user_email: userEmail,
+        currency: 'genesis',
+        amount: 5000,
+        balance_after: currentBal + 5000,
+        reason: 'Récompense guide du débutant',
+      });
+
+      // 3. Gift items (add to Inventory)
+      for (const item of GIFT_ITEMS) {
+        await base44.entities.Inventory.create({
+          item_name: item.name,
+          item_icon: item.icon,
+          item_type: item.type,
+          quantity: 2,
+          effect: { description: item.description },
+        });
+      }
+
+      // 4. Random breed horse worth ~30,000 genesis
+      const BREEDS = [
+        "Arabian", "Thoroughbred", "Friesian", "Lipizzaner",
+        "Anglo-Arabian", "Haflinger", "Connemara",
+        "Selle Français", "KWPN", "Hanoverian", "Holsteiner", "Oldenburg", "Belgian Warmblood",
+        "Quarter Horse", "Paint Horse", "Appaloosa", "Shire", "Shetland"
+      ];
+      const breed = BREEDS[Math.floor(Math.random() * BREEDS.length)];
+      const femaleNames = ["Luna", "Aurore", "Perle", "Tempête", "Étoile", "Jade", "Iris", "Stella", "Naya", "Olympe", "Diva", "Bella", "Ruby", "Velvet"];
+      const maleNames = ["Orion", "Tornado", "Apache", "Spirit", "Shadow", "King", "Thor", "Zeus", "Apache", "Diablo", "Ringo", "Flash", "Storm", "Rocket"];
+      const isMale = Math.random() > 0.5;
+      const namePool = isMale ? maleNames : femaleNames;
+      const name = namePool[Math.floor(Math.random() * namePool.length)];
+
+      // Simple genotype for the gift horse
+      const ext = Math.random() < 0.5 ? 'EE' : 'Ee';
+      const agouti = Math.random() < 0.5 ? 'AA' : 'Aa';
+      const cr = Math.random() < 0.85 ? 'nn' : 'Crn';
+      const grey = Math.random() < 0.9 ? 'gg' : 'Gg';
+      const geno = { extension: ext, agouti, cream: cr, grey, kit: 'toto', dun: 'nd2nd2', champagne: 'nn', silver: 'zz', leopard: 'lplp', pattern1: 'patn1patn1', sooty: 'soso', flaxen: 'FF', pangare: 'pp', mushroom: 'MuMu', splash: 'nn', overo: 'nn', rabicano: 'rbrb' };
+
+      let color;
+      if (ext === 'ee') color = 'Alezan';
+      else if (agouti !== 'aa') color = 'Bai';
+      else color = 'Noir';
+      if (cr === 'Crn') {
+        if (color === 'Alezan') color = 'Palomino';
+        else if (color === 'Bai') color = 'Isabelle';
+        else color = 'Smoky Black';
+      }
+      if (grey === 'Gg') color = 'Gris';
+
+      const statNames = ["speed", "endurance", "agility", "strength", "temperament", "jumping", "dressage"];
+      const stats = {};
+      statNames.forEach(s => { stats[s] = Math.round(25 + Math.random() * 20); });
+
+      const horseData = {
+        name: name + ' Cadeau',
+        breed,
+        sex: isMale ? 'male' : 'female',
+        age: 3 + Math.floor(Math.random() * 4),
+        genotype: geno,
+        coat_color: color,
+        stats,
+        health_genes: [],
+        energy: 100,
+        character: ["energique", "courageux", "docile", "intelligent"][Math.floor(Math.random() * 4)],
+        mental_traits: [],
+        morphology: [],
+        genetic_potential: {},
+        owner_email: userEmail,
+        competition_wins: 0,
+        is_for_sale: false,
+        estimated_value: 30000,
+      };
+
+      const created = await base44.entities.Horse.create(horseData);
+
+      setRewardData({
+        horse: created,
+        genesis: 5000,
+        rep: 30,
+        items: GIFT_ITEMS.map(i => `${i.name} ×2`),
+      });
+      setRewardsCollected(true);
+      localStorage.setItem('equigenesis_tutorial_completed', 'true');
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['horses'] });
+      toast.success('🎉 Tutoriel terminé ! Toutes les récompenses sont à toi !');
+    } catch (e) {
+      toast.error('Erreur lors de la collecte des récompenses');
+    }
+    setIsCollectingGift(false);
+  };
+
+  if (tutorialCompleted && rewardData) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50 rounded-2xl border-2 border-amber-200 p-8 text-center space-y-4">
+          <div className="text-6xl animate-bounce">🎉</div>
+          <h2 className="text-2xl font-bold text-stone-800">Guide terminé !</h2>
+          <p className="text-stone-500">Tu as déjà reçu tes récompenses. Retrouve ton cheval dans l'écurie.</p>
+          <div className="flex justify-center gap-3">
+            <Button onClick={() => navigate('/Stable')} className="bg-stone-800 hover:bg-stone-900">
+              Voir mon écurie
+            </Button>
+            <Button variant="outline" onClick={() => { localStorage.removeItem('equigenesis_tutorial_completed'); setRewardData(null); setCompletedSteps(new Set()); setCurrentStep(-1); }}>
+              Refaire le guide
+            </Button>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Navigation par sections */}
-      <div className="flex flex-wrap gap-2">
-        {sections.map(s => {
-          const Icon = s.icon;
-          const isActive = activeSection === s.id;
-          return (
-            <button
-              key={s.id}
-              onClick={() => setActiveSection(s.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
-                isActive
-                  ? `bg-gradient-to-r ${s.color} text-white shadow-lg`
-                  : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-              }`}
+  // Already completed
+  if (tutorialCompleted) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl border border-amber-200 p-8 text-center space-y-4">
+          <div className="text-6xl">🎓</div>
+          <h2 className="text-2xl font-bold text-stone-800">Tu as déjà terminé le guide !</h2>
+          <p className="text-stone-500">Tu peux le refaire pour réviser les bases.</p>
+          <Button onClick={() => { localStorage.removeItem('equigenesis_tutorial_completed'); setCompletedSteps(new Set()); setCurrentStep(-1); setRewardData(null); }} className="bg-stone-800 hover:bg-stone-900">
+            Refaire le guide
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step content display
+  const renderStep = (stepIndex) => {
+    if (stepIndex === -1) {
+      return (
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-rose-50 rounded-2xl border-2 border-amber-200 p-8 text-center space-y-6">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center mx-auto shadow-lg shadow-amber-200/50">
+              <Book className="w-10 h-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-stone-800">Guide du Débutant</h1>
+              <p className="text-stone-500 mt-2 max-w-md mx-auto">
+                Un tutoriel interactif en 7 étapes pour maîtriser les bases d'EquiGenesis.
+                Chaque étape complétée te rapporte des récompenses !
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+              <div className="bg-white/70 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-amber-600">50 ₲</p>
+                <p className="text-xs text-stone-400">par étape</p>
+              </div>
+              <div className="bg-white/70 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-purple-600">+5 réput.</p>
+                <p className="text-xs text-stone-400">par étape</p>
+              </div>
+              <div className="bg-white/70 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-emerald-600">+5 000 ₲</p>
+                <p className="text-xs text-stone-400">à la fin</p>
+              </div>
+              <div className="bg-white/70 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-rose-600">🎁 Cheval</p>
+                <p className="text-xs text-stone-400">30 000 ₲</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setCurrentStep(0)}
+              size="lg"
+              className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-8 py-6 text-lg rounded-2xl shadow-lg"
             >
-              <Icon className="w-3.5 h-3.5" />
-              {s.label}
-            </button>
-          );
-        })}
-      </div>
+              Commencer le guide
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      );
+    }
 
-      {/* Contenu de la section active */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
-        {sections.find(s => s.id === activeSection)?.content}
+    if (stepIndex >= STEPS.length) {
+      // Final — collect rewards
+      return (
+        <div className="max-w-2xl mx-auto space-y-6">
+          {rewardsCollected && rewardData ? (
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50 rounded-2xl border-2 border-amber-200 p-8 text-center space-y-4">
+                <div className="text-6xl">🎉</div>
+                <h2 className="text-2xl font-bold text-stone-800">Félicitations !</h2>
+                <p className="text-stone-500">Tu as terminé le guide et reçu toutes tes récompenses.</p>
+                <div className="bg-white/80 rounded-xl p-4 space-y-2 text-left max-w-sm mx-auto">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="w-5 h-5 text-amber-500" />
+                    <span className="text-sm"><strong>{rewardData.rep}</strong> points de réputation</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <ShoppingCart className="w-5 h-5 text-emerald-500" />
+                    <span className="text-sm"><strong>{rewardData.genesis.toLocaleString('fr-FR')} ₲</strong> Genesis</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Gift className="w-5 h-5 text-rose-500" />
+                    <span className="text-sm">{rewardData.items.join(' · ')}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Heart className="w-5 h-5 text-pink-500" />
+                    <span className="text-sm"><strong>{rewardData.horse.name}</strong> — {rewardData.horse.breed} {rewardData.horse.sex === 'male' ? '♂' : '♀'} (30 000 ₲)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-center gap-3">
+                <Button onClick={() => navigate('/Stable')} className="bg-stone-800 hover:bg-stone-900">
+                  <Heart className="w-4 h-4 mr-2" /> Voir mon écurie
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/HorseDetail?id=' + rewardData.horse.id)}>
+                  Voir mon nouveau cheval
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-lg mx-auto text-center space-y-6 py-12">
+              <div className="text-6xl">🎁</div>
+              <h2 className="text-2xl font-bold text-stone-800">Guide terminé !</h2>
+              <p className="text-stone-500">Toutes les étapes sont complétées. Il est temps de récupérer tes récompenses.</p>
+              <div className="bg-white/80 rounded-xl p-4 text-left space-y-2 max-w-sm mx-auto border border-stone-200">
+                <h3 className="font-semibold text-stone-700 text-sm">Récompenses finales :</h3>
+                <div className="flex items-center gap-2 text-sm"><Trophy className="w-4 h-4 text-amber-500" /> 30 points de réputation</div>
+                <div className="flex items-center gap-2 text-sm"><ShoppingCart className="w-4 h-4 text-emerald-500" /> 5 000 ₲ Genesis</div>
+                <div className="flex items-center gap-2 text-sm"><Gift className="w-4 h-4 text-rose-500" /> Aliment énergétique ×2 + Baume ×2</div>
+                <div className="flex items-center gap-2 text-sm"><Heart className="w-4 h-4 text-pink-500" /> Un cheval d'une race aléatoire (valeur 30 000 ₲)</div>
+              </div>
+              <Button
+                onClick={collectFinalRewards}
+                disabled={isCollectingGift}
+                size="lg"
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-8 py-6 text-lg rounded-2xl shadow-lg"
+              >
+                {isCollectingGift ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Attribution des récompenses...
+                  </>
+                ) : (
+                  <>
+                    <Gift className="w-5 h-5 mr-2" /> Collecter mes récompenses
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const step = STEPS[stepIndex];
+    const isCompleted = completedSteps.has(stepIndex);
+    const Icon = step.icon;
+    const progress = ((stepIndex) / STEPS.length) * 100;
+
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Progress bar */}
+        <div className="bg-white rounded-2xl border border-stone-200 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-stone-500 font-medium">Étape {stepIndex + 1}/{STEPS.length}</p>
+            <p className="text-xs text-stone-400">{Math.round(progress)}%</p>
+          </div>
+          <Progress value={progress} className="h-2 bg-stone-100 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:to-rose-400" />
+        </div>
+
+        {/* Step card */}
+        <div className={`bg-gradient-to-br ${step.color} rounded-2xl p-8 text-white shadow-lg`}>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm">
+              <Icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">{step.title}</h2>
+              <p className="text-sm text-white/80 mt-1">{step.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <Card className="border-0 bg-white shadow-sm">
+          <CardContent className="p-6">
+            <div className="whitespace-pre-line text-sm text-stone-700 leading-relaxed space-y-3">
+              {step.content.split('\n').map((line, i) => {
+                if (line.startsWith('•')) {
+                  return <div key={i} className="flex items-start gap-2 ml-2"><span className="text-amber-500 mt-0.5">•</span><span>{line.slice(1)}</span></div>;
+                }
+                if (line.startsWith('✓')) {
+                  return <div key={i} className="flex items-start gap-2 ml-2"><CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" /><span className="text-emerald-700">{line.slice(1)}</span></div>;
+                }
+                if (line.match(/^[\wéèêëàâäùûüîïôöç]+\s*[:：]/)) {
+                  const [title, ...rest] = line.split(/[:：]/);
+                  return <p key={i} className="font-semibold text-stone-800 mt-3"><span className="text-amber-600">{title}</span> : {rest.join(':')}</p>;
+                }
+                if (line.trim()) return <p key={i}>{line}</p>;
+                return <div key={i} className="h-2" />;
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Step bonus */}
+        {stepIndex < stepRewards.length && (
+          <div className="bg-amber-50 rounded-xl border border-amber-200 p-3 flex items-center gap-3">
+            <Gift className="w-5 h-5 text-amber-500 shrink-0" />
+            <p className="text-xs text-amber-700">
+              <strong>Bonus étape :</strong> {stepRewards[stepIndex].rep} pts de réputation + {stepRewards[stepIndex].genesis} ₲
+            </p>
+          </div>
+        )}
+
+        {/* Navigation buttons */}
+        <div className="flex gap-3">
+          {completedSteps.size > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Find the last incomplete before current
+                let prev = currentStep - 1;
+                while (prev >= 0 && completedSteps.has(prev)) prev--;
+                if (prev < 0) prev = Math.max(0, currentStep - 1);
+                // Actually go to previous step that user has visited
+                const prevCompleted = Array.from(completedSteps).sort((a, b) => b - a);
+                const lastVisited = prevCompleted.length > 0 ? prevCompleted[prevCompleted.length - 1] : 0;
+                setCurrentStep(lastVisited - 1 >= 0 ? lastVisited - 1 : 0);
+              }}
+            >
+              ← Retour
+            </Button>
+          )}
+          <div className="flex-1" />
+          {isCompleted ? (
+            <Button
+              onClick={() => {
+                if (stepIndex < STEPS.length - 1) {
+                  setCurrentStep(stepIndex + 1);
+                } else {
+                  setCurrentStep(STEPS.length);
+                }
+              }}
+              className="bg-stone-800 hover:bg-stone-900"
+            >
+              Étape suivante <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          ) : (
+            <Button
+              onClick={() => completeStep(stepIndex)}
+              className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white"
+            >
+              <CheckCircle className="w-4 h-4 mr-1" />
+              Terminer l'étape
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  return renderStep(currentStep);
 }

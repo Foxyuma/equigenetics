@@ -14,183 +14,183 @@ const STEPS = [
   {
     id: 'intro',
     icon: Star,
-    title: 'Bienvenue dans EquiGenesis !',
-    description: 'Le guide interactif va te faire découvrir les bases du jeu. À chaque étape, tu gagneras des récompenses !',
+    title: 'Welcome to EquiGenesis!',
+    description: 'This interactive guide will teach you the basics of the game. Each step rewards you!',
     color: 'from-amber-500 to-yellow-500',
     content: `
-      Bienvenue, jeune éleveur ! Tu vas découvrir tout ce qu'il faut savoir pour gérer ton haras,
-      comprendre la génétique équine, réaliser des croisements, entraîner tes chevaux et les faire concourir.
+      Welcome, young breeder! You're about to discover everything you need to run your stud farm,
+      understand equine genetics, perform breedings, train your horses and enter competitions.
       
-      Ce tutoriel te guidera pas à pas. Termine chaque étape pour débloquer des récompenses :
-      points de réputation, argent, objets... et un cheval à la fin !
+      This tutorial will guide you step by step. Complete each stage to unlock rewards:
+      reputation points, money, items... and a horse at the end!
     `
   },
   {
     id: 'cycle',
     icon: Clock,
-    title: 'Le cycle de vie des chevaux',
-    description: 'Comprends comment les chevaux naissent, grandissent, et vieillissent.',
+    title: 'Horse Life Cycle',
+    description: 'Understand how horses are born, grow, and age.',
     color: 'from-sky-500 to-blue-500',
     content: `
-      Dans EquiGenesis, le temps passe en continu. Les chevaux naissent à 0 an (poulains), 
-      deviennent adultes à 3-4 ans, et peuvent vivre jusqu'à environ 30 ans selon leur santé génétique.
+      In EquiGenesis, time moves forward continuously. Horses are born at 0 years (foals),
+      become adults at 3-4 years, and can live up to about 30 years depending on their genetic health.
       
-      Le jeu a son propre calendrier : 1 mois de jeu = 14 jours réels, 
-      1 année de jeu = 168 jours réels. Chaque jour à 3h30, un tick automatique 
-      fait vieillir les chevaux, avance les saisons et traite les concours.
+      The game has its own calendar: 1 game month = 14 real days,
+      1 game year = 168 real days. Every day at 3:30 AM UTC, an automatic tick
+      ages horses, advances seasons and processes competitions.
       
-      Les saisons (printemps, été, automne, hiver) durent 3 mois de jeu chacune.
-      Certains événements et compétitions varient selon la saison.
+      Seasons (spring, summer, autumn, winter) each last 3 game months.
+      Some events and competitions vary by season.
     `
   },
   {
     id: 'genetics',
     icon: Dna,
-    title: 'Les bases de la génétique',
-    description: 'Comprends comment fonctionnent les gènes, les robes et l\'hérédité.',
+    title: 'Genetics Basics',
+    description: 'Understand how genes, coat colors and heredity work.',
     color: 'from-purple-500 to-violet-500',
     content: `
-      Chaque cheval possède un génome complet qui détermine sa robe, ses motifs et sa santé.
+      Every horse has a complete genome that determines its coat, patterns and health.
       
-      Les bases : chaque gène existe en deux copies (allèles), une du père et une de la mère.
-      - Homozygote : les deux allèles sont identiques (ex: EE ou ee)
-      - Hétérozygote : les deux allèles sont différents (ex: Ee)
+      The basics: each gene exists in two copies (alleles), one from the sire and one from the dam.
+      - Homozygous: both alleles are identical (e.g. EE or ee)
+      - Heterozygous: the two alleles are different (e.g. Ee)
       
-      Un allèle DOMINANT (majuscule) s'exprime même en un seul exemplaire.
-      Un allèle RÉCESSIF (minuscule) ne s'exprime qu'en deux copies.
+      A DOMINANT (uppercase) allele expresses itself even in a single copy.
+      A RECESSIVE (lowercase) allele only expresses itself in two copies.
       
-      Couleurs de base :
-      • Bai (E_ + A_) — corps brun, crins noirs
-      • Alezan (ee) — corps et crins roux
-      • Noir (E_ + aa) — corps et crins noirs
-      • Gris (G_) — robe qui grisonne avec l'âge
+      Base colors:
+      \u2022 Bay (E_ + A_) — brown body, black mane/tail
+      \u2022 Chestnut (ee) — red body and mane/tail
+      \u2022 Black (E_ + aa) — black body and mane/tail
+      \u2022 Grey (G_) — coat that lightens with age
       
-      Dilutions : Crème (Palomino, Isabelle), Dun (marques primitives),
-      Champagne (reflets dorés), Silver (crins clairs).
+      Dilutions: Cream (Palomino, Buckskin), Dun (primitive markings),
+      Champagne (golden sheen), Silver (lightened mane/tail).
       
-      Motifs : Tobiano (grandes taches blanches), Sabino (balzanes hautes),
-      Roan (poils blancs mélangés), Léopard (taches Appaloosa).
+      Patterns: Tobiano (large white patches), Sabino (high stockings),
+      Roan (mixed white hairs), Leopard (Appaloosa spots).
     `
   },
   {
     id: 'reproduction',
     icon: Heart,
-    title: 'Les saillies',
-    description: 'Comment faire reproduire tes chevaux pour créer la génération suivante.',
+    title: 'Breeding',
+    description: 'How to breed your horses to create the next generation.',
     color: 'from-rose-500 to-pink-500',
     content: `
-      La reproduction est au cœur du jeu. Voici le processus complet :
+      Breeding is at the heart of the game. Here is the full process:
       
-      1. La jument doit avoir au moins 3 ans
-      2. Va dans sa fiche détaillée → onglet "Reproduction"
-      3. Choisis un étalon : tes propres mâles (gratuit) ou via le Marché des Saillies (payant)
-      4. Simule le croisement pour voir les prévisions génétiques
-      5. Confirme la saillie — elle coûte 25 d'énergie à la jument
-      6. La naissance a lieu après 11 mois de jeu (158 jours réels)
+      1. The mare must be at least 3 years old
+      2. Go to her detailed profile \u2192 "Breeding" tab
+      3. Choose a stallion: your own males (free) or via the Stallion Market (paid)
+      4. Simulate the cross to see genetic predictions
+      5. Confirm the breeding — it costs 25 energy from the mare
+      6. Birth takes place after 11 game months (158 real days)
       
-      Le poulain hérite aléatoirement un allèle de chaque parent pour chaque gène 
-      (loi de Mendel : 50% du père, 50% de la mère). Les stats sont une moyenne 
-      des parents avec une variation aléatoire.
+      The foal randomly inherits one allele from each parent for every gene
+      (Mendel's law: 50% from the sire, 50% from the dam). Stats are an average
+      of the parents with a random variation.
       
-      Attention : les étalons doivent être approuvés pour que leurs poulains soient
-      inscrits au studbook. Un étalon non approuvé produit un poulain OC 
+      Note: stallions must be approved for their foals to be registered
+      in the studbook. An unapproved stallion produces an OC foal
       (Origines Constatées).
       
-      Niveau d'approbation :
-      • Élite (×2.5) • Sport (×1.8) • Approuvé (×1.4) • Refusé (×0.7)
+      Approval levels:
+      \u2022 Elite (\u00d72.5) \u2022 Sport (\u00d71.8) \u2022 Approved (\u00d71.4) \u2022 Rejected (\u00d70.7)
     `
   },
   {
     id: 'training',
     icon: TrendingUp,
-    title: 'L\'entraînement',
-    description: 'Améliore les compétences de tes chevaux pour les préparer aux concours.',
+    title: 'Training',
+    description: 'Improve your horses\' skills to prepare them for competitions.',
     color: 'from-emerald-500 to-green-500',
     content: `
-      L'entraînement permet d'améliorer les 7 compétences : vitesse, endurance, agilité,
-      force, tempérament, saut et dressage.
+      Training improves the 7 skills: speed, endurance, agility,
+      strength, temperament, jumping and dressage.
       
-      Points clés :
-      • Chaque séance consomme de l'énergie physique ET mentale
-      • Un cheval fatigué a des performances réduites
-      • L'énergie se régénère avec le temps ou avec des objets
-      • Les stats ne peuvent PAS dépasser le potentiel génétique maximum
-      • Le caractère du cheval influence l'efficacité de l'entraînement
-      • Les poulains (<3 ans) ont un entraînement spécial (manipulation, désensibilisation)
+      Key points:
+      \u2022 Each session consumes physical AND mental energy
+      \u2022 A tired horse has reduced performance
+      \u2022 Energy regenerates over time or with items
+      \u2022 Stats CANNOT exceed the maximum genetic potential
+      \u2022 The horse's character influences training efficiency
+      \u2022 Foals (<3 years) have special training (handling, desensitization)
     `
   },
   {
     id: 'competitions',
     icon: Trophy,
-    title: 'Les concours',
-    description: 'Inscris tes chevaux dans des compétitions pour gagner prestige et argent.',
+    title: 'Competitions',
+    description: 'Enter your horses in competitions to earn prestige and money.',
     color: 'from-amber-500 to-orange-500',
     content: `
-      Les concours sont la principale source de revenus et de prestige.
+      Competitions are the main source of income and prestige.
       
-      Disciplines disponibles :
-      • Dressage — dressage + tempérament
-      • CSO (Saut d'obstacles) — saut + agilité + vitesse
-      • Cross — endurance + saut + vitesse
-      • Endurance — endurance +++
-      • Barrel Racing — vitesse + agilité
-      • Reining — agilité + force
-      • Modèles & Allures — beauté et conformation par race
+      Available disciplines:
+      \u2022 Dressage \u2014 dressage + temperament
+      \u2022 Show Jumping (CSO) \u2014 jumping + agility + speed
+      \u2022 Cross Country \u2014 endurance + jumping + speed
+      \u2022 Endurance \u2014 endurance +++
+      \u2022 Barrel Racing \u2014 speed + agility
+      \u2022 Reining \u2014 agility + strength
+      \u2022 Conformation & Movement \u2014 beauty and conformation by breed
       
-      Les gains augmentent avec le niveau de difficulté. Les victoires améliorent
-      la réputation de ton élevage ! Inscris-toi depuis l'onglet Concours.
+      Winnings increase with difficulty level. Victories improve
+      your farm's reputation! Register from the Competitions tab.
     `
   },
   {
     id: 'economy',
     icon: ShoppingCart,
-    title: 'Économie et progression',
-    description: 'Gère tes finances, achète et vends des chevaux.',
+    title: 'Economy & Progression',
+    description: 'Manage your finances, buy and sell horses.',
     color: 'from-yellow-500 to-amber-500',
     content: `
-      Le jeu utilise deux monnaies :
+      The game uses two currencies:
       
-      • GENESIS (₲) — monnaie principale, gagnée en concours et ventes
-      • CREDITS — monnaie premium pour accélérer certaines actions
+      \u2022 GENESIS (\u20b2) \u2014 main currency, earned through competitions and sales
+      \u2022 CREDITS \u2014 premium currency to speed up certain actions
       
-      Où dépenser ?
-      • Acheter des chevaux aux enchères (Marché)
-      • Payer des saillies au Marché des Saillies
-      • Acheter des objets à la Boutique (soins, aliments)
-      • Embaucher du personnel (palefreniers, vétérinaires, entraîneurs)
-      • Tests génétiques au Labo Génétique
+      Where to spend?
+      \u2022 Buy horses at auction (Market)
+      \u2022 Pay for breedings at the Stallion Market
+      \u2022 Buy items at the Shop (care, food)
+      \u2022 Hire staff (grooms, vets, trainers)
+      \u2022 Genetic tests at the Genetics Lab
       
-      Conseil : commence avec une race polyvalente comme le Selle Français
-      ou le KWPN, entraîne-toi, participe à des concours, puis investis
-      dans la reproduction pour améliorer ta lignée génération après génération.
+      Tip: start with a versatile breed like the Selle Français
+      or KWPN, train it, enter competitions, then invest
+      in breeding to improve your line generation after generation.
     `
   },
   {
     id: 'final',
     icon: Gift,
-    title: 'Récompenses !',
-    description: 'Félicitations ! Tu as terminé le guide. Reçois tes récompenses.',
+    title: 'Rewards!',
+    description: 'Congratulations! You finished the guide. Claim your rewards.',
     color: 'from-amber-500 to-rose-500',
     content: `
-      Tu as parcouru toutes les bases d'EquiGenesis ! Tu connais maintenant :
-      ✓ Le cycle de vie des chevaux
-      ✓ Les fondamentaux de la génétique
-      ✓ Le fonctionnement des saillies
-      ✓ L'entraînement et les concours
-      ✓ La gestion économique de ton haras
+      You've covered all the basics of EquiGenesis! You now know:
+      \u2713 The horse life cycle
+      \u2713 The fundamentals of genetics
+      \u2713 How breeding works
+      \u2713 Training and competitions
+      \u2713 Managing your stud farm's economy
       
-      Il est temps de mettre tout ça en pratique. Bonne chance, éleveur !
+      Time to put it all into practice. Good luck, breeder!
     `
   }
 ];
 
 const GIFT_ITEMS = [
-  { name: 'Aliment énergétique', icon: '🥩', type: 'food', description: 'Restaure 30 points d\'énergie' },
-  { name: 'Baume réparateur', icon: '🧴', type: 'care', description: 'Soigne les blessures légères' },
+  { name: 'Energy Feed', icon: '\uD83E\uDD5A', type: 'food', description: 'Restores 30 energy points' },
+  { name: 'Healing Balm', icon: '\uD83E\uDDEE', type: 'care', description: 'Heals minor injuries' },
 ];
 
 export default function Guide() {
-  const [currentStep, setCurrentStep] = useState(-1); // -1 = not started
+  const [currentStep, setCurrentStep] = useState(-1);
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [isCollectingGift, setIsCollectingGift] = useState(false);
   const [rewardsCollected, setRewardsCollected] = useState(false);
@@ -203,7 +203,6 @@ export default function Guide() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Check if tutorial already completed
   const { data: tutorialCompleted } = useQuery({
     queryKey: ['tutorial-completed'],
     queryFn: async () => {
@@ -214,15 +213,14 @@ export default function Guide() {
     },
   });
 
-  // Bonus reputation et argent par étape
   const stepRewards = [
-    { rep: 5, genesis: 50 },     // intro
-    { rep: 5, genesis: 100 },    // cycle
-    { rep: 10, genesis: 150 },   // genetics
-    { rep: 10, genesis: 200 },   // reproduction
-    { rep: 5, genesis: 100 },    // training
-    { rep: 10, genesis: 250 },   // competitions
-    { rep: 5, genesis: 150 },    // economy
+    { rep: 5, genesis: 50 },
+    { rep: 5, genesis: 100 },
+    { rep: 10, genesis: 150 },
+    { rep: 10, genesis: 200 },
+    { rep: 5, genesis: 100 },
+    { rep: 10, genesis: 250 },
+    { rep: 5, genesis: 150 },
   ];
 
   const completeStep = async (stepIndex) => {
@@ -232,7 +230,6 @@ export default function Guide() {
     newCompleted.add(stepIndex);
     setCompletedSteps(newCompleted);
 
-    // Grant step reward
     const reward = stepRewards[stepIndex] || { rep: 5, genesis: 50 };
     try {
       const currentRep = currentUser.breeding_reputation ?? 0;
@@ -246,18 +243,16 @@ export default function Guide() {
         currency: 'genesis',
         amount: reward.genesis,
         balance_after: currentBal + reward.genesis,
-        reason: `Guide étape ${stepIndex + 1} - ${STEPS[stepIndex].title}`,
+        reason: `Guide step ${stepIndex + 1} - ${STEPS[stepIndex].title}`,
       });
       queryClient.invalidateQueries({ queryKey: ['me'] });
     } catch (e) {
       // continue
     }
 
-    // Move to next step
     if (stepIndex < STEPS.length - 1) {
       setCurrentStep(stepIndex + 1);
     } else {
-      // Completed all steps
       setCurrentStep(STEPS.length);
     }
   };
@@ -269,11 +264,9 @@ export default function Guide() {
     try {
       const userEmail = currentUser.email;
 
-      // 1. Reputation bonus
       const currentRep = currentUser.breeding_reputation ?? 0;
       await base44.auth.updateMe({ breeding_reputation: currentRep + 30 });
 
-      // 2. Genesis bonus
       const currentBal = currentUser.genesis_balance ?? 0;
       await base44.auth.updateMe({ genesis_balance: currentBal + 5000 });
       await base44.entities.Transaction.create({
@@ -281,10 +274,9 @@ export default function Guide() {
         currency: 'genesis',
         amount: 5000,
         balance_after: currentBal + 5000,
-        reason: 'Récompense guide du débutant',
+        reason: 'Beginner\'s guide reward',
       });
 
-      // 3. Gift items (add to Inventory)
       for (const item of GIFT_ITEMS) {
         await base44.entities.Inventory.create({
           item_name: item.name,
@@ -295,7 +287,6 @@ export default function Guide() {
         });
       }
 
-      // 4. Gift horse — 8 years old, random genes, pre-trained in a discipline
       const BREEDS = [
         "Arabian", "Thoroughbred", "Friesian", "Lipizzaner",
         "Anglo-Arabian", "Haflinger", "Connemara",
@@ -309,7 +300,6 @@ export default function Guide() {
       const namePool = isMale ? maleNames : femaleNames;
       const name = namePool[Math.floor(Math.random() * namePool.length)];
 
-      // Random genotype — both visible and hidden genes are randomized
       const extOpts = ['EE', 'Ee', 'ee'];
       const agoutiOpts = ['AA', 'Aa', 'aa'];
       const ext = extOpts[Math.floor(Math.random() * extOpts.length)];
@@ -341,7 +331,6 @@ export default function Guide() {
       };
       const color = determineCoatColor(geno);
 
-      // Stats — already trained in a random discipline (boosted)
       const statNames = ["speed", "endurance", "agility", "strength", "temperament", "jumping", "dressage"];
       const disciplinePrimeStats = {
         speed: ['speed', 'agility'],
@@ -358,17 +347,16 @@ export default function Guide() {
 
       const stats = {};
       statNames.forEach(s => {
-        let base = 15 + Math.floor(Math.random() * 15); // 15-29 base
-        if (primeStats.includes(s)) base += 20 + Math.floor(Math.random() * 15); // +20-34 training boost
+        let base = 15 + Math.floor(Math.random() * 15);
+        if (primeStats.includes(s)) base += 20 + Math.floor(Math.random() * 15);
         stats[s] = Math.min(100, base);
       });
 
-      // Generate proper foal traits for genetic potential / character / morphology
       const foalTraits = generateFoalTraits(null, null, breed);
       const characters = ["energique", "anxieux", "intelligent", "paresseux", "courageux", "docile"];
 
       const horseData = {
-        name: name + ' Cadeau',
+        name: name + ' Gift',
         breed,
         sex: isMale ? 'male' : 'female',
         age: 8,
@@ -390,7 +378,6 @@ export default function Guide() {
 
       const created = await base44.entities.Horse.create(horseData);
 
-      // Create a training record to document the discipline training
       await base44.entities.Training.create({
         horse_id: created.id,
         horse_name: created.name,
@@ -410,15 +397,15 @@ export default function Guide() {
         horse: created,
         genesis: 5000,
         rep: 30,
-        items: GIFT_ITEMS.map(i => `${i.name} ×2`),
+        items: GIFT_ITEMS.map(i => `${i.name} \u00d72`),
       });
       setRewardsCollected(true);
       localStorage.setItem('equigenesis_tutorial_completed', 'true');
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['horses'] });
-      toast.success('🎉 Tutoriel terminé ! Toutes les récompenses sont à toi !');
+      toast.success('\uD83C\uDF89 Tutorial complete! All rewards are yours!');
     } catch (e) {
-      toast.error('Erreur lors de la collecte des récompenses');
+      toast.error('Error collecting rewards');
     }
     setIsCollectingGift(false);
   };
@@ -428,14 +415,14 @@ export default function Guide() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50 rounded-2xl border-2 border-amber-200 p-8 text-center space-y-4">
           <div className="text-6xl animate-bounce">🎉</div>
-          <h2 className="text-2xl font-bold text-stone-800">Guide terminé !</h2>
-          <p className="text-stone-500">Tu as déjà reçu tes récompenses. Retrouve ton cheval dans l'écurie.</p>
+          <h2 className="text-2xl font-bold text-stone-800">Guide Complete!</h2>
+          <p className="text-stone-500">You already received your rewards. Find your horse in the stable.</p>
           <div className="flex justify-center gap-3">
             <Button onClick={() => navigate('/Stable')} className="bg-stone-800 hover:bg-stone-900">
-              Voir mon écurie
+              View My Stable
             </Button>
             <Button variant="outline" onClick={() => { localStorage.removeItem('equigenesis_tutorial_completed'); setRewardData(null); setCompletedSteps(new Set()); setCurrentStep(-1); }}>
-              Refaire le guide
+              Redo the Guide
             </Button>
           </div>
         </div>
@@ -443,23 +430,21 @@ export default function Guide() {
     );
   }
 
-  // Already completed
   if (tutorialCompleted) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl border border-amber-200 p-8 text-center space-y-4">
           <div className="text-6xl">🎓</div>
-          <h2 className="text-2xl font-bold text-stone-800">Tu as déjà terminé le guide !</h2>
-          <p className="text-stone-500">Tu peux le refaire pour réviser les bases.</p>
+          <h2 className="text-2xl font-bold text-stone-800">You already completed the guide!</h2>
+          <p className="text-stone-500">You can redo it to review the basics.</p>
           <Button onClick={() => { localStorage.removeItem('equigenesis_tutorial_completed'); setCompletedSteps(new Set()); setCurrentStep(-1); setRewardData(null); }} className="bg-stone-800 hover:bg-stone-900">
-            Refaire le guide
+            Redo the Guide
           </Button>
         </div>
       </div>
     );
   }
 
-  // Step content display
   const renderStep = (stepIndex) => {
     if (stepIndex === -1) {
       return (
@@ -469,28 +454,28 @@ export default function Guide() {
               <Book className="w-10 h-10 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-stone-800">Guide du Débutant</h1>
+              <h1 className="text-2xl font-bold text-stone-800">Beginner's Guide</h1>
               <p className="text-stone-500 mt-2 max-w-md mx-auto">
-                Un tutoriel interactif en 7 étapes pour maîtriser les bases d'EquiGenesis.
-                Chaque étape complétée te rapporte des récompenses !
+                An interactive 7-step tutorial to master the basics of EquiGenesis.
+                Each completed step rewards you!
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
               <div className="bg-white/70 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-amber-600">50 ₲</p>
-                <p className="text-xs text-stone-400">par étape</p>
+                <p className="text-lg font-bold text-amber-600">50 \u20b2</p>
+                <p className="text-xs text-stone-400">per step</p>
               </div>
               <div className="bg-white/70 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-purple-600">+5 réput.</p>
-                <p className="text-xs text-stone-400">par étape</p>
+                <p className="text-lg font-bold text-purple-600">+5 rep.</p>
+                <p className="text-xs text-stone-400">per step</p>
               </div>
               <div className="bg-white/70 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-emerald-600">+5 000 ₲</p>
-                <p className="text-xs text-stone-400">à la fin</p>
+                <p className="text-lg font-bold text-emerald-600">+5 000 \u20b2</p>
+                <p className="text-xs text-stone-400">at the end</p>
               </div>
               <div className="bg-white/70 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-rose-600">🎁 Cheval</p>
-                <p className="text-xs text-stone-400">30 000 ₲</p>
+                <p className="text-lg font-bold text-rose-600">🎁 Horse</p>
+                <p className="text-xs text-stone-400">30 000 \u20b2</p>
               </div>
             </div>
             <Button
@@ -498,7 +483,7 @@ export default function Guide() {
               size="lg"
               className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white px-8 py-6 text-lg rounded-2xl shadow-lg"
             >
-              Commencer le guide
+              Start the Guide
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
@@ -507,54 +492,53 @@ export default function Guide() {
     }
 
     if (stepIndex >= STEPS.length) {
-      // Final — collect rewards
       return (
         <div className="max-w-2xl mx-auto space-y-6">
           {rewardsCollected && rewardData ? (
             <div className="space-y-4">
               <div className="bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50 rounded-2xl border-2 border-amber-200 p-8 text-center space-y-4">
                 <div className="text-6xl">🎉</div>
-                <h2 className="text-2xl font-bold text-stone-800">Félicitations !</h2>
-                <p className="text-stone-500">Tu as terminé le guide et reçu toutes tes récompenses.</p>
+                <h2 className="text-2xl font-bold text-stone-800">Congratulations!</h2>
+                <p className="text-stone-500">You completed the guide and received all your rewards.</p>
                 <div className="bg-white/80 rounded-xl p-4 space-y-2 text-left max-w-sm mx-auto">
                   <div className="flex items-center gap-3">
                     <Trophy className="w-5 h-5 text-amber-500" />
-                    <span className="text-sm"><strong>{rewardData.rep}</strong> points de réputation</span>
+                    <span className="text-sm"><strong>{rewardData.rep}</strong> reputation points</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <ShoppingCart className="w-5 h-5 text-emerald-500" />
-                    <span className="text-sm"><strong>{rewardData.genesis.toLocaleString('fr-FR')} ₲</strong> Genesis</span>
+                    <span className="text-sm"><strong>{rewardData.genesis.toLocaleString('en-US')} \u20b2</strong> Genesis</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Gift className="w-5 h-5 text-rose-500" />
-                    <span className="text-sm">{rewardData.items.join(' · ')}</span>
+                    <span className="text-sm">{rewardData.items.join(' \u00b7 ')}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-purple-500" />
-                    <span className="text-sm"><strong>{rewardData.horse.name}</strong> — {rewardData.horse.breed} {rewardData.horse.sex === 'male' ? '♂' : '♀'}</span>
+                    <span className="text-sm"><strong>{rewardData.horse.name}</strong> \u2014 {rewardData.horse.breed} {rewardData.horse.sex === 'male' ? '\u2642' : '\u2640'}</span>
                   </div>
                 </div>
               </div>
               <div className="flex justify-center gap-3">
                 <Button onClick={() => navigate('/Stable')} className="bg-stone-800 hover:bg-stone-900">
-                  <Heart className="w-4 h-4 mr-2" /> Voir mon écurie
+                  <Heart className="w-4 h-4 mr-2" /> View My Stable
                 </Button>
                 <Button variant="outline" onClick={() => navigate('/HorseDetail?id=' + rewardData.horse.id)}>
-                  Voir mon nouveau cheval
+                  View My New Horse
                 </Button>
               </div>
             </div>
           ) : (
             <div className="max-w-lg mx-auto text-center space-y-6 py-12">
               <div className="text-6xl">🎁</div>
-              <h2 className="text-2xl font-bold text-stone-800">Guide terminé !</h2>
-              <p className="text-stone-500">Toutes les étapes sont complétées. Il est temps de récupérer tes récompenses.</p>
+              <h2 className="text-2xl font-bold text-stone-800">Guide Complete!</h2>
+              <p className="text-stone-500">All steps are finished. Time to claim your rewards.</p>
               <div className="bg-white/80 rounded-xl p-4 text-left space-y-2 max-w-sm mx-auto border border-stone-200">
-                <h3 className="font-semibold text-stone-700 text-sm">Récompenses finales :</h3>
-                <div className="flex items-center gap-2 text-sm"><Trophy className="w-4 h-4 text-amber-500" /> 30 points de réputation</div>
-                <div className="flex items-center gap-2 text-sm"><ShoppingCart className="w-4 h-4 text-emerald-500" /> 5 000 ₲ Genesis</div>
-                <div className="flex items-center gap-2 text-sm"><Gift className="w-4 h-4 text-rose-500" /> Objets cadeaux ×4</div>
-                <div className="flex items-center gap-2 text-sm"><Sparkles className="w-4 h-4 text-purple-500" /> 🎁 Un cheval mystère !</div>
+                <h3 className="font-semibold text-stone-700 text-sm">Final Rewards:</h3>
+                <div className="flex items-center gap-2 text-sm"><Trophy className="w-4 h-4 text-amber-500" /> 30 reputation points</div>
+                <div className="flex items-center gap-2 text-sm"><ShoppingCart className="w-4 h-4 text-emerald-500" /> 5 000 \u20b2 Genesis</div>
+                <div className="flex items-center gap-2 text-sm"><Gift className="w-4 h-4 text-rose-500" /> Gift items \u00d74</div>
+                <div className="flex items-center gap-2 text-sm"><Sparkles className="w-4 h-4 text-purple-500" /> 🎁 A mystery horse!</div>
               </div>
               <Button
                 onClick={collectFinalRewards}
@@ -565,11 +549,11 @@ export default function Guide() {
                 {isCollectingGift ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Attribution des récompenses...
+                    Assigning rewards...
                   </>
                 ) : (
                   <>
-                    <Gift className="w-5 h-5 mr-2" /> Collecter mes récompenses
+                    <Gift className="w-5 h-5 mr-2" /> Collect My Rewards
                   </>
                 )}
               </Button>
@@ -586,16 +570,14 @@ export default function Guide() {
 
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Progress bar */}
         <div className="bg-white rounded-2xl border border-stone-200 p-4">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs text-stone-500 font-medium">Étape {stepIndex + 1}/{STEPS.length}</p>
+            <p className="text-xs text-stone-500 font-medium">Step {stepIndex + 1}/{STEPS.length}</p>
             <p className="text-xs text-stone-400">{Math.round(progress)}%</p>
           </div>
           <Progress value={progress} className="h-2 bg-stone-100 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:to-rose-400" />
         </div>
 
-        {/* Step card */}
         <div className={`bg-gradient-to-br ${step.color} rounded-2xl p-8 text-white shadow-lg`}>
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm">
@@ -608,18 +590,17 @@ export default function Guide() {
           </div>
         </div>
 
-        {/* Content */}
         <Card className="border-0 bg-white shadow-sm">
           <CardContent className="p-6">
             <div className="whitespace-pre-line text-sm text-stone-700 leading-relaxed space-y-3">
               {step.content.split('\n').map((line, i) => {
-                if (line.startsWith('•')) {
-                  return <div key={i} className="flex items-start gap-2 ml-2"><span className="text-amber-500 mt-0.5">•</span><span>{line.slice(1)}</span></div>;
+                if (line.startsWith('\u2022')) {
+                  return <div key={i} className="flex items-start gap-2 ml-2"><span className="text-amber-500 mt-0.5">\u2022</span><span>{line.slice(1)}</span></div>;
                 }
-                if (line.startsWith('✓')) {
+                if (line.startsWith('\u2713')) {
                   return <div key={i} className="flex items-start gap-2 ml-2"><CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" /><span className="text-emerald-700">{line.slice(1)}</span></div>;
                 }
-                if (line.match(/^[\wéèêëàâäùûüîïôöç]+\s*[:：]/)) {
+                if (line.match(/^[\w\u00e9\u00e8\u00ea\u00eb\u00e0\u00e2\u00e4\u00f9\u00fb\u00fc\u00ee\u00ef\u00f4\u00f6\u00e7]+\s*[:：]/)) {
                   const [title, ...rest] = line.split(/[:：]/);
                   return <p key={i} className="font-semibold text-stone-800 mt-3"><span className="text-amber-600">{title}</span> : {rest.join(':')}</p>;
                 }
@@ -630,33 +611,29 @@ export default function Guide() {
           </CardContent>
         </Card>
 
-        {/* Step bonus */}
         {stepIndex < stepRewards.length && (
           <div className="bg-amber-50 rounded-xl border border-amber-200 p-3 flex items-center gap-3">
             <Gift className="w-5 h-5 text-amber-500 shrink-0" />
             <p className="text-xs text-amber-700">
-              <strong>Bonus étape :</strong> {stepRewards[stepIndex].rep} pts de réputation + {stepRewards[stepIndex].genesis} ₲
+              <strong>Step bonus:</strong> {stepRewards[stepIndex].rep} rep points + {stepRewards[stepIndex].genesis} \u20b2
             </p>
           </div>
         )}
 
-        {/* Navigation buttons */}
         <div className="flex gap-3">
           {completedSteps.size > 0 && (
             <Button
               variant="outline"
               onClick={() => {
-                // Find the last incomplete before current
                 let prev = currentStep - 1;
                 while (prev >= 0 && completedSteps.has(prev)) prev--;
                 if (prev < 0) prev = Math.max(0, currentStep - 1);
-                // Actually go to previous step that user has visited
                 const prevCompleted = Array.from(completedSteps).sort((a, b) => b - a);
                 const lastVisited = prevCompleted.length > 0 ? prevCompleted[prevCompleted.length - 1] : 0;
                 setCurrentStep(lastVisited - 1 >= 0 ? lastVisited - 1 : 0);
               }}
             >
-              ← Retour
+              \u2190 Back
             </Button>
           )}
           <div className="flex-1" />
@@ -671,7 +648,7 @@ export default function Guide() {
               }}
               className="bg-stone-800 hover:bg-stone-900"
             >
-              Étape suivante <ChevronRight className="w-4 h-4 ml-1" />
+              Next Step <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
             <Button
@@ -679,7 +656,7 @@ export default function Guide() {
               className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white"
             >
               <CheckCircle className="w-4 h-4 mr-1" />
-              Terminer l'étape
+              Complete Step
             </Button>
           )}
         </div>

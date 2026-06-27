@@ -11,159 +11,159 @@ import { isStallionCompetitionOpen, SEASON_LABELS, getStallionCompetitionName, g
 
 const INSPECTION_CRITERIA = {
   'Arabian': {
-    label: 'Inspection Arabe',
+    label: 'Arabian Inspection',
     icon: '🐎',
     minAge: 3,
     criteria: [
-      { name: 'Type racial', weight: 0.2, description: 'Conformité au type arabe' },
-      { name: 'Conformation', weight: 0.2, description: 'Structure osseuse et musculaire' },
-      { name: 'Locomotion', weight: 0.2, description: 'Qualité des allures' },
-      { name: 'Élégance', weight: 0.2, description: 'Élégance générale' },
-      { name: 'Profil de tête', weight: 0.2, description: 'Profil distinctif arabe' }
+      { name: 'Breed Type', weight: 0.2, description: 'Conformity to Arabian type' },
+      { name: 'Conformation', weight: 0.2, description: 'Bone and muscle structure' },
+      { name: 'Locomotion', weight: 0.2, description: 'Gait quality' },
+      { name: 'Elegance', weight: 0.2, description: 'Overall elegance' },
+      { name: 'Head Profile', weight: 0.2, description: 'Distinctive Arabian profile' }
     ],
   },
   'Thoroughbred': {
-    label: 'Approbation Pur-Sang',
+    label: 'Thoroughbred Approval',
     icon: '🏇',
     minAge: 4,
     criteria: [
-      { name: 'Modèle', weight: 0.2, description: 'Structure de coureur' },
-      { name: 'Locomotion', weight: 0.25, description: 'Efficacité des foulées' },
-      { name: 'Aptitude course', weight: 0.25, description: 'Potentiel athlétique' },
-      { name: 'Lignée/Pedigree', weight: 0.15, description: 'Qualité des ascendants' },
-      { name: 'Conformité studbook', weight: 0.15, description: 'Registre et authenticité' }
+      { name: 'Model', weight: 0.2, description: 'Racer structure' },
+      { name: 'Locomotion', weight: 0.25, description: 'Stride efficiency' },
+      { name: 'Racing Aptitude', weight: 0.25, description: 'Athletic potential' },
+      { name: 'Lineage/Pedigree', weight: 0.15, description: 'Quality of ancestors' },
+      { name: 'Studbook Compliance', weight: 0.15, description: 'Registry and authenticity' }
     ],
   },
   'Selle Français': {
-    label: 'Évaluation Selle Français',
+    label: 'Selle Français Evaluation',
     icon: '🏆',
     minAge: 3,
     criteria: [
-      { name: 'Allures', weight: 0.2, description: 'Qualité des trois allures' },
-      { name: 'Aptitude saut', weight: 0.25, description: 'Potentiel de sauteur' },
-      { name: 'Modèle', weight: 0.2, description: 'Proportions sportives' },
-      { name: 'Comportement', weight: 0.15, description: 'Tempérament et docilité' },
-      { name: 'Potentiel sport', weight: 0.2, description: 'Capacité compétitive' }
+      { name: 'Gaits', weight: 0.2, description: 'Quality of all three gaits' },
+      { name: 'Jumping Aptitude', weight: 0.25, description: 'Jumping potential' },
+      { name: 'Model', weight: 0.2, description: 'Sporting proportions' },
+      { name: 'Temperament', weight: 0.15, description: 'Behavior and docility' },
+      { name: 'Sport Potential', weight: 0.2, description: 'Competitive ability' }
     ],
   },
   'KWPN': {
-    label: 'Licence KWPN',
+    label: 'KWPN Licensing',
     icon: '🇳🇱',
     minAge: 3,
     criteria: [
-      { name: 'Allures', weight: 0.2, description: 'Élasticité et régularité' },
-      { name: 'Aptitude saut', weight: 0.25, description: 'Technique de saut' },
-      { name: 'Modèle', weight: 0.2, description: 'Type sportif' },
-      { name: 'Comportement', weight: 0.15, description: 'Fiabilité mentale' },
-      { name: 'Potentiel sport', weight: 0.2, description: 'Capacité sportive' }
+      { name: 'Gaits', weight: 0.2, description: 'Elasticity and regularity' },
+      { name: 'Jumping Aptitude', weight: 0.25, description: 'Jumping technique' },
+      { name: 'Model', weight: 0.2, description: 'Sporting type' },
+      { name: 'Temperament', weight: 0.15, description: 'Mental reliability' },
+      { name: 'Sport Potential', weight: 0.2, description: 'Sporting ability' }
     ],
   },
   'Friesian': {
-    label: 'Inspection Frison',
+    label: 'Friesian Inspection',
     icon: '⚫',
     minAge: 3,
     criteria: [
-      { name: 'Type racial', weight: 0.2, description: 'Pureté du type frison' },
-      { name: 'Allures', weight: 0.2, description: 'Élévation et cadence' },
-      { name: "Port d'encolure", weight: 0.2, description: 'Port distinctif' },
-      { name: 'Modèle', weight: 0.2, description: 'Proportions frisonnes' },
-      { name: 'Pureté du type', weight: 0.2, description: 'Conformité au standard' }
+      { name: 'Breed Type', weight: 0.2, description: 'Purity of Friesian type' },
+      { name: 'Gaits', weight: 0.2, description: 'Elevation and cadence' },
+      { name: 'Neck Carriage', weight: 0.2, description: 'Distinctive neck set' },
+      { name: 'Model', weight: 0.2, description: 'Friesian proportions' },
+      { name: 'Type Purity', weight: 0.2, description: 'Standard compliance' }
     ],
   },
   'Holsteiner': {
-    label: 'Inspection Holsteiner',
+    label: 'Holsteiner Inspection',
     icon: '🐴',
     minAge: 3,
     criteria: [
-      { name: 'Allures', weight: 0.2, description: 'Qualité des mouvements' },
-      { name: 'Aptitude saut', weight: 0.25, description: 'Capacité de saut' },
-      { name: 'Modèle', weight: 0.2, description: 'Type sportif' },
-      { name: 'Conformation', weight: 0.2, description: 'Structure solide' },
-      { name: 'Tempérament', weight: 0.15, description: 'Caractère stable' }
+      { name: 'Gaits', weight: 0.2, description: 'Movement quality' },
+      { name: 'Jumping Aptitude', weight: 0.25, description: 'Jumping ability' },
+      { name: 'Model', weight: 0.2, description: 'Sporting type' },
+      { name: 'Conformation', weight: 0.2, description: 'Solid structure' },
+      { name: 'Temperament', weight: 0.15, description: 'Stable character' }
     ],
   },
   'Hanoverian': {
-    label: 'Inspection Hanoverian',
+    label: 'Hanoverian Inspection',
     icon: '🐴',
     minAge: 3,
     criteria: [
-      { name: 'Allures', weight: 0.25, description: 'Impulsion et régularité' },
-      { name: 'Aptitude dressage', weight: 0.25, description: 'Potentiel de dressage' },
-      { name: 'Modèle', weight: 0.2, description: 'Type noble' },
-      { name: 'Conformation', weight: 0.15, description: 'Structure harmonieuse' },
-      { name: 'Tempérament', weight: 0.15, description: 'Caractère équilibré' }
+      { name: 'Gaits', weight: 0.25, description: 'Impulsion and regularity' },
+      { name: 'Dressage Aptitude', weight: 0.25, description: 'Dressage potential' },
+      { name: 'Model', weight: 0.2, description: 'Noble type' },
+      { name: 'Conformation', weight: 0.15, description: 'Harmonious structure' },
+      { name: 'Temperament', weight: 0.15, description: 'Balanced character' }
     ],
   },
   'Oldenburg': {
-    label: 'Inspection Oldenburg',
+    label: 'Oldenburg Inspection',
     icon: '🐴',
     minAge: 3,
     criteria: [
-      { name: 'Allures', weight: 0.25, description: 'Élasticité et amplitude' },
-      { name: 'Aptitude saut', weight: 0.2, description: 'Capacité de saut' },
-      { name: 'Modèle', weight: 0.2, description: 'Type expressif' },
-      { name: 'Conformation', weight: 0.2, description: 'Structure puissante' },
-      { name: 'Tempérament', weight: 0.15, description: 'Caractère fiable' }
+      { name: 'Gaits', weight: 0.25, description: 'Elasticity and amplitude' },
+      { name: 'Jumping Aptitude', weight: 0.2, description: 'Jumping ability' },
+      { name: 'Model', weight: 0.2, description: 'Expressive type' },
+      { name: 'Conformation', weight: 0.2, description: 'Powerful structure' },
+      { name: 'Temperament', weight: 0.15, description: 'Reliable character' }
     ],
   },
   'Belgian Warmblood': {
-    label: 'Inspection BWP',
+    label: 'BWP Inspection',
     icon: '🐴',
     minAge: 3,
     criteria: [
-      { name: 'Allures', weight: 0.25, description: 'Qualité des allures' },
-      { name: 'Aptitude saut', weight: 0.25, description: 'Technique de saut' },
-      { name: 'Modèle', weight: 0.2, description: 'Type sportif' },
-      { name: 'Conformation', weight: 0.15, description: 'Structure solide' },
-      { name: 'Potentiel sport', weight: 0.15, description: 'Capacité compétitive' }
+      { name: 'Gaits', weight: 0.25, description: 'Gait quality' },
+      { name: 'Jumping Aptitude', weight: 0.25, description: 'Jumping technique' },
+      { name: 'Model', weight: 0.2, description: 'Sporting type' },
+      { name: 'Conformation', weight: 0.15, description: 'Solid structure' },
+      { name: 'Sport Potential', weight: 0.15, description: 'Competitive ability' }
     ],
   },
   'Anglo-Arabian': {
-    label: 'Inspection Anglo-Arabe',
+    label: 'Anglo-Arabian Inspection',
     icon: '🐎',
     minAge: 3,
     criteria: [
-      { name: 'Type racial', weight: 0.2, description: 'Mélange arabe/PS' },
-      { name: 'Allures', weight: 0.2, description: 'Qualité des allures' },
-      { name: 'Aptitude CCE', weight: 0.25, description: 'Potentiel cross' },
-      { name: 'Modèle', weight: 0.2, description: 'Proportions sportives' },
-      { name: 'Endurance', weight: 0.15, description: "Capacité d'endurance" }
+      { name: 'Breed Type', weight: 0.2, description: 'Arabian/TB blend' },
+      { name: 'Gaits', weight: 0.2, description: 'Gait quality' },
+      { name: 'Eventing Aptitude', weight: 0.25, description: 'Cross country potential' },
+      { name: 'Model', weight: 0.2, description: 'Sporting proportions' },
+      { name: 'Endurance', weight: 0.15, description: 'Endurance capacity' }
     ],
   },
   'Lipizzaner': {
-    label: 'Inspection Lipizzan',
+    label: 'Lipizzaner Inspection',
     icon: '⚪',
     minAge: 3,
     criteria: [
-      { name: 'Type racial', weight: 0.25, description: 'Pureté du type baroque' },
-      { name: 'Allures', weight: 0.25, description: 'Cadence et élévation' },
-      { name: 'Modèle', weight: 0.2, description: 'Proportions classiques' },
-      { name: 'Aptitude dressage', weight: 0.2, description: 'Potentiel école' },
-      { name: 'Tempérament', weight: 0.1, description: 'Caractère noble' }
+      { name: 'Breed Type', weight: 0.25, description: 'Baroque type purity' },
+      { name: 'Gaits', weight: 0.25, description: 'Cadence and elevation' },
+      { name: 'Model', weight: 0.2, description: 'Classic proportions' },
+      { name: 'Dressage Aptitude', weight: 0.2, description: 'School potential' },
+      { name: 'Temperament', weight: 0.1, description: 'Noble character' }
     ],
   },
   'Haflinger': {
-    label: 'Inspection Haflinger',
+    label: 'Haflinger Inspection',
     icon: '🐴',
     minAge: 3,
     criteria: [
-      { name: 'Type racial', weight: 0.25, description: 'Pureté du type' },
-      { name: 'Modèle', weight: 0.2, description: 'Proportions de pony' },
-      { name: 'Allures', weight: 0.2, description: 'Régularité' },
-      { name: 'Conformation', weight: 0.2, description: 'Solidité' },
-      { name: 'Tempérament', weight: 0.15, description: 'Docilité' }
+      { name: 'Breed Type', weight: 0.25, description: 'Type purity' },
+      { name: 'Model', weight: 0.2, description: 'Pony proportions' },
+      { name: 'Gaits', weight: 0.2, description: 'Regularity' },
+      { name: 'Conformation', weight: 0.2, description: 'Soundness' },
+      { name: 'Temperament', weight: 0.15, description: 'Docility' }
     ],
   },
   'Connemara': {
-    label: 'Inspection Connemara',
+    label: 'Connemara Inspection',
     icon: '🐴',
     minAge: 3,
     criteria: [
-      { name: 'Type racial', weight: 0.2, description: 'Type pony sportif' },
-      { name: 'Allures', weight: 0.2, description: 'Qualité des allures' },
-      { name: 'Aptitude saut', weight: 0.25, description: 'Capacité de saut' },
-      { name: 'Modèle', weight: 0.2, description: 'Proportions' },
-      { name: 'Tempérament', weight: 0.15, description: 'Caractère fiable' }
+      { name: 'Breed Type', weight: 0.2, description: 'Sporting pony type' },
+      { name: 'Gaits', weight: 0.2, description: 'Gait quality' },
+      { name: 'Jumping Aptitude', weight: 0.25, description: 'Jumping ability' },
+      { name: 'Model', weight: 0.2, description: 'Proportions' },
+      { name: 'Temperament', weight: 0.15, description: 'Reliable character' }
     ],
   }
 };
@@ -224,28 +224,28 @@ export default function StallionInspection() {
   const performInspectionMutation = useMutation({
     mutationFn: async (stallion) => {
       const criteria = INSPECTION_CRITERIA[stallion.breed];
-      if (!criteria) throw new Error('Race non inspectable');
+      if (!criteria) throw new Error('Breed not inspectable');
 
-      // Vérifier test ADN complet obligatoire
+      // Check mandatory full DNA test
       if (!hasFullGeneticTest(stallion.id)) {
-        throw new Error('Test ADN complet obligatoire avant inspection. Veuillez effectuer le test à la clinique vétérinaire.');
+        throw new Error('Full DNA test required before inspection. Please run the test at the Vet Clinic.');
       }
 
-      // Facturer les frais d'inscription au testage (150 genesis)
+      // Charge inspection enrollment fee (150 genesis)
       const testingEnrollmentCost = 150;
       const balance = currentUser?.genesis_balance || 0;
       if (balance < testingEnrollmentCost) {
-        throw new Error(`Fonds insuffisants. Frais d'inscription au testage : ${testingEnrollmentCost} ₲`);
+        throw new Error(`Insufficient funds. Inspection enrollment fee: ${testingEnrollmentCost} ₲`);
       }
 
-      // Débiter les frais d'inscription
+      // Deduct enrollment fee
       await base44.auth.updateMe({ genesis_balance: balance - testingEnrollmentCost });
       await base44.entities.Transaction.create({
         user_email: currentUser.email,
         currency: 'genesis',
         amount: -testingEnrollmentCost,
         balance_after: balance - testingEnrollmentCost,
-        reason: `Frais d'inscription testage - ${stallion.name}`,
+        reason: `Inspection enrollment fee - ${stallion.name}`,
       });
 
       // Calculate score using comprehensive scoring system
@@ -311,7 +311,7 @@ export default function StallionInspection() {
             <div className={`bg-gradient-to-r ${colorGradient} rounded-xl p-6 text-white`}>
               <div className="text-center">
                 <p className="text-5xl font-bold mb-2">{Math.round(score)}</p>
-                <p className="text-lg opacity-90">Score d'approbation</p>
+                <p className="text-lg opacity-90">Approval Score</p>
               </div>
             </div>
 
@@ -323,19 +323,19 @@ export default function StallionInspection() {
               </div>
               <div className="p-3 rounded-lg bg-stone-50 text-center">
                 <p className="text-lg font-bold text-stone-800">{stallion.age}y</p>
-                <p className="text-xs text-stone-500">Âge</p>
+                <p className="text-xs text-stone-500">Age</p>
               </div>
               <div className="p-3 rounded-lg bg-stone-50 text-center">
                 <p className="text-lg font-bold text-stone-800">
                   {Math.round(Object.values(stallion.stats || {}).reduce((a, b) => a + b, 0) / Object.keys(stallion.stats || {}).length)}
                 </p>
-                <p className="text-xs text-stone-500">Moy. Stats</p>
+                <p className="text-xs text-stone-500">Avg Stats</p>
               </div>
             </div>
 
             {/* Breakdown du score */}
             <div className="p-4 rounded-lg bg-stone-50 border border-stone-200">
-              <h4 className="font-semibold text-stone-700 mb-3">Détail du scoring (/100)</h4>
+              <h4 className="font-semibold text-stone-700 mb-3">Scoring Breakdown (/100)</h4>
               <div className="space-y-2">
                 {scoreData && Object.entries(scoreData.breakdown).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
@@ -357,7 +357,7 @@ export default function StallionInspection() {
                 {scoreData.bonuses.length > 0 && (
                   <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
                     <h5 className="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-                      <Gift className="w-4 h-4" /> Bonus génétiques
+                      <Gift className="w-4 h-4" /> Genetic Bonuses
                     </h5>
                     <ul className="space-y-1 text-sm text-emerald-700">
                       {scoreData.bonuses.map((b, i) => (
@@ -369,7 +369,7 @@ export default function StallionInspection() {
                 {scoreData.penalties.length > 0 && (
                   <div className="p-3 rounded-lg bg-red-50 border border-red-200">
                     <h5 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
-                      <Frown className="w-4 h-4" /> Pénalités génétiques
+                      <Frown className="w-4 h-4" /> Genetic Penalties
                     </h5>
                     <ul className="space-y-1 text-sm text-red-700">
                       {scoreData.penalties.map((p, i) => (
@@ -389,14 +389,14 @@ export default function StallionInspection() {
                 }}
                 className="flex-1 bg-stone-800 hover:bg-stone-900"
               >
-                Inspectez un autre étalon
+                Inspect Another Stallion
               </Button>
               <Button
                 onClick={() => setSelectedStallion(null)}
                 variant="outline"
                 className="flex-1"
               >
-                Retour à la liste
+                Back to List
               </Button>
             </div>
           </CardContent>
@@ -410,7 +410,7 @@ export default function StallionInspection() {
     const hasTest = hasFullGeneticTest(selectedStallion.id);
     return (
       <div className="max-w-3xl mx-auto space-y-6">
-        <Button variant="outline" onClick={() => setSelectedStallion(null)}>← Retour</Button>
+        <Button variant="outline" onClick={() => setSelectedStallion(null)}>← Back</Button>
 
         <Card>
           <CardHeader>
@@ -422,15 +422,15 @@ export default function StallionInspection() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-3 gap-4">
               <div className="p-3 rounded-lg bg-stone-50 text-center">
-                <p className="text-sm font-semibold text-stone-700">Âge</p>
+                <p className="text-sm font-semibold text-stone-700">Age</p>
                 <p className="text-2xl font-bold text-stone-800">{selectedStallion.age}</p>
               </div>
               <div className="p-3 rounded-lg bg-stone-50 text-center">
-                <p className="text-sm font-semibold text-stone-700">Race</p>
+                <p className="text-sm font-semibold text-stone-700">Breed</p>
                 <p className="text-lg font-bold text-stone-800">{selectedStallion.breed}</p>
               </div>
               <div className="p-3 rounded-lg bg-stone-50 text-center">
-                <p className="text-sm font-semibold text-stone-700">Statistiques moy.</p>
+                <p className="text-sm font-semibold text-stone-700">Avg Stats</p>
                 <p className="text-2xl font-bold text-stone-800">
                   {Math.round(
                     Object.values(selectedStallion.stats || {}).reduce((a, b) => a + b, 0) /
@@ -445,16 +445,16 @@ export default function StallionInspection() {
               <div className="p-4 rounded-lg bg-red-50 border-2 border-red-300">
                 <div className="flex items-center gap-2 text-red-700 font-semibold">
                   <AlertTriangle className="w-5 h-5" />
-                  <span>Test ADN complet obligatoire manquant</span>
+                  <span>Mandatory Full DNA Test Missing</span>
                 </div>
                 <p className="text-sm text-red-600 mt-1">
-                  Vous devez d'abord effectuer un <strong>Full Genetic Profile</strong> au Laboratoire Génétique avant de pouvoir lancer l'inspection.
+                  You must first run a <strong>Full Genetic Profile</strong> at the Genetics Lab before starting the inspection.
                 </p>
               </div>
             )}
 
             <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-              <h4 className="font-semibold text-blue-900 mb-3">Critères d'évaluation</h4>
+              <h4 className="font-semibold text-blue-900 mb-3">Evaluation Criteria</h4>
               <div className="space-y-2">
                 {criteria.criteria.map((c, idx) => (
                   <div key={idx} className="flex items-start justify-between p-2 bg-white/50 rounded border border-blue-100">
@@ -475,7 +475,7 @@ export default function StallionInspection() {
               size="lg"
             >
               <Award className="w-5 h-5 mr-2" />
-              {hasTest ? "Lancer l'inspection" : 'Test ADN requis'}
+              {hasTest ? "Start Inspection" : 'DNA Test Required'}
             </Button>
           </CardContent>
         </Card>
@@ -486,30 +486,30 @@ export default function StallionInspection() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800">Inspection des Étalons</h1>
-        <p className="text-stone-500 mt-1">Evaluez et certifiez vos étalons pour les saillies approuvées</p>
+        <h1 className="text-3xl font-bold text-stone-800">Stallion Inspection</h1>
+        <p className="text-stone-500 mt-1">Evaluate and certify your stallions for approved breedings</p>
       </div>
 
       <Card className={`border-0 bg-gradient-to-r ${stallionSeasonOpen ? 'from-emerald-50 to-green-50' : 'from-amber-50 to-orange-50'}`}>
         <CardContent className="p-6">
           <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-blue-600" />
-            Calendrier des concours
+            Competition Calendar
           </h3>
           {stallionSeasonOpen ? (
             <div className="space-y-2 text-sm text-stone-700">
               <p className="text-emerald-700 font-semibold">
                 🏆 {getStallionCompetitionName(currentSeason)} — Année {gameYear}
               </p>
-              <p>Saison actuelle : <strong>{SEASON_LABELS[currentSeason]}</strong>. Les inscriptions sont ouvertes !</p>
-              <p className="text-xs text-stone-500 mt-2">2 concours par an : un en automne, un en hiver.</p>
+              <p>Current season: <strong>{SEASON_LABELS[currentSeason]}</strong>. Registrations are open!</p>
+              <p className="text-xs text-stone-500 mt-2">2 competitions per year: one in autumn, one in winter.</p>
             </div>
           ) : (
             <div className="space-y-2 text-sm text-stone-700">
               <p className="text-amber-700 font-semibold">
-                ⏳ Les concours d'étalons ont lieu en automne et en hiver.
+                ⏳ Stallion competitions take place in autumn and winter.
               </p>
-              <p>Saison actuelle : <strong>{SEASON_LABELS[currentSeason]}</strong>. Revenez en automne pour le prochain concours.</p>
+              <p>Current season: <strong>{SEASON_LABELS[currentSeason]}</strong>. Come back in autumn for the next competition.</p>
             </div>
           )}
         </CardContent>
@@ -519,27 +519,27 @@ export default function StallionInspection() {
         <CardContent className="p-6">
           <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-blue-600" />
-            Conditions de participation
+            Entry Requirements
           </h3>
           <ul className="space-y-2 text-sm text-stone-700">
-            <li>✓ Étalon (sexe : mâle)</li>
-            <li>✓ Âge minimum: selon la race (3-4 ans)</li>
-            <li>✓ Race inspectable (Arabian, Thoroughbred, Selle Français, KWPN, Holsteiner, Frison)</li>
-            <li>✓ Pas d'enregistrement OC</li>
-            <li>✓ Santé correcte (pas de maladie active)</li>
-            <li>✓ <strong>Test ADN complet obligatoire</strong> (effectué une seule fois)</li>
-            <li>✓ <strong>Frais d'inscription au testage : 150 ₲</strong></li>
+            <li>✓ Stallion (male sex)</li>
+            <li>✓ Minimum age: by breed (3-4 years)</li>
+            <li>✓ Inspectable breed (Arabian, Thoroughbred, Selle Français, KWPN, Holsteiner, Friesian)</li>
+            <li>✓ No OC registration</li>
+            <li>✓ Healthy (no active illness)</li>
+            <li>✓ <strong>Mandatory full DNA test</strong> (performed once)</li>
+            <li>✓ <strong>Inspection enrollment fee: 150 ₲</strong></li>
           </ul>
         </CardContent>
       </Card>
 
       <div className="space-y-3">
-        <h2 className="text-xl font-bold text-stone-800">Étalons éligibles ({eligibleStallions.length})</h2>
+        <h2 className="text-xl font-bold text-stone-800">Eligible Stallions ({eligibleStallions.length})</h2>
         {eligibleStallions.length === 0 ? (
         <Card className="border-0 bg-stone-50">
         <CardContent className="p-12 text-center">
           <Zap className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-          <p className="text-stone-400">Aucun étalon éligible pour l'inspection</p>
+          <p className="text-stone-400">No eligible stallions for inspection</p>
         </CardContent>
         </Card>
         ) : (
@@ -578,21 +578,21 @@ export default function StallionInspection() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Badge variant="outline">{stallion.age} ans</Badge>
-                      <Badge className="bg-blue-100 text-blue-700 border-0">Moy. {avgStat}</Badge>
+                      <Badge variant="outline">{stallion.age} yrs</Badge>
+                      <Badge className="bg-blue-100 text-blue-700 border-0">Avg {avgStat}</Badge>
                     </div>
 
                     {/* Statut test ADN */}
                     {!hasTest && (
                       <div className="p-2 rounded bg-red-50 border border-red-300 text-xs font-semibold text-red-700 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5" />
-                        Test ADN manquant
+                        Missing DNA Test
                       </div>
                     )}
                     {hasTest && !isApproved && stallion.breeding_approval_status === 'not_evaluated' && (
                       <div className="p-2 rounded bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Test ADN OK — prêt pour inspection
+                        DNA Test OK — ready for inspection
                       </div>
                     )}
 

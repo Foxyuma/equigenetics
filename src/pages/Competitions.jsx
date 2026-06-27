@@ -14,25 +14,25 @@ import SeasonManager from '../components/season/SeasonManager';
 
 const DISCIPLINES = [
   { id: "dressage", name: "Dressage", olympic: true, icon: "🎩" },
-  { id: "show_jumping", name: "Saut d'obstacles", olympic: true, icon: "🏇" },
+  { id: "show_jumping", name: "Show Jumping", olympic: true, icon: "🏇" },
   { id: "cross_country", name: "Cross-Country", olympic: true, icon: "🌲" },
-  { id: "eventing", name: "Concours complet", olympic: true, icon: "⭐" },
+  { id: "eventing", name: "Eventing", olympic: true, icon: "⭐" },
   { id: "endurance", name: "Endurance", olympic: false, icon: "🏔️" },
   { id: "reining", name: "Reining", olympic: false, icon: "🤠" },
   { id: "barrel_racing", name: "Barrel Racing", olympic: false, icon: "🛢️" },
   { id: "polo", name: "Polo", olympic: false, icon: "🏑" },
-  { id: "vaulting", name: "Voltige", olympic: false, icon: "🤸" },
-  { id: "driving", name: "Attelage", olympic: false, icon: "🐎" },
+  { id: "vaulting", name: "Vaulting", olympic: false, icon: "🤸" },
+  { id: "driving", name: "Driving", olympic: false, icon: "🐎" },
   { id: "trail", name: "Trail", olympic: false, icon: "🌄" },
   { id: "western_pleasure", name: "Western Pleasure", olympic: false, icon: "🌵" },
 ];
 
 const LEVELS = [
   { id: "novice", name: "Novice", color: "bg-green-100 text-green-700" },
-  { id: "intermediate", name: "Intermédiaire", color: "bg-blue-100 text-blue-700" },
-  { id: "advanced", name: "Avancé", color: "bg-purple-100 text-purple-700" },
-  { id: "elite", name: "Élite", color: "bg-amber-100 text-amber-700" },
-  { id: "olympic", name: "Olympique", color: "bg-red-100 text-red-700" },
+  { id: "intermediate", name: "Intermediate", color: "bg-blue-100 text-blue-700" },
+  { id: "advanced", name: "Advanced", color: "bg-purple-100 text-purple-700" },
+  { id: "elite", name: "Elite", color: "bg-amber-100 text-amber-700" },
+  { id: "olympic", name: "Olympic", color: "bg-red-100 text-red-700" },
 ];
 
 export default function Competitions() {
@@ -131,22 +131,22 @@ export default function Competitions() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Compétitions</h1>
-        <p className="text-stone-500 mt-1">Engagez vos chevaux dans des épreuves olympiques et non-olympiques</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Competitions</h1>
+        <p className="text-stone-500 mt-1">Enter your horses in Olympic and non-Olympic events</p>
       </div>
 
       <SeasonManager compact />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="bg-stone-100/80">
-          <TabsTrigger value="compete">Participer</TabsTrigger>
-          <TabsTrigger value="history">Palmarès</TabsTrigger>
+          <TabsTrigger value="compete">Compete</TabsTrigger>
+          <TabsTrigger value="history">Record</TabsTrigger>
         </TabsList>
 
         <TabsContent value="compete" className="mt-4 space-y-6">
           {/* Discipline selection */}
           <div>
-            <h3 className="font-semibold text-stone-700 mb-3">Choisissez une discipline</h3>
+            <h3 className="font-semibold text-stone-700 mb-3">Choose a Discipline</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {DISCIPLINES.map(d => {
                 const isAvailable = availableCompetitions.includes(d.id);
@@ -167,14 +167,14 @@ export default function Competitions() {
                     <span className="font-medium text-sm block">{d.name}</span>
                     {!isAvailable && (
                       <Badge className="mt-1 text-xs border-0 bg-stone-300 text-stone-600">
-                        Hors saison
+                        Off-season
                       </Badge>
                     )}
                     {d.olympic && isAvailable && (
                       <Badge className={`mt-1 text-xs border-0 ${
                         selectedDiscipline === d.id ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
                       }`}>
-                        Olympique
+                        Olympic
                       </Badge>
                     )}
                   </button>
@@ -187,7 +187,7 @@ export default function Competitions() {
           {selectedDiscipline && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-stone-600 mb-2 block">Niveau</label>
+                <label className="text-sm font-medium text-stone-600 mb-2 block">Level</label>
                 <Select value={selectedLevel} onValueChange={setSelectedLevel}>
                   <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -198,9 +198,9 @@ export default function Competitions() {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium text-stone-600 mb-2 block">Cheval</label>
+                <label className="text-sm font-medium text-stone-600 mb-2 block">Horse</label>
                 <Select value={selectedHorseId} onValueChange={setSelectedHorseId}>
-                  <SelectTrigger className="bg-white"><SelectValue placeholder="Choisir un cheval..." /></SelectTrigger>
+                  <SelectTrigger className="bg-white"><SelectValue placeholder="Choose a horse..." /></SelectTrigger>
                   <SelectContent>
                     {horses.map(h => (
                       <SelectItem key={h.id} value={h.id}>
@@ -223,7 +223,7 @@ export default function Competitions() {
                     <p className="text-sm text-stone-500">{selectedHorse.breed} — {selectedHorse.coat_color}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-stone-500">Score estimé</p>
+                    <p className="text-sm text-stone-500">Estimated Score</p>
                     <p className="text-2xl font-bold text-stone-800">
                       {getCompetitionScore(selectedHorse, selectedDiscipline).toFixed(1)}
                     </p>
@@ -233,23 +233,23 @@ export default function Competitions() {
                   const bonus = getBreedDisciplineBonus(selectedHorse.breed, selectedDiscipline);
                   if (bonus > 0) return (
                     <div className="mt-3 p-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs flex items-center gap-2">
-                      🏆 Prédisposition {selectedHorse.breed} pour cette discipline (+{bonus} pts race)
+                      🏆 {selectedHorse.breed} breed predisposition for this discipline (+{bonus} pts)
                     </div>
                   );
                   return null;
                 })()}
                 {selectedHorse.health_genes?.some(h => h.status === 'affected') && (
                   <div className="mt-3 p-2 rounded-lg bg-red-50 text-red-600 text-xs flex items-center gap-2">
-                    ⚠️ Ce cheval est atteint d'une maladie génétique — performances réduites
+                    ⚠️ This horse has a genetic disease — reduced performance
                   </div>
                 )}
                 {selectedHorse.doping_risk_until && new Date(selectedHorse.doping_risk_until) > new Date() && (
                   <div className="mt-2 p-3 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 text-xs">
                     <div className="flex items-center gap-2 font-semibold mb-1">
                       <AlertTriangle className="w-4 h-4" />
-                      Risque antidopage jusqu'au {new Date(selectedHorse.doping_risk_until).toLocaleDateString('fr-FR')}
+                      Doping risk until {new Date(selectedHorse.doping_risk_until).toLocaleDateString('en-US')}
                     </div>
-                    <p>Ce cheval est sous substances détectables. Probabilité de contrôle positif : <strong>{Math.round((DOPING_CHECK_PROBABILITY[selectedLevel] || 0.1) * 100)}%</strong> ({level?.name}). En cas de contrôle positif : disqualification + perte de réputation.</p>
+                    <p>This horse is under detectable substances. Positive test probability: <strong>{Math.round((DOPING_CHECK_PROBABILITY[selectedLevel] || 0.1) * 100)}%</strong> ({level?.name}). On positive test: disqualification + reputation loss.</p>
                   </div>
                 )}
               </CardContent>
@@ -260,7 +260,7 @@ export default function Competitions() {
           {pendingCompetitions.length > 0 && (
             <Card className="border-0 bg-blue-50 border border-blue-200">
               <CardContent className="p-4">
-                <p className="text-sm font-semibold text-blue-800 mb-2">🌙 Inscriptions en attente (résultats à 3h30 UTC)</p>
+                <p className="text-sm font-semibold text-blue-800 mb-2">🌙 Pending registrations (results at 3:30 AM UTC)</p>
                 <div className="space-y-2">
                   {pendingCompetitions.map(c => (
                     <div key={c.id} className="flex items-center justify-between text-sm text-blue-700 bg-white/60 rounded-lg p-2">
@@ -286,7 +286,7 @@ export default function Competitions() {
               ) : (
                 <Trophy className="w-5 h-5 mr-2" />
               )}
-              Inscrire pour demain à 3h30 UTC
+              Register for tomorrow at 3:30 AM UTC
             </Button>
           </div>
         </TabsContent>
@@ -294,7 +294,7 @@ export default function Competitions() {
         <TabsContent value="history" className="mt-4">
           <Card className="border-0 bg-white/60">
             <CardHeader>
-              <CardTitle className="text-lg">Résultats récents</CardTitle>
+              <CardTitle className="text-lg">Recent Results</CardTitle>
             </CardHeader>
             <CardContent>
               {allCompetitions.length === 0 ? (

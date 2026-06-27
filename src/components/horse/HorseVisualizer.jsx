@@ -104,58 +104,17 @@ export default function HorseVisualizer({ genotype, coatColor, size = 320, showG
       {/* Horse with genetic color */}
       <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ width: size, height: size, background: style.bg }}>
 
-        {/* Tobiano: white patches behind the image */}
-        {style.hasTobiano && (
-          <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full">
-            <ellipse cx="200" cy="190" rx="95" ry="60" fill="white" opacity="0.95" />
-            <ellipse cx="140" cy="310" rx="32" ry="52" fill="white" opacity="0.95" />
-            <ellipse cx="265" cy="320" rx="28" ry="48" fill="white" opacity="0.95" />
-          </svg>
-        )}
-
-        {/* Horse image — multiply blends with background color */}
-        <img
-          src={BASE_IMAGE}
-          alt="Cheval"
-          className="absolute inset-0 w-full h-full object-contain"
-          style={{
-            filter: style.imgFilter,
-            mixBlendMode: 'multiply',
-          }}
-        />
-
-        {/* Roan: white stipple OVER the image */}
-        {style.hasRoan && (
-          <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full pointer-events-none">
-            <defs>
-              <pattern id="roanPat" x="0" y="0" width="7" height="7" patternUnits="userSpaceOnUse">
-                <circle cx="1.5" cy="1.5" r="1.1" fill="white" opacity="0.5" />
-                <circle cx="5" cy="5" r="0.9" fill="white" opacity="0.4" />
-              </pattern>
-            </defs>
-            <ellipse cx="200" cy="195" rx="145" ry="110" fill="url(#roanPat)" />
-          </svg>
-        )}
-
-        {/* Dun dorsal stripe */}
-        {style.hasDun && (
-          <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full pointer-events-none">
-            <path d="M 192 70 Q 196 160 198 265 Q 202 160 208 70" fill="rgba(60,30,5,0.4)" />
-          </svg>
-        )}
-
-        {/* Silver: sheen over mane area */}
-        {style.hasSilver && (
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: 'radial-gradient(ellipse 60% 40% at 35% 35%, rgba(230,230,245,0.35) 0%, transparent 70%)',
-            mixBlendMode: 'screen',
-          }} />
-        )}
-
-        {/* Coat label */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap backdrop-blur-sm">
-          {coatColor || 'Couleur inconnue'}
+        {/* Horse silhouette — emoji, zero network, instant */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span style={{ fontSize: size * 0.5 }} className="opacity-40 select-none">🐎</span>
         </div>
+
+        {/* Coat label — hidden in compact mode (card shows it below) */}
+        {showGenotype && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap backdrop-blur-sm">
+            {coatColor || 'Couleur inconnue'}
+          </div>
+        )}
       </div>
 
       {/* Genotype badges */}

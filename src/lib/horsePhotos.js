@@ -12,9 +12,10 @@ const PHENO_IMAGES = {
   buckskin:      "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/ebca1607c_generated_image.png",
   silverBlack:   "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/bffd08910_generated_image.png",
   perlino:       "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/efcde8ad6_generated_image.png",
-  // === Roan (adult) ===
-  blueRoan:      "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/e02ae90f1_generated_image.png",
-  bayRoan:       "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/cde8790b6_generated_image.png",
+  // === Roan (adult) — trois variantes : bai granité, alezan granité (aubère), noir granité (gris fer) ===
+  bayRoan:       "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/6e4725486_generated_image.png",
+  chestnutRoan:  "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/2e846bac7_generated_image.png",
+  blueRoan:      "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/f3a1831ea_generated_image.png",
   // === Breed-specific (adult) ===
   haflinger:     "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/a48cad7cf_generated_image.png",
   appaloosa:     "https://media.base44.com/images/public/69b44c69482b4d9133223b0e/5ffc5983f_generated_image.png",
@@ -122,7 +123,9 @@ export function getHorsePhotoUrl(genotype, horseId = "", breed, age) {
 
   // === Roan ===
   if (hasRoan && !hasTobiano) {
+    // Trois variantes : noir granité (gris fer), alezan granité (aubère), bai granité
     if (base === "black" || base === "silverBlack") return PHENO_IMAGES.blueRoan;
+    if (base === "chestnut" || base === "palomino") return PHENO_IMAGES.chestnutRoan;
     return PHENO_IMAGES.bayRoan;
   }
 

@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Book, Clock, Heart, Dna, TrendingUp, Trophy, Baby, Sparkles, Gift, CheckCircle, ArrowRight, Star, ChevronRight, Info, Zap, Calendar, Award, Activity, ShoppingCart, AlertTriangle, MapPin, GitBranch } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { determineCoatColor, generateFoalTraits } from '../components/genetics/GeneticsEngine';
 
 const STEPS = [
   {
@@ -294,7 +295,7 @@ export default function Guide() {
         });
       }
 
-      // 4. Random breed horse worth ~30,000 genesis
+      // 4. Gift horse — 8 years old, random genes, pre-trained in a discipline
       const BREEDS = [
         "Arabian", "Thoroughbred", "Friesian", "Lipizzaner",
         "Anglo-Arabian", "Haflinger", "Connemara",
@@ -308,42 +309,79 @@ export default function Guide() {
       const namePool = isMale ? maleNames : femaleNames;
       const name = namePool[Math.floor(Math.random() * namePool.length)];
 
-      // Simple genotype for the gift horse
-      const ext = Math.random() < 0.5 ? 'EE' : 'Ee';
-      const agouti = Math.random() < 0.5 ? 'AA' : 'Aa';
-      const cr = Math.random() < 0.85 ? 'nn' : 'Crn';
-      const grey = Math.random() < 0.9 ? 'gg' : 'Gg';
-      const geno = { extension: ext, agouti, cream: cr, grey, kit: 'toto', dun: 'nd2nd2', champagne: 'nn', silver: 'zz', leopard: 'lplp', pattern1: 'patn1patn1', sooty: 'soso', flaxen: 'FF', pangare: 'pp', mushroom: 'MuMu', splash: 'nn', overo: 'nn', rabicano: 'rbrb' };
+      // Random genotype — both visible and hidden genes are randomized
+      const extOpts = ['EE', 'Ee', 'ee'];
+      const agoutiOpts = ['AA', 'Aa', 'aa'];
+      const ext = extOpts[Math.floor(Math.random() * extOpts.length)];
+      const agouti = agoutiOpts[Math.floor(Math.random() * agoutiOpts.length)];
+      const creamOpts = ['nn', 'Crn', 'CrCr'];
+      const greyOpts = ['gg', 'Gg', 'GG'];
+      const kitOpts = ['toto', 'Toto', 'ToTo', 'Sb1sb1', 'Sb1Sb1', 'Rnrn', 'RnRn'];
+      const dunOpts = ['nd2nd2', 'Dnd1', 'Dnd2', 'DD'];
+      const champagneOpts = ['nn', 'CHn', 'CHCH'];
+      const silverOpts = ['zz', 'Zz', 'ZZ'];
+      const leopardOpts = ['lplp', 'Lplp', 'LpLp'];
+      const pattern1Opts = ['patn1patn1', 'PATN1patn1', 'PATN1PATN1'];
+      const splashOpts = ['nn', 'SplSpl'];
 
-      let color;
-      if (ext === 'ee') color = 'Alezan';
-      else if (agouti !== 'aa') color = 'Bai';
-      else color = 'Noir';
-      if (cr === 'Crn') {
-        if (color === 'Alezan') color = 'Palomino';
-        else if (color === 'Bai') color = 'Isabelle';
-        else color = 'Smoky Black';
-      }
-      if (grey === 'Gg') color = 'Gris';
+      const geno = {
+        extension: ext,
+        agouti,
+        cream: creamOpts[Math.floor(Math.random() * creamOpts.length)],
+        grey: greyOpts[Math.floor(Math.random() * greyOpts.length)],
+        kit: kitOpts[Math.floor(Math.random() * kitOpts.length)],
+        dun: dunOpts[Math.floor(Math.random() * dunOpts.length)],
+        champagne: champagneOpts[Math.floor(Math.random() * champagneOpts.length)],
+        silver: silverOpts[Math.floor(Math.random() * silverOpts.length)],
+        leopard: leopardOpts[Math.floor(Math.random() * leopardOpts.length)],
+        pattern1: pattern1Opts[Math.floor(Math.random() * pattern1Opts.length)],
+        sooty: 'soso', flaxen: 'FF', pangare: 'pp', mushroom: 'MuMu',
+        splash: splashOpts[Math.floor(Math.random() * splashOpts.length)],
+        overo: 'nn', rabicano: 'rbrb',
+      };
+      const color = determineCoatColor(geno);
 
+      // Stats — already trained in a random discipline (boosted)
       const statNames = ["speed", "endurance", "agility", "strength", "temperament", "jumping", "dressage"];
+      const disciplinePrimeStats = {
+        speed: ['speed', 'agility'],
+        endurance: ['endurance', 'strength'],
+        agility: ['agility', 'speed'],
+        strength: ['strength', 'endurance'],
+        temperament: ['temperament', 'dressage'],
+        jumping: ['jumping', 'agility', 'speed'],
+        dressage: ['dressage', 'temperament', 'agility'],
+      };
+      const disciplines = Object.keys(disciplinePrimeStats);
+      const trainedDiscipline = disciplines[Math.floor(Math.random() * disciplines.length)];
+      const primeStats = disciplinePrimeStats[trainedDiscipline];
+
       const stats = {};
-      statNames.forEach(s => { stats[s] = Math.round(25 + Math.random() * 20); });
+      statNames.forEach(s => {
+        let base = 15 + Math.floor(Math.random() * 15); // 15-29 base
+        if (primeStats.includes(s)) base += 20 + Math.floor(Math.random() * 15); // +20-34 training boost
+        stats[s] = Math.min(100, base);
+      });
+
+      // Generate proper foal traits for genetic potential / character / morphology
+      const foalTraits = generateFoalTraits(null, null, breed);
+      const characters = ["energique", "anxieux", "intelligent", "paresseux", "courageux", "docile"];
 
       const horseData = {
         name: name + ' Cadeau',
         breed,
         sex: isMale ? 'male' : 'female',
-        age: 3 + Math.floor(Math.random() * 4),
+        age: 8,
         genotype: geno,
         coat_color: color,
         stats,
+        genetic_potential: foalTraits.genetic_potential,
         health_genes: [],
         energy: 100,
-        character: ["energique", "courageux", "docile", "intelligent"][Math.floor(Math.random() * 4)],
-        mental_traits: [],
-        morphology: [],
-        genetic_potential: {},
+        mental_energy: 100,
+        character: characters[Math.floor(Math.random() * characters.length)],
+        mental_traits: foalTraits.mental_traits || [],
+        morphology: foalTraits.morphology || [],
         owner_email: userEmail,
         competition_wins: 0,
         is_for_sale: false,
@@ -351,6 +389,22 @@ export default function Guide() {
       };
 
       const created = await base44.entities.Horse.create(horseData);
+
+      // Create a training record to document the discipline training
+      await base44.entities.Training.create({
+        horse_id: created.id,
+        horse_name: created.name,
+        training_type: trainedDiscipline,
+        stat_trained: trainedDiscipline,
+        stats_gained: { [trainedDiscipline]: Math.round(25 + Math.random() * 10) },
+        difficulty: 'hard',
+        energy_cost: 0,
+        mental_energy_cost: 0,
+        success: true,
+        stat_gain: primeStats.length * 10,
+        side_effects: [],
+        training_date: new Date().toISOString().split('T')[0],
+      });
 
       setRewardData({
         horse: created,

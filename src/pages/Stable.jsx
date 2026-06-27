@@ -16,6 +16,7 @@ export default function Stable() {
   const [filterBreed, setFilterBreed] = useState('all');
   const [filterSex, setFilterSex] = useState('all');
   const [filterAge, setFilterAge] = useState('all');
+  const [filterValue, setFilterValue] = useState('all');
 
   const { data: currentUser } = useQuery({
     queryKey: ['me'],
@@ -44,6 +45,14 @@ export default function Stable() {
     if (filterBreed !== 'all' && h.breed !== filterBreed) return false;
     if (filterSex !== 'all' && h.sex !== filterSex) return false;
     if (filterAge !== 'all' && h.age !== parseInt(filterAge, 10)) return false;
+    if (filterValue !== 'all') {
+      const val = h.estimated_value || 0;
+      if (filterValue === 'lt5k' && !(val < 5000)) return false;
+      if (filterValue === '5to15k' && !(val >= 5000 && val < 15000)) return false;
+      if (filterValue === '15to50k' && !(val >= 15000 && val < 50000)) return false;
+      if (filterValue === '50to100k' && !(val >= 50000 && val < 100000)) return false;
+      if (filterValue === 'gt100k' && !(val >= 100000)) return false;
+    }
     return true;
   });
 
@@ -102,6 +111,19 @@ export default function Stable() {
           <SelectContent>
             <SelectItem value="all">Tous âges</SelectItem>
             {availableAges.map(a => <SelectItem key={a} value={String(a)}>{a} an{a > 1 ? 's' : ''}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterValue} onValueChange={setFilterValue}>
+          <SelectTrigger className="w-full sm:w-40 bg-white/80">
+            <SelectValue placeholder="Valeur" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes valeurs</SelectItem>
+            <SelectItem value="lt5k">&lt; 5 000 pts</SelectItem>
+            <SelectItem value="5to15k">5 000 – 15 000 pts</SelectItem>
+            <SelectItem value="15to50k">15 000 – 50 000 pts</SelectItem>
+            <SelectItem value="50to100k">50 000 – 100 000 pts</SelectItem>
+            <SelectItem value="gt100k">&gt; 100 000 pts</SelectItem>
           </SelectContent>
         </Select>
       </div>

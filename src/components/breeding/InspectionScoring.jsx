@@ -2,28 +2,28 @@
 
 const SCORING_CATEGORIES = {
   conformation: {
-    name: 'Modèle / Conformation',
-    description: 'Équilibre général, membres, dos, encolure, type de corps, solidité',
+    name: 'Model / Conformation',
+    description: 'Overall balance, legs, back, neck, body type, soundness',
     maxScore: 25
   },
   locomotion: {
     name: 'Locomotion',
-    description: 'Qualité des allures, amplitude, souplesse, régularité, propulsion',
+    description: 'Gait quality, stride, flexibility, regularity, propulsion',
     maxScore: 25
   },
   breedType: {
-    name: 'Type racial',
-    description: 'Ressemblance au standard, tête, proportions, expression, cohérence',
+    name: 'Breed type',
+    description: 'Standard conformity, head, proportions, expression, consistency',
     maxScore: 20
   },
   genetics: {
-    name: 'Génétique / Santé',
-    description: 'Maladies génétiques, qualité des lignées, tests ADN, défauts majeurs',
+    name: 'Genetics / Health',
+    description: 'Genetic diseases, lineage quality, DNA tests, major defects',
     maxScore: 20
   },
   performance: {
-    name: 'Performances / Potentiel',
-    description: 'Résultats compétition, potentiel sportif, aptitude, mental',
+    name: 'Performance / Potential',
+    description: 'Competition results, sport potential, aptitude, mental',
     maxScore: 10
   }
 };
@@ -147,7 +147,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
     if (approvedParents > 0) {
       const bonus = approvedParents === 2 ? 5 : 2; // +5 si les deux parents approuvés, +2 sinon
       modifiedScore += bonus;
-      modifiers.bonuses.push({ type: 'approved_parents', value: bonus, description: `Parents approuvés (+${bonus})` });
+      modifiers.bonuses.push({ type: 'approved_parents', value: bonus,         description: `Approved parents (+${bonus})` });
     }
   }
 
@@ -157,7 +157,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
     if (avgStat >= 70) {
       const bonus = Math.min(5, Math.round((avgStat - 70) / 6));
       modifiedScore += bonus;
-      modifiers.bonuses.push({ type: 'high_performance', value: bonus, description: `Performances supérieures (+${bonus})` });
+      modifiers.bonuses.push({ type: 'high_performance', value: bonus,         description: `Superior performance (+${bonus})` });
     }
   }
 
@@ -165,7 +165,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
   if (horse.stats?.temperament && horse.stats.temperament >= 75) {
     const bonus = Math.min(3, Math.round((horse.stats.temperament - 75) / 8));
     modifiedScore += bonus;
-    modifiers.bonuses.push({ type: 'excellent_temperament', value: bonus, description: `Tempérament excellent (+${bonus})` });
+    modifiers.bonuses.push({ type: 'excellent_temperament', value: bonus,         description: `Excellent temperament (+${bonus})` });
   }
 
   // === MALUS ===
@@ -175,7 +175,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
   if (carrierDiseases.length > 0) {
     const penalty = -4 * carrierDiseases.length;
     modifiedScore += penalty;
-    modifiers.penalties.push({ type: 'carrier_diseases', value: penalty, description: `Porteur de maladie (${penalty})` });
+    modifiers.penalties.push({ type: 'carrier_diseases', value: penalty,         description: `Disease carrier (${penalty})` });
   }
 
   // 2. Faible locomotion
@@ -186,7 +186,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
     if (locomotionScore < 40) {
       const penalty = Math.round(-3 - (40 - locomotionScore) / 2);
       modifiedScore += penalty;
-      modifiers.penalties.push({ type: 'low_locomotion', value: penalty, description: `Faible locomotion (${penalty})` });
+      modifiers.penalties.push({ type: 'low_locomotion', value: penalty,         description: `Weak locomotion (${penalty})` });
     }
   }
 
@@ -199,14 +199,14 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
   if (rareGeneCount === 0) {
     const penalty = -3;
     modifiedScore += penalty;
-    modifiers.penalties.push({ type: 'weak_breed_type', value: penalty, description: `Type racial faible (${penalty})` });
+    modifiers.penalties.push({ type: 'weak_breed_type', value: penalty,         description: `Weak breed type (${penalty})` });
   }
 
   // 4. Consanguinité élevée
   if (inbreedingCoef !== undefined && inbreedingCoef > 0.10) {
     const penalty = Math.round(-2 - (inbreedingCoef - 0.10) * 50);
     modifiedScore += penalty;
-    modifiers.penalties.push({ type: 'high_inbreeding', value: penalty, description: `Consanguinité élevée (${penalty})` });
+    modifiers.penalties.push({ type: 'high_inbreeding', value: penalty,         description: `High inbreeding (${penalty})` });
   }
 
   // 5. Blessure récente / visite véto problématique
@@ -218,7 +218,7 @@ export function applyModifiers(score, horse, parentHorses, healthRecord, inbreed
     };
     const penalty = severityPenalty[healthRecord.illness_severity] || -3;
     modifiedScore += penalty;
-    modifiers.penalties.push({ type: 'recent_health_issue', value: penalty, description: `Problème de santé récent (${penalty})` });
+    modifiers.penalties.push({ type: 'recent_health_issue', value: penalty,         description: `Recent health issue (${penalty})` });
   }
 
   return { modifiedScore: Math.max(0, Math.min(100, modifiedScore)), modifiers };
@@ -266,25 +266,25 @@ export function calculateInspectionScore(horse) {
 
   if (affectedCount === 0 && carrierCount === 0) {
     geneticScore += Math.round(weights.genetics * 0.25);
-    bonuses.push({ key: 'cleanGenetics', description: 'ADN sain sans porteur' });
+    bonuses.push({ key: 'cleanGenetics', description: 'Healthy DNA without carrier' });
   }
 
   if (rareGeneCount >= 2) {
     geneticScore += 1;
-    bonuses.push({ key: 'rareGenes', description: 'Gènes rares/recherchés' });
+    bonuses.push({ key: 'rareGenes', description: 'Rare/sought-after genes' });
   }
 
   if (affectedCount > 0) {
     geneticScore -= Math.round((weights.genetics * 0.5) * affectedCount);
     for (let i = 0; i < affectedCount; i++) {
-      penalties.push({ key: 'affectedGenes', description: 'Affecté par maladie génétique' });
+      penalties.push({ key: 'affectedGenes', description: 'Affected by genetic disease' });
     }
   }
 
   if (carrierCount > 0) {
     geneticScore -= Math.round((weights.genetics * 0.2) * carrierCount);
     for (let i = 0; i < carrierCount; i++) {
-      penalties.push({ key: 'carrierDisease', description: 'Porteur de maladie génétique' });
+      penalties.push({ key: 'carrierDisease', description: 'Carrier of genetic disease' });
     }
   }
 
@@ -397,7 +397,7 @@ const APPROVAL_THRESHOLDS = {
 // Zones de probabilités finales
 const APPROVAL_PROBABILITY_ZONES = [
   {
-    name: 'Zone 1: Très faible',
+    name: 'Zone 1: Very low',
     range: [0, 49],
     outcomes: [
       { status: 'not_approved', probability: 0.95 },
@@ -405,7 +405,7 @@ const APPROVAL_PROBABILITY_ZONES = [
     ]
   },
   {
-    name: 'Zone 2: Passable',
+    name: 'Zone 2: Fair',
     range: [50, 64],
     outcomes: [
       { status: 'not_approved', probability: 0.45 },
@@ -414,7 +414,7 @@ const APPROVAL_PROBABILITY_ZONES = [
     ]
   },
   {
-    name: 'Zone 3: Bon',
+    name: 'Zone 3: Good',
     range: [65, 79],
     outcomes: [
       { status: 'approved_restricted', probability: 0.20 },
@@ -423,7 +423,7 @@ const APPROVAL_PROBABILITY_ZONES = [
     ]
   },
   {
-    name: 'Zone 4: Très bon',
+    name: 'Zone 4: Very good',
     range: [80, 89],
     outcomes: [
       { status: 'approved', probability: 0.20 },
@@ -449,7 +449,7 @@ export function detectAutoRejects(horse, healthRecord) {
   if (affectedLethals.length > 0) {
     rejects.push({
       type: 'lethal_disease',
-      reason: `Maladie génétique affectée : ${affectedLethals.map(d => d.disease).join(', ')}`,
+      reason: `Genetic disease affected: ${affectedLethals.map(d => d.disease).join(', ')}`,
       severity: 'critical',
       forceRejected: true
     });
@@ -463,7 +463,7 @@ export function detectAutoRejects(horse, healthRecord) {
     if (conformationScore < 8) {
       rejects.push({
         type: 'severe_conformation',
-        reason: 'Défaut grave de conformation (score < 8/30)',
+        reason: 'Severe conformation defect (score < 8/30)',
         severity: 'critical',
         forceRejected: true
       });
@@ -474,7 +474,7 @@ export function detectAutoRejects(horse, healthRecord) {
   if (healthRecord?.current_illness && healthRecord.current_illness.toLowerCase().includes('laméness')) {
     rejects.push({
       type: 'active_lameness',
-      reason: 'Boiterie active détectée',
+      reason: 'Active lameness detected',
       severity: 'critical',
       forceRejected: true
     });
@@ -484,7 +484,7 @@ export function detectAutoRejects(horse, healthRecord) {
   if ((horse.age || 0) < 3) {
     rejects.push({
       type: 'insufficient_age',
-      reason: `Âge insuffisant (${horse.age}y < 3y minimum)`,
+      reason: `Insufficient age (${horse.age}y < 3y minimum)`,
       severity: 'critical',
       forceRejected: true
     });
@@ -501,7 +501,7 @@ export function detectAutoRestrictions(horse) {
   if (carrierDiseases.length > 0) {
     restrictions.push({
       type: 'carrier_diseases',
-      reason: `Porteur de ${carrierDiseases.length} maladie(s) génétique(s)`,
+      reason: `Carrier of ${carrierDiseases.length} genetic disease(s)`,
       severity: 'high',
       forceRestricted: true
     });
@@ -519,7 +519,7 @@ export function detectAutoRestrictions(horse) {
     if (conformationScore >= 18 && locomotionScore < 10) {
       restrictions.push({
         type: 'low_locomotion',
-        reason: 'Modèle correct mais locomotion insuffisante',
+        reason: 'Good model but insufficient locomotion',
         severity: 'medium',
         forceRestricted: true
       });
@@ -535,7 +535,7 @@ export function detectAutoRestrictions(horse) {
     if (performanceScore >= 70 && horse.competition_wins < 2 && horse.age >= 4) {
       restrictions.push({
         type: 'unproven_performance',
-        reason: 'Potentiel bon mais résultats insuffisants',
+        reason: 'Good potential but insufficient results',
         severity: 'medium',
         forceRestricted: true
       });

@@ -215,7 +215,7 @@ export default function HorseDetail() {
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                   <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700">
-                    Estimated value: <strong>{estimateHorseValue(horse).toLocaleString('fr-FR')} ₲</strong>
+                    Estimated value: <strong>{estimateHorseValue(horse).toLocaleString('en-GB')} ₲</strong>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="custom-price">Sale price (₲ Genesis)</Label>
@@ -287,21 +287,21 @@ export default function HorseDetail() {
               <CardContent className="p-4 text-center">
                 <Trophy className="w-5 h-5 mx-auto text-amber-500 mb-1" />
                 <p className="text-2xl font-bold text-stone-800">{horse.competition_wins || 0}</p>
-                <p className="text-xs text-stone-500">Victoires</p>
+                <p className="text-xs text-stone-500">Wins</p>
               </CardContent>
             </Card>
             <Card className="border-0 bg-white/60">
               <CardContent className="p-4 text-center">
                 <Heart className="w-5 h-5 mx-auto text-rose-500 mb-1" />
                 <p className="text-2xl font-bold text-stone-800">{horse.energy || 100}%</p>
-                <p className="text-xs text-stone-500">Énergie</p>
+                <p className="text-xs text-stone-500">Energy</p>
               </CardContent>
             </Card>
             <Card className="border-0 bg-white/60">
               <CardContent className="p-4 text-center">
                 <Dna className="w-5 h-5 mx-auto text-violet-500 mb-1" />
                 <p className="text-2xl font-bold text-stone-800">{horse.health_genes?.filter(h => h.status !== 'clear').length || 0}</p>
-                <p className="text-xs text-stone-500">Gènes santé</p>
+                <p className="text-xs text-stone-500">Health Genes</p>
               </CardContent>
             </Card>
           </div>
@@ -312,7 +312,7 @@ export default function HorseDetail() {
                 <Link to={`/HorseDetail?id=${parents.father.id}`} className="flex-1">
                   <Card className="border-0 bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer">
                     <CardContent className="p-3">
-                      <p className="text-xs text-blue-400 font-medium">Père</p>
+                      <p className="text-xs text-blue-400 font-medium">Sire</p>
                       <p className="font-semibold text-stone-800">{parents.father.name}</p>
                       <p className="text-xs text-stone-500">{parents.father.breed}</p>
                     </CardContent>
@@ -323,7 +323,7 @@ export default function HorseDetail() {
                 <Link to={`/HorseDetail?id=${parents.mother.id}`} className="flex-1">
                   <Card className="border-0 bg-pink-50/50 hover:bg-pink-50 transition-colors cursor-pointer">
                     <CardContent className="p-3">
-                      <p className="text-xs text-pink-400 font-medium">Mère</p>
+                      <p className="text-xs text-pink-400 font-medium">Dam</p>
                       <p className="font-semibold text-stone-800">{parents.mother.name}</p>
                       <p className="text-xs text-stone-500">{parents.mother.breed}</p>
                     </CardContent>
@@ -339,13 +339,13 @@ export default function HorseDetail() {
 
       <Tabs defaultValue="stats" className="w-full">
         <TabsList className="bg-stone-100/80 flex-wrap">
-          <TabsTrigger value="stats">Compétences</TabsTrigger>
+          <TabsTrigger value="stats">Skills</TabsTrigger>
           <TabsTrigger value="traits">🧬 Traits</TabsTrigger>
-          <TabsTrigger value="genetics">Génétique</TabsTrigger>
-          <TabsTrigger value="health">Santé</TabsTrigger>
-          <TabsTrigger value="career">Carrière</TabsTrigger>
-          {horse.sex === 'female' && <TabsTrigger value="reproduction">Reproduction</TabsTrigger>}
-          {horse.sex === 'male' && <TabsTrigger value="approval">Approbation</TabsTrigger>}
+          <TabsTrigger value="genetics">Genetics</TabsTrigger>
+          <TabsTrigger value="health">Health</TabsTrigger>
+          <TabsTrigger value="career">Career</TabsTrigger>
+          {horse.sex === 'female' && <TabsTrigger value="reproduction">Breeding</TabsTrigger>}
+          {horse.sex === 'male' && <TabsTrigger value="approval">Approval</TabsTrigger>}
         </TabsList>
         <TabsContent value="stats" className="mt-4">
           <Card className="border-0 bg-white/60">
@@ -364,7 +364,7 @@ export default function HorseDetail() {
         </TabsContent>
         <TabsContent value="genetics" className="mt-4">
           <Card className="border-0 bg-white/60">
-            <CardHeader><CardTitle className="text-lg">Génotype</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-lg">Genotype</CardTitle></CardHeader>
             <CardContent>
               <GeneticPanel genotype={horse.genotype} />
             </CardContent>
@@ -372,7 +372,7 @@ export default function HorseDetail() {
         </TabsContent>
         <TabsContent value="health" className="mt-4 space-y-4">
           <Card className="border-0 bg-white/60">
-            <CardHeader><CardTitle className="text-lg">Maladies Génétiques</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-lg">Genetic Diseases</CardTitle></CardHeader>
             <CardContent>
               <HealthPanel healthGenes={horse.health_genes} breed={horse.breed} />
             </CardContent>
@@ -401,12 +401,12 @@ export default function HorseDetail() {
               <Card className="border-0 bg-white/60">
                 <CardContent className="p-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-stone-600 text-sm">Date d'approbation</span>
-                    <span className="font-semibold text-stone-800">{new Date(horse.breeding_approval_date).toLocaleDateString('fr-FR')}</span>
+                    <span className="text-stone-600 text-sm">Approval date</span>
+                    <span className="font-semibold text-stone-800">{new Date(horse.breeding_approval_date).toLocaleDateString('en-GB')}</span>
                   </div>
                   {horse.breeding_approval_breed && (
                     <div className="flex justify-between">
-                      <span className="text-stone-600 text-sm">Race approuvée</span>
+                      <span className="text-stone-600 text-sm">Approved breed</span>
                       <span className="font-semibold text-stone-800">{horse.breeding_approval_breed}</span>
                     </div>
                   )}

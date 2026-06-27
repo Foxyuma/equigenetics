@@ -3,9 +3,9 @@
 export const FOAL_TRAININGS = [
   {
     id: 'manipulation',
-    label: 'Manipulation',
+    label: 'Handling',
     icon: '🤲',
-    description: 'Habituer le poulain au contact humain',
+    description: 'Accustom the foal to human contact',
     energyCost: 20,
     mentalCost: 10,
     foalSkill: 'manipulation',
@@ -14,9 +14,9 @@ export const FOAL_TRAININGS = [
   },
   {
     id: 'desensibilisation',
-    label: 'Désensibilisation',
+    label: 'Desensitization',
     icon: '🎭',
-    description: 'Habituer le poulain aux stimuli extérieurs',
+    description: 'Accustom the foal to external stimuli',
     energyCost: 20,
     mentalCost: 15,
     foalSkill: 'desensibilisation',
@@ -25,9 +25,9 @@ export const FOAL_TRAININGS = [
   },
   {
     id: 'embarquement',
-    label: 'Travail à l\'embarquement',
+    label: 'Trailer loading',
     icon: '🚛',
-    description: 'Apprentissage du van et du box',
+    description: 'Learning the trailer and stall',
     energyCost: 20,
     mentalCost: 20,
     foalSkill: 'embarquement',
@@ -39,9 +39,9 @@ export const FOAL_TRAININGS = [
 export const ADULT_TRAININGS = [
   {
     id: 'longe',
-    label: 'Travail à la longe',
+    label: 'Lunge work',
     icon: '🔄',
-    description: 'Musculature, dressage, trot',
+    description: 'Muscle building, dressage, trot',
     energyCost: 20,
     mentalCost: 10,
     statGains: { strength: [2, 6], dressage: [2, 5], speed: [1, 4] },
@@ -50,9 +50,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'liberte',
-    label: 'Travail en liberté',
+    label: 'Liberty work',
     icon: '🌿',
-    description: 'Confiance, obéissance, mental',
+    description: 'Confidence, obedience, mental',
     energyCost: 15,
     mentalCost: 5,
     statGains: { temperament: [3, 7], agility: [2, 5] },
@@ -74,7 +74,7 @@ export const ADULT_TRAININGS = [
     id: 'dressage',
     label: 'Dressage',
     icon: '🎪',
-    description: 'Dressage, souplesse, endurance',
+    description: 'Dressage, flexibility, endurance',
     energyCost: 25,
     mentalCost: 20,
     statGains: { dressage: [3, 8], agility: [2, 5], endurance: [1, 4] },
@@ -83,9 +83,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'barres_sol',
-    label: 'Barres au sol',
+    label: 'Ground poles',
     icon: '➖',
-    description: 'Trot, équilibre, bases du saut',
+    description: 'Trot, balance, jumping basics',
     energyCost: 20,
     mentalCost: 10,
     statGains: { speed: [2, 6], agility: [2, 5], jumping: [1, 4] },
@@ -94,9 +94,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'gym_obstacle',
-    label: 'Gymnastique obstacle',
+    label: 'Jump gymnastics',
     icon: '🏗️',
-    description: 'Saut, coordination, dressage',
+    description: 'Jumping, coordination, dressage',
     energyCost: 30,
     mentalCost: 15,
     statGains: { jumping: [3, 8], agility: [2, 6], dressage: [1, 4] },
@@ -105,9 +105,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'balade',
-    label: 'Balade active',
+    label: 'Active trail',
     icon: '🌄',
-    description: 'Moral, endurance, réduction stress',
+    description: 'Morale, endurance, stress reduction',
     energyCost: 15,
     mentalCost: -15,
     statGains: { temperament: [2, 5], endurance: [2, 6] },
@@ -118,7 +118,7 @@ export const ADULT_TRAININGS = [
     id: 'trotting',
     label: 'Trotting',
     icon: '🏃',
-    description: 'Endurance, trot, musculature',
+    description: 'Endurance, trot, muscle building',
     energyCost: 25,
     mentalCost: 10,
     statGains: { endurance: [3, 7], speed: [2, 5], strength: [1, 4] },
@@ -127,9 +127,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'galop_terrain',
-    label: 'Galop terrain varié',
+    label: 'Varied terrain gallop',
     icon: '⛰️',
-    description: 'Galop, souffle, équilibre',
+    description: 'Gallop, breath, balance',
     energyCost: 35,
     mentalCost: 15,
     statGains: { speed: [3, 8], endurance: [2, 6], agility: [2, 5] },
@@ -138,9 +138,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'parcours_obstacles',
-    label: 'Parcours d\'obstacles',
+    label: 'Obstacle course',
     icon: '🏇',
-    description: 'Saut, réactivité, mental compétition',
+    description: 'Jumping, reactivity, competition mental',
     energyCost: 30,
     mentalCost: 25,
     statGains: { jumping: [3, 8], agility: [2, 6], temperament: [1, 4] },
@@ -149,9 +149,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'cross',
-    label: 'Cross',
+    label: 'Cross-country',
     icon: '🌲',
-    description: 'Endurance, courage, galop — fatigue élevée',
+    description: 'Endurance, courage, gallop — high fatigue',
     energyCost: 40,
     mentalCost: 20,
     statGains: { endurance: [4, 8], speed: [3, 7], temperament: [1, 4] },
@@ -160,9 +160,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'marche_main',
-    label: 'Marche en main',
+    label: 'Hand walking',
     icon: '🦶',
-    description: 'Récupération, confiance, baisse stress',
+    description: 'Recovery, confidence, stress reduction',
     energyCost: 5,
     mentalCost: -10,
     statGains: { temperament: [2, 5] },
@@ -171,9 +171,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'spa',
-    label: 'Spa / Récupération',
+    label: 'Spa / Recovery',
     icon: '🛁',
-    description: 'Récupération physique, prévention blessures',
+    description: 'Physical recovery, injury prevention',
     energyCost: -20,
     mentalCost: -20,
     statGains: {},
@@ -185,18 +185,18 @@ export const ADULT_TRAININGS = [
 
 // Synergies bonus : si le cheval a été entraîné avec ces deux types récemment
 export const SYNERGY_BONUSES = {
-  'barres_sol+dressage': { stat: 'agility', bonus: 2, label: 'Barres + Dressage = équilibre amélioré' },
-  'trotting+cross': { stat: 'endurance', bonus: 3, label: 'Trotting + Cross = bonus endurance' },
-  'gym_obstacle+barres_sol': { stat: 'jumping', bonus: 2, label: 'Gym + Barres = meilleur saut' },
+  'barres_sol+dressage': { stat: 'agility', bonus: 2,   label: 'Poles + Dressage = improved balance' },
+  'trotting+cross': { stat: 'endurance', bonus: 3,   label: 'Trotting + Cross = endurance bonus' },
+  'gym_obstacle+barres_sol': { stat: 'jumping', bonus: 2,   label: 'Gym + Poles = better jumping' },
 };
 
 // Modificateurs selon le caractère du cheval
 export const CHARACTER_MODIFIERS = {
-  energique: { energyCostMult: 0.9, mentalCostMult: 0.8, statBonusMult: 1.1, label: '⚡ Énergique' },
-  anxieux: { energyCostMult: 1.0, mentalCostMult: 1.3, statBonusMult: 0.9, label: '😰 Anxieux' },
+  energique: { energyCostMult: 0.9, mentalCostMult: 0.8, statBonusMult: 1.1, label: '⚡ Energetic' },
+  anxieux: { energyCostMult: 1.0, mentalCostMult: 1.3, statBonusMult: 0.9, label: '😰 Anxious' },
   intelligent: { energyCostMult: 0.95, mentalCostMult: 0.85, statBonusMult: 1.15, label: '🧠 Intelligent' },
-  paresseux: { energyCostMult: 1.1, mentalCostMult: 1.0, statBonusMult: 0.85, label: '😴 Paresseux' },
-  courageux: { energyCostMult: 1.0, mentalCostMult: 0.9, statBonusMult: 1.1, label: '🦁 Courageux' },
+  paresseux: { energyCostMult: 1.1, mentalCostMult: 1.0, statBonusMult: 0.85, label: '😴 Lazy' },
+  courageux: { energyCostMult: 1.0, mentalCostMult: 0.9, statBonusMult: 1.1, label: '🦁 Courageous' },
   docile: { energyCostMult: 0.95, mentalCostMult: 0.95, statBonusMult: 1.0, label: '🕊️ Docile' },
 };
 

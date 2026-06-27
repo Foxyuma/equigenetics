@@ -70,8 +70,8 @@ export default function Stable() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Mon Écurie</h1>
-          <p className="text-stone-500 mt-1">{horses.length} chevaux</p>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">My Stable</h1>
+          <p className="text-stone-500 mt-1">{horses.length} horses</p>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function Stable() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
           <Input 
-            placeholder="Rechercher un cheval..." 
+            placeholder="Search for a horse..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 bg-white/80"
@@ -92,7 +92,7 @@ export default function Stable() {
             <SelectValue placeholder="Race" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes les races</SelectItem>
+            <SelectItem value="all">All breeds</SelectItem>
             {BREEDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -101,9 +101,9 @@ export default function Stable() {
             <SelectValue placeholder="Sexe" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="male">♂ Mâles</SelectItem>
-            <SelectItem value="female">♀ Femelles</SelectItem>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="male">♂ Males</SelectItem>
+            <SelectItem value="female">♀ Females</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterAge} onValueChange={setFilterAge}>
@@ -111,8 +111,8 @@ export default function Stable() {
             <SelectValue placeholder="Âge" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous âges</SelectItem>
-            {availableAges.map(a => <SelectItem key={a} value={String(a)}>{a} an{a > 1 ? 's' : ''}</SelectItem>)}
+            <SelectItem value="all">All ages</SelectItem>
+            {availableAges.map(a => <SelectItem key={a} value={String(a)}>{a} yrs</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterValue} onValueChange={setFilterValue}>
@@ -120,7 +120,7 @@ export default function Stable() {
             <SelectValue placeholder="Valeur" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes valeurs</SelectItem>
+            <SelectItem value="all">All values</SelectItem>
             <SelectItem value="lt5k">&lt; 5 000 ₲</SelectItem>
             <SelectItem value="5to15k">5 000 – 15 000 ₲</SelectItem>
             <SelectItem value="15to50k">15 000 – 50 000 ₲</SelectItem>
@@ -140,8 +140,8 @@ export default function Stable() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-20">
           <span className="text-5xl mb-4 block">🐴</span>
-          <h3 className="text-lg font-semibold text-stone-600">{horses.length === 0 ? 'Votre écurie est vide' : 'Aucun résultat'}</h3>
-          <p className="text-stone-400 mt-1">{horses.length === 0 ? 'Vous n\'avez pas encore de cheval dans votre écurie.' : 'Essayez de modifier vos filtres.'}</p>
+          <h3 className="text-lg font-semibold text-stone-600">{horses.length === 0 ? 'Your stable is empty' : 'No results'}</h3>
+          <p className="text-stone-400 mt-1">{horses.length === 0 ? 'You don\'t have any horses in your stable yet.' : 'Try adjusting your filters.'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

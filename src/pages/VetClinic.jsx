@@ -261,7 +261,7 @@ export default function VetClinic() {
         currency: 'genesis',
         amount: -testConfig.price,
         balance_after: balance - testConfig.price,
-        reason: `Test ADN ${testConfig.label} - ${selectedTestHorse.name}`,
+        reason: `DNA Test ${testConfig.label} - ${selectedTestHorse.name}`,
       });
 
       return test;
@@ -320,7 +320,7 @@ export default function VetClinic() {
         currency: 'genesis',
         amount: -totalCost,
         balance_after: balance - totalCost,
-        reason: `Test ADN ${testConfig.label} - ${untestedHorses.length} chevaux`,
+        reason: `DNA Test ${testConfig.label} - ${untestedHorses.length} horses`,
       });
     },
     onSuccess: () => {
@@ -967,7 +967,7 @@ export default function VetClinic() {
                             <span className="text-sm">{medication?.icon} {med}</span>
                             {medication?.doping_risk && (
                               <Badge className="bg-orange-100 text-orange-700 border-0 text-xs flex items-center gap-1">
-                                <AlertTriangle className="w-3 h-3" />Dopage
+                                <AlertTriangle className="w-3 h-3" />Doping
                               </Badge>
                             )}
                           </div>

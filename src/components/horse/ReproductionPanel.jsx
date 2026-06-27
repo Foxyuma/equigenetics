@@ -32,7 +32,7 @@ import StatBar from './StatBar';
 import GeneticPanel from './GeneticPanel';
 import { toast } from 'sonner';
 import { addDays, format, isPast, parseISO, differenceInWeeks } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enGB } from 'date-fns/locale';
 
 // 1 mois de jeu = 14 jours réels (2 semaines)
 // Gestation = 11 mois + 4 jours = 11 × 14 + 4 = 158 jours réels
@@ -166,8 +166,8 @@ export default function ReproductionPanel({ mare }) {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       const breedingDate = getBreedingDate();
       const dueDate = addDays(breedingDate, GESTATION_DAYS);
-      const label = breedingDateChoice === 'immediate' ? 'immédiatement' : 'dans 30 jours';
-      toast.success(`Saillie confirmée ${label} ! Naissance prévue le ${format(dueDate, 'd MMMM yyyy', { locale: fr })} 🐴`);
+      const label = breedingDateChoice === 'immediate' ? 'immediately' : 'in 30 days';
+      toast.success(`Breeding confirmed ${label}! Birth expected on ${format(dueDate, 'd MMMM yyyy', { locale: enGB })} 🐴`);
       setFoalPreview(null);
       setSelectedStallion(null);
     },
@@ -184,7 +184,7 @@ export default function ReproductionPanel({ mare }) {
         : affixes.length > 0
           ? `L'éleveur a l'affixe "${affixes[0].name}" mais ne l'a pas sélectionné.`
           : 'Pas d\'affixe d\'élevage.';
-      const prompt = `Tu es expert en noms de chevaux de race. Propose 5 noms courts et élégants pour un poulain de race ${birthingFoal.foal_breed}, de robe ${birthingFoal.foal_coat_color}, né d'un père ${birthingFoal.father_name} et d'une mère ${mare.name}. ${affixInfo} Les noms doivent sonner noble, poétique, et adapté à la tradition équestre française. Retourne uniquement les 5 noms, un par ligne, sans numérotation ni explication.`;
+      const prompt = `You are an expert in naming purebred horses. Suggest 5 short elegant names for a ${birthingFoal.foal_breed} foal, ${birthingFoal.foal_coat_color} coat, born from sire ${birthingFoal.father_name} and dam ${mare.name}. ${affixInfo} The names should sound noble, poetic, and fitting for equestrian tradition. Return only the 5 names, one per line, no numbering or explanation.`;
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const names = result.split('\n').map(n => n.trim()).filter(Boolean).slice(0, 5);
       if (names.length > 0) {
@@ -265,9 +265,9 @@ export default function ReproductionPanel({ mare }) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
         <span className="text-5xl">🌱</span>
-        <h3 className="text-lg font-semibold text-stone-700">Trop jeune pour se reproduire</h3>
+        <h3 className="text-lg font-semibold text-stone-700">Too young to breed</h3>
         <p className="text-stone-500 text-sm max-w-sm">
-          <strong>{mare.name}</strong> a {mare.age} an{mare.age > 1 ? 's' : ''}. Les juments doivent avoir au moins <strong>3 ans</strong> pour être mises à la reproduction.
+          <strong>{mare.name}</strong> is {mare.age} year{mare.age > 1 ? 's' : ''} old. Mares must be at least <strong>3 years</strong> old to be bred.
         </p>
       </div>
     );
@@ -291,7 +291,7 @@ export default function ReproductionPanel({ mare }) {
       {readyToBeborn.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
-            <Gift className="w-4 h-4 text-pink-500" /> Naissances prêtes !
+            <Gift className="w-4 h-4 text-pink-500" /> Births ready!
           </h3>
           {readyToBeborn.map(b => (
             <Card key={b.id} className="border-2 border-pink-200 bg-pink-50/50">
@@ -320,7 +320,7 @@ export default function ReproductionPanel({ mare }) {
                             onClick={() => { setSelectedAffixe(null); localStorage.removeItem('equigenesis_last_affixe'); }}
                             className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!selectedAffixe ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-300 hover:border-stone-400'}`}
                           >
-                            Sans affixe
+                            No affix
                           </button>
                           {(currentUser.affixes ?? []).map((a, i) => (
                             <button
@@ -338,7 +338,7 @@ export default function ReproductionPanel({ mare }) {
                     {/* Nom */}
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Nom du poulain..."
+                        placeholder="Foal's name..."
                         value={foalName}
                         onChange={e => setFoalName(e.target.value)}
                         className="flex-1"
@@ -349,7 +349,7 @@ export default function ReproductionPanel({ mare }) {
                         onClick={generateFoalName}
                         disabled={isGeneratingName}
                         className="shrink-0 border-amber-300 text-amber-700 hover:bg-amber-50"
-                        title="Suggérer un nom via l'IA"
+                        title="Suggest a name via AI"
                       >
                         {isGeneratingName ? (
                           <div className="w-4 h-4 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
@@ -362,7 +362,7 @@ export default function ReproductionPanel({ mare }) {
                     {/* Suggestions IA */}
                     {nameSuggestions.length > 0 && (
                       <div>
-                        <p className="text-xs text-stone-400 mb-1">Autres suggestions :</p>
+                        <p className="text-xs text-stone-400 mb-1">Other suggestions:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {nameSuggestions.map((n, i) => {
                             const displayName = selectedAffixe
@@ -388,9 +388,9 @@ export default function ReproductionPanel({ mare }) {
                         disabled={!foalName || birthFoalMutation.isPending}
                         className="flex-1 bg-stone-800 hover:bg-stone-900"
                       >
-                        {birthFoalMutation.isPending ? 'Naissance en cours…' : 'Nommer & faire naître'}
+                        {birthFoalMutation.isPending ? 'Birth in progress…' : 'Name & birth'}
                       </Button>
-                      <Button variant="outline" onClick={() => { setBirthingFoal(null); setFoalName(''); setNameSuggestions([]); }}>Annuler</Button>
+                      <Button variant="outline" onClick={() => { setBirthingFoal(null); setFoalName(''); setNameSuggestions([]); }}>Cancel</Button>
                     </div>
                   </div>
                 ) : (
@@ -398,7 +398,7 @@ export default function ReproductionPanel({ mare }) {
                     onClick={() => { setBirthingFoal(b); setFoalName(''); }}
                     className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white"
                   >
-                    <Baby className="w-4 h-4 mr-2" /> Faire naître ce poulain
+                    <Baby className="w-4 h-4 mr-2" /> Birth this foal
                   </Button>
                 )}
               </CardContent>
@@ -410,7 +410,7 @@ export default function ReproductionPanel({ mare }) {
       {waitingBreedings.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-amber-500" /> Gestations en cours
+            <Calendar className="w-4 h-4 text-amber-500" /> Ongoing pregnancies
           </h3>
           {waitingBreedings.map(b => {
             const weeksLeft = differenceInWeeks(parseISO(b.foal_due_date), new Date());
@@ -424,7 +424,7 @@ export default function ReproductionPanel({ mare }) {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-amber-700 font-semibold">
-                    {monthsLeft > 0 ? `${monthsLeft} mois restant${monthsLeft > 1 ? 's' : ''}` : 'Prêt à naître'}
+                    {monthsLeft > 0 ? `${monthsLeft} month${monthsLeft > 1 ? 's' : ''} left` : 'Ready to birth'}
                   </p>
                   {b.is_oc && <p className="text-xs text-orange-600">OC</p>}
                 </div>
@@ -436,23 +436,23 @@ export default function ReproductionPanel({ mare }) {
       )}
 
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-stone-700">Nouvelle saillie</h3>
+        <h3 className="text-sm font-semibold text-stone-700">New breeding</h3>
         <Tabs value={stallionSource} onValueChange={(v) => { setStallionSource(v); setSelectedStallion(null); setFoalPreview(null); }}>
           <TabsList className="bg-stone-100/80">
-            <TabsTrigger value="own">Mes étalons ({ownMales.length})</TabsTrigger>
-            <TabsTrigger value="market">Marché des saillies ({stallionOffers.length})</TabsTrigger>
+            <TabsTrigger value="own">My stallions ({ownMales.length})</TabsTrigger>
+            <TabsTrigger value="market">Stallion market ({stallionOffers.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value={stallionSource} className="mt-4">
             {availableBreeds.length > 1 && (
               <div className="mb-3">
-                <p className="text-xs text-stone-500 font-medium mb-1.5">Filtrer par race</p>
+                <p className="text-xs text-stone-500 font-medium mb-1.5">Filter by breed</p>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => setBreedFilter('')}
                     className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!breedFilter ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-200 hover:border-stone-400'}`}
                   >
-                    Toutes
+                    All
                   </button>
                   {availableBreeds.map(b => (
                     <button
@@ -467,7 +467,7 @@ export default function ReproductionPanel({ mare }) {
               </div>
             )}
             {stallionsToShow.length === 0 ? (
-              <p className="text-stone-400 text-sm py-6 text-center">Aucun étalon disponible pour cette race</p>
+              <p className="text-stone-400 text-sm py-6 text-center">No stallions available for this breed</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {stallionsToShow.map(s => {
@@ -501,7 +501,7 @@ export default function ReproductionPanel({ mare }) {
                           {s.is_own
                               ? <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
                               : <div className="text-right">
-                                  <p className="text-amber-700 font-bold text-sm">{calcDynamicPrice(s).toLocaleString('fr-FR')} ₲</p>
+                                  <p className="text-amber-700 font-bold text-sm">{calcDynamicPrice(s).toLocaleString('en-GB')} ₲</p>
                                   <Badge className={`border-0 text-[10px] ${approvalConfig.color}`} title={`Multiplicateur de prix : ${approvalConfig.multLabel}`}>
                                     {approvalConfig.label}
                                   </Badge>
@@ -548,7 +548,7 @@ export default function ReproductionPanel({ mare }) {
                            </div>
                          )}
                           {incestBlocked && (
-                            <p className="text-xs text-red-600 mt-1">Ce cheval est le parent ou l'enfant de {mare.name} — reproduction impossible.</p>
+                            <p className="text-xs text-red-600 mt-1">This horse is the parent or offspring of {mare.name} — breeding not possible.</p>
                           )}
                         </CardContent>
                         </Card>
@@ -561,7 +561,7 @@ export default function ReproductionPanel({ mare }) {
               <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-200">
                 <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-red-700">
-                  Certains chevaux sont grisés car ils sont le <strong>parent ou l'enfant</strong> de {mare.name}. La reproduction directe parent-enfant n'est pas autorisée.
+                  Some horses are greyed out because they are the <strong>parent or offspring</strong> of {mare.name}. Direct parent-offspring breeding is not allowed.
                 </p>
               </div>
             )}
@@ -578,8 +578,8 @@ export default function ReproductionPanel({ mare }) {
               >
                 <Clock className="w-4 h-4 text-amber-500" />
                 <div className="text-left">
-                  <p className="font-semibold text-stone-800">Immédiatement</p>
-                  <p className="text-xs text-stone-400">Naissance dans 11 mois</p>
+                  <p className="font-semibold text-stone-800">Immediately</p>
+                  <p className="text-xs text-stone-400">Birth in 11 months</p>
                 </div>
               </button>
               <button
@@ -590,7 +590,7 @@ export default function ReproductionPanel({ mare }) {
                 <div className="text-left">
                   <p className="font-semibold text-stone-800">Dans 30 jours</p>
                   <p className="text-xs text-stone-400">
-                    Naissance le {format(addDays(new Date(new Date().setDate(new Date().getDate() + 30)), GESTATION_DAYS), 'd MMM yyyy', { locale: fr })}
+                    Birth on {format(addDays(new Date(new Date().setDate(new Date().getDate() + 30)), GESTATION_DAYS), 'd MMM yyyy', { locale: enGB })}
                   </p>
                 </div>
               </button>
@@ -602,9 +602,9 @@ export default function ReproductionPanel({ mare }) {
           <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border-2 border-red-200">
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-red-800">
-              <p className="font-semibold mb-1">🚫 Reproduction impossible</p>
+              <p className="font-semibold mb-1">🚫 Breeding impossible</p>
               <p className="text-xs">
-                <strong>{selectedStallion.stallion_name}</strong> et <strong>{mare.name}</strong> sont liés par un lien parent-enfant direct. Cette union n'est pas autorisée.
+                <strong>{selectedStallion.stallion_name}</strong> and <strong>{mare.name}</strong> are directly related as parent and child. This pairing is not allowed.
               </p>
             </div>
           </div>
@@ -626,7 +626,7 @@ export default function ReproductionPanel({ mare }) {
               className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
             >
               <FlaskConical className="w-4 h-4 mr-2" />
-              Simuler le croisement avec {selectedStallion.stallion_name}
+              Simulate breeding with {selectedStallion.stallion_name}
             </Button>
           </div>
         )}
@@ -647,11 +647,11 @@ export default function ReproductionPanel({ mare }) {
                 const color = statusColors[selectedStallion.breeding_approval_status || 'not_approved'] || statusColors.not_approved;
                 return (
                   <div className={`p-3 rounded-xl bg-gradient-to-r ${color} text-white`}>
-                    <p className="font-semibold mb-2">📋 Impact de l'approbation du père</p>
+                    <p className="font-semibold mb-2">📋 Sire approval impact</p>
                     <div className="space-y-1 text-xs">
-                      <p><strong>Statut du poulain:</strong> {impact.foalRegistration === 'oc' ? '❌ OC (Origines Constatées)' : '✅ Studbook complet'}</p>
-                      <p><strong>Valeur multipliée par:</strong> {impact.priceMultiplier}×</p>
-                      <p><strong>Bonus prestige:</strong> {impact.prestigeBonus > 0 ? '+' : ''}{impact.prestigeBonus}</p>
+                      <p><strong>Foal status:</strong> {impact.foalRegistration === 'oc' ? '❌ OC (Observed Origins)' : '✅ Full studbook'}</p>
+                      <p><strong>Value multiplier:</strong> {impact.priceMultiplier}×</p>
+                      <p><strong>Prestige bonus:</strong> {impact.prestigeBonus > 0 ? '+' : ''}{impact.prestigeBonus}</p>
                       {impact.restrictions.length > 0 && (
                         <div className="mt-2 pt-2 border-t border-white/30">
                           <p className="font-semibold mb-1">⚠️ Limitations:</p>
@@ -668,14 +668,14 @@ export default function ReproductionPanel({ mare }) {
               <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
                 <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-blue-700">
-                  <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe peuvent varier lors de la naissance réelle.
+                  <strong>Indicative forecast:</strong> skills, genotype and sex may vary at actual birth.
                 </p>
               </div>
               
               {foalPreview.isOC && (
                 <div className="p-3 rounded-xl bg-amber-50 border-2 border-amber-200">
                   <p className="text-xs font-semibold text-amber-800 mb-1 flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Enregistrement comme OC
+                    <AlertTriangle className="w-3.5 h-3.5" /> Registration as OC
                   </p>
                   <p className="text-xs text-amber-700">{foalPreview.ocMessage}</p>
                 </div>
@@ -684,42 +684,42 @@ export default function ReproductionPanel({ mare }) {
               {!foalPreview.viable && (
                 <div className="p-3 rounded-xl bg-red-50 border border-red-200">
                   <p className="text-xs font-semibold text-red-700 mb-1 flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Poulain non-viable
+                    <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Non-viable foal
                   </p>
-                  <p className="text-xs text-red-600">{foalPreview.viability_cause}: Le poulain naîtra mort-né.</p>
+                  <p className="text-xs text-red-600">{foalPreview.viability_cause}: The foal will be stillborn.</p>
                 </div>
               )}
               
               {foalPreview.death_age !== null && foalPreview.death_age !== undefined && (
                 <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
                   <p className="text-xs font-semibold text-orange-700 mb-1 flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Durée de vie réduite
+                    <AlertTriangle className="w-3.5 h-3.5" /> ⚠️ Reduced lifespan
                   </p>
-                  <p className="text-xs text-orange-600">Le poulain aura une espérance de vie limitée ({Math.floor(foalPreview.death_age * 12)} mois max).</p>
+                  <p className="text-xs text-orange-600">The foal will have a limited life expectancy ({Math.floor(foalPreview.death_age * 12)} months max).</p>
                 </div>
               )}
 
               {/* Surprise : on ne révèle pas le sexe, les stats ni la couleur */}
               <div className="p-4 rounded-xl bg-gradient-to-br from-pink-50 to-amber-50 border-2 border-dashed border-amber-300 text-center">
                 <p className="text-2xl mb-1">🎁</p>
-                <p className="font-semibold text-amber-800">C'est la surprise !</p>
-                <p className="text-xs text-amber-600 mt-1">Le sexe, la robe et les compétences du poulain seront révélés à la naissance.</p>
+                <p className="font-semibold text-amber-800">It's a surprise!</p>
+                <p className="text-xs text-amber-600 mt-1">The sex, coat and skills of the foal will be revealed at birth.</p>
                 <div className="flex flex-wrap gap-2 justify-center mt-3">
                   <Badge variant="outline">{foalPreview.breed}</Badge>
-                  <Badge className="bg-amber-100 text-amber-700 border-0">Robe : mystère 🎨</Badge>
-                  <Badge className="bg-pink-100 text-pink-700 border-0">Sexe : mystère ❓</Badge>
+                  <Badge className="bg-amber-100 text-amber-700 border-0">Coat: mystery 🎨</Badge>
+                  <Badge className="bg-pink-100 text-pink-700 border-0">Sex: mystery ❓</Badge>
                 </div>
               </div>
 
               {foalPreview.health_genes?.some(g => g.status !== 'clear') && (
                 <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
                   <p className="text-xs font-semibold text-orange-700 mb-2 flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Risques génétiques détectés
+                    <AlertTriangle className="w-3.5 h-3.5" /> Genetic risks detected
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {foalPreview.health_genes.filter(g => g.status !== 'clear').map(g => (
                       <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {g.disease}: {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                        {g.disease}: {g.status === 'carrier' ? 'Carrier' : 'Affected'}
                       </Badge>
                     ))}
                   </div>
@@ -733,9 +733,9 @@ export default function ReproductionPanel({ mare }) {
                   className="flex-1 bg-stone-800 hover:bg-stone-900"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {(() => { const p = selectedStallion.is_own ? 0 : calcDynamicPrice(selectedStallion); return `Confirmer la saillie${p > 0 ? ` — ${p.toLocaleString('fr-FR')} ₲` : ''}`; })()}
+                  {(() => { const p = selectedStallion.is_own ? 0 : calcDynamicPrice(selectedStallion); return `Confirm breeding${p > 0 ? ` — ${p.toLocaleString('en-GB')} ₲` : ''}`; })()}
                 </Button>
-                <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
+                <Button variant="outline" onClick={simulateBreeding}>🎲 Re-roll</Button>
               </div>
             </CardContent>
           </Card>

@@ -6,15 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Syringe, Dna, ClipboardList, ShieldAlert } from 'lucide-react';
 
 const VACCINE_LABELS = {
-  influenza: 'Grippe équine',
-  tetanus: 'Tétanos',
-  rhinopneumonie: 'Rhinopneumonie',
+  influenza: 'Equine Flu',
+  tetanus: 'Tetanus',
+  rhinopneumonie: 'Rhinopneumonia',
 };
 
 const TEST_TYPE_LABELS = {
-  health_panel: 'Panel santé',
-  coat_test: 'Test couleur',
-  full_test: 'Test complet',
+  health_panel: 'Health panel',
+  coat_test: 'Coat test',
+  full_test: 'Full test',
 };
 
 export default function VetHistoryPanel({ horseId }) {
@@ -40,7 +40,7 @@ export default function VetHistoryPanel({ horseId }) {
     return (
       <div className="text-center py-8 text-stone-400">
         <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-30" />
-        <p className="text-sm">Aucun soin vétérinaire enregistré</p>
+        <p className="text-sm">No veterinary records</p>
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function VetHistoryPanel({ horseId }) {
               <div key={key} className="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0">
                 <span className="text-sm text-stone-700 font-medium">{VACCINE_LABELS[key] || key}</span>
                 <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50 text-xs">
-                  {new Date(date).toLocaleDateString('fr-FR')}
+                  {new Date(date).toLocaleDateString('en-GB')}
                 </Badge>
               </div>
             ))}
@@ -73,7 +73,7 @@ export default function VetHistoryPanel({ horseId }) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Dna className="w-4 h-4 text-violet-600" />
-              Tests ADN
+              DNA Tests
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -84,7 +84,7 @@ export default function VetHistoryPanel({ horseId }) {
                   <p className="text-xs text-stone-400">{test.cost} ₲</p>
                 </div>
                 <Badge variant="outline" className="text-violet-700 border-violet-200 bg-violet-50 text-xs">
-                  {new Date(test.tested_at || test.created_date).toLocaleDateString('fr-FR')}
+                  {new Date(test.tested_at || test.created_date).toLocaleDateString('en-GB')}
                 </Badge>
               </div>
             ))}
@@ -97,7 +97,7 @@ export default function VetHistoryPanel({ horseId }) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-red-600" />
-              Contrôles antidopage
+              Doping Controls
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -106,18 +106,18 @@ export default function VetHistoryPanel({ horseId }) {
                 <div>
                   <span className="text-sm text-stone-700 font-medium">{ctrl.competition_name}</span>
                   <p className="text-xs text-stone-400">
-                    {new Date(ctrl.date).toLocaleDateString('fr-FR')} — {ctrl.substance}
+                    {new Date(ctrl.date).toLocaleDateString('en-GB')} — {ctrl.substance}
                   </p>
                 </div>
                 {ctrl.result === 'positive' ? (
                   <div className="text-right">
-                    <Badge className="bg-red-100 text-red-700 border-0 text-xs">Positif</Badge>
+                    <Badge className="bg-red-100 text-red-700 border-0 text-xs">Positive</Badge>
                     {ctrl.fine_amount > 0 && (
-                      <p className="text-xs text-red-600 font-semibold mt-0.5">-{ctrl.fine_amount.toLocaleString('fr-FR')} ₲</p>
+                      <p className="text-xs text-red-600 font-semibold mt-0.5">-{ctrl.fine_amount.toLocaleString('en-GB')} ₲</p>
                     )}
                   </div>
                 ) : (
-                  <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-xs">Négatif</Badge>
+                  <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-xs">Negative</Badge>
                 )}
               </div>
             ))}

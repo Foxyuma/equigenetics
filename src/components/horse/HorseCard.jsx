@@ -7,7 +7,7 @@ import { getDisplayBreed } from '@/lib/horseImagePrompt';
 import HorseVisualizer from '@/components/horse/HorseVisualizer';
 
 const sexColors = { male: "bg-blue-100 text-blue-700", female: "bg-pink-100 text-pink-700" };
-const sexLabels = { male: "♂ Mâle", female: "♀ Femelle" };
+const sexLabels = { male: "♂ Male", female: "♀ Female" };
 
 export default function HorseCard({ horse }) {
   const hasDisease = horse.health_genes?.some(h => h.status === "affected");
@@ -35,14 +35,14 @@ export default function HorseCard({ horse }) {
           {hasDisease && (
             <div className="absolute top-3 right-3">
               <Badge className="bg-red-100 text-red-700 border-0 text-xs">
-                <AlertTriangle className="w-3 h-3 mr-1" />Malade
+                <AlertTriangle className="w-3 h-3 mr-1" />Sick
               </Badge>
             </div>
           )}
           {!hasDisease && isCarrier && (
             <div className="absolute top-3 right-3">
               <Badge className="bg-orange-100 text-orange-700 border-0 text-xs">
-                Porteur
+                Carrier
               </Badge>
             </div>
           )}
@@ -54,7 +54,7 @@ export default function HorseCard({ horse }) {
             <span className="text-xs font-medium px-2 py-1 rounded-full bg-stone-100 text-stone-600">
               {horse.coat_color || "Inconnu"}
             </span>
-            <span className="text-xs text-stone-400">{horse.age || 0} ans</span>
+            <span className="text-xs text-stone-400">{horse.age || 0} yrs</span>
           </div>
           <div className="mt-3 flex items-center gap-1">
             <Heart className="w-3.5 h-3.5 text-rose-400" />

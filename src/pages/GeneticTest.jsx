@@ -133,14 +133,14 @@ export default function GeneticTest() {
       <div className="min-h-screen bg-gradient-to-br from-stone-50 via-blue-50/30 to-stone-50 p-6">
         <div className="max-w-6xl mx-auto space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-stone-900 mb-2">Laboratoire Génétique</h1>
-            <p className="text-stone-500">Testez vos chevaux pour découvrir leurs secrets génétiques</p>
+            <h1 className="text-3xl font-bold text-stone-900 mb-2">Genetic Laboratory</h1>
+            <p className="text-stone-500">Test your horses to discover their genetic secrets</p>
           </div>
 
           {horses.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
-                <p className="text-stone-400">Vous n'avez aucun cheval à tester</p>
+                <p className="text-stone-400">You have no horses to test</p>
               </CardContent>
             </Card>
           ) : (
@@ -183,7 +183,7 @@ export default function GeneticTest() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-stone-50 via-emerald-50/30 to-stone-50 p-6">
         <div className="max-w-4xl mx-auto space-y-6">
-          <Button variant="outline" onClick={() => setShowResults(null)}>← Retour</Button>
+          <Button variant="outline" onClick={() => setShowResults(null)}>← Back</Button>
 
           <Card className="border-0 bg-gradient-to-br from-emerald-50/60 to-blue-50/60">
             <CardHeader className="border-b">
@@ -193,7 +193,7 @@ export default function GeneticTest() {
                     <span>{testConfig.icon}</span>
                     {testConfig.label} - {selectedHorse.name}
                   </CardTitle>
-                  <p className="text-sm text-stone-500 mt-2">Résultats du test ADN</p>
+                  <p className="text-sm text-stone-500 mt-2">DNA test results</p>
                 </div>
                 <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
@@ -203,7 +203,7 @@ export default function GeneticTest() {
               {showResults.test_type === 'health_panel' && (
                 <div className="space-y-4">
                   <h3 className="font-semibold text-stone-800 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" /> Maladies génétiques détectées
+                    <AlertCircle className="w-4 h-4" /> Genetic diseases detected
                   </h3>
                   {showResults.results.health_genes && showResults.results.health_genes.length > 0 ? (
                     <div className="space-y-2">
@@ -220,11 +220,11 @@ export default function GeneticTest() {
                             <div>
                               <p className="font-semibold text-stone-800">{gene.disease}</p>
                               <p className={`text-sm ${gene.status === 'affected' ? 'text-red-600' : 'text-orange-600'}`}>
-                                {gene.status === 'carrier' ? 'Porteur du gène' : 'Atteint(e) du gène'}
+                                {gene.status === 'carrier' ? 'Gene carrier' : 'Gene affected'}
                               </p>
                             </div>
                             <Badge className={`border-0 ${gene.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                              {gene.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                              {gene.status === 'carrier' ? 'Carrier' : 'Affected'}
                             </Badge>
                           </div>
                         </div>
@@ -233,7 +233,7 @@ export default function GeneticTest() {
                   ) : (
                     <div className="p-4 rounded-lg bg-emerald-50 border-2 border-emerald-200 flex items-center gap-3">
                       <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                      <p className="text-emerald-700 font-semibold">Aucune maladie génétique détectée ! ✨</p>
+                      <p className="text-emerald-700 font-semibold">No genetic diseases detected! ✨</p>
                     </div>
                   )}
                 </div>
@@ -241,12 +241,12 @@ export default function GeneticTest() {
 
               {showResults.test_type === 'coat_test' && (
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-stone-800">Génétique de la robe</h3>
+                  <h3 className="font-semibold text-stone-800">Coat genetics</h3>
                   <div className="p-4 rounded-lg bg-blue-50 border-2 border-blue-200">
-                    <p className="text-sm text-stone-500 mb-2">Couleur phénotypique estimée :</p>
+                    <p className="text-sm text-stone-500 mb-2">Estimated phenotypic color:</p>
                     <p className="text-lg font-bold text-blue-700">{showResults.results.coat_color}</p>
                   </div>
-                  <h4 className="font-semibold text-stone-700 mt-4">Génotype complet</h4>
+                  <h4 className="font-semibold text-stone-700 mt-4">Full genotype</h4>
                   <GeneticPanel genotype={showResults.results.genotype} />
                 </div>
               )}
@@ -254,10 +254,10 @@ export default function GeneticTest() {
               {showResults.test_type === 'full_test' && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-semibold text-stone-800 mb-4">Profil génétique complet</h3>
+                    <h3 className="font-semibold text-stone-800 mb-4">Full genetic profile</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-blue-50 border-2 border-blue-200">
-                        <p className="text-sm text-stone-500 mb-2">Couleur phénotypique :</p>
+                        <p className="text-sm text-stone-500 mb-2">Phenotypic color:</p>
                         <p className="text-lg font-bold text-blue-700">{showResults.results.coat_color}</p>
                       </div>
                       <div className="p-4 rounded-lg bg-purple-50 border-2 border-purple-200">
@@ -268,13 +268,13 @@ export default function GeneticTest() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-stone-700 mb-3">Génotype complet</h4>
+                    <h4 className="font-semibold text-stone-700 mb-3">Full genotype</h4>
                     <GeneticPanel genotype={showResults.results.genotype} />
                   </div>
 
                   {showResults.results.health_genes && showResults.results.health_genes.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="font-semibold text-stone-700">Gènes de santé</h4>
+                      <h4 className="font-semibold text-stone-700">Health genes</h4>
                       <div className="space-y-2">
                         {showResults.results.health_genes.map(gene => (
                           <Badge key={gene.disease} className={`block text-left py-2 px-3 border-0 ${
@@ -293,10 +293,10 @@ export default function GeneticTest() {
 
               <div className="pt-4 border-t border-stone-200 flex gap-3">
                 <Button onClick={() => setShowResults(null)} variant="outline" className="flex-1">
-                  Fermer
+                  Close
                 </Button>
                 <Button onClick={() => { setShowResults(null); setSelectedHorse(null); }} className="flex-1 bg-stone-800 hover:bg-stone-900">
-                  Tester un autre cheval
+                  Test another horse
                 </Button>
               </div>
             </CardContent>
@@ -317,12 +317,12 @@ export default function GeneticTest() {
             </h1>
             <p className="text-stone-500">{selectedHorse.breed} · {selectedHorse.coat_color}</p>
           </div>
-          <Button variant="outline" onClick={() => setSelectedHorse(null)}>← Changer de cheval</Button>
+          <Button variant="outline" onClick={() => setSelectedHorse(null)}>← Change horse</Button>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <p className="text-sm text-blue-700">
-            <strong>Solde disponible :</strong> {(currentUser?.genesis_balance || 0).toLocaleString('fr-FR')} ₲
+            <strong>Available balance:</strong> {(currentUser?.genesis_balance || 0).toLocaleString('en-GB')} ₲
           </p>
         </div>
 
@@ -355,7 +355,7 @@ export default function GeneticTest() {
                   <p className="text-sm text-stone-600">{testConfig.description}</p>
 
                   <div>
-                    <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Révèle :</p>
+                    <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Reveals:</p>
                     <ul className="text-sm space-y-1">
                       {testConfig.reveals.map(reveal => (
                         <li key={reveal} className="flex items-center gap-2 text-stone-700">
@@ -378,7 +378,7 @@ export default function GeneticTest() {
                         disabled={!canAfford || performTestMutation.isPending}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       >
-                        {!canAfford ? '❌ Fonds insuffisants' : performTestMutation.isPending ? 'En cours...' : `Commander ce test`}
+                        {!canAfford ? '❌ Insufficient funds' : performTestMutation.isPending ? 'Processing...' : `Order this test`}
                       </Button>
                     )}
                   </div>
@@ -393,7 +393,7 @@ export default function GeneticTest() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Beaker className="w-5 h-5" />
-                Historique des tests
+                Test history
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -406,11 +406,11 @@ export default function GeneticTest() {
                       <div>
                         <p className="font-semibold text-stone-800">{TEST_TYPES[test.test_type]?.label}</p>
                         <p className="text-xs text-stone-500">
-                          {new Date(test.created_date).toLocaleDateString('fr-FR')} · {test.cost} ₲
+                          {new Date(test.created_date).toLocaleDateString('en-GB')} · {test.cost} ₲
                         </p>
                       </div>
                       <Button size="sm" variant="outline" onClick={() => setShowResults(test)}>
-                        Voir résultats
+                        View results
                       </Button>
                     </div>
                   ))}

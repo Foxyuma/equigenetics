@@ -11,12 +11,12 @@ const statColors = {
 };
 
 const statLabels = {
-  speed: "Vitesse",
+  speed: "Speed",
   endurance: "Endurance",
-  agility: "Agilité",
-  strength: "Force",
-  temperament: "Tempérament",
-  jumping: "Saut",
+  agility: "Agility",
+  strength: "Strength",
+  temperament: "Temperament",
+  jumping: "Jumping",
   dressage: "Dressage",
 };
 

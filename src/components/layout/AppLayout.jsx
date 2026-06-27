@@ -12,49 +12,49 @@ import { useGameNotifications } from '@/hooks/useGameNotifications';
 
 const menuGroups = [
   {
-    label: "Écurie",
+    label: "Stable",
     icon: Home,
     items: [
-      { path: "/Stable", label: "Mes Chevaux", icon: Home },
-      { path: "/Training", label: "Entraînement", icon: TrendingUp },
+      { path: "/Stable", label: "My Horses", icon: Home },
+      { path: "/Training", label: "Training", icon: TrendingUp },
       { path: "/Paddocks", label: "Paddocks", icon: LayoutGrid },
       { path: "/Staff", label: "Personnel", icon: Users },
-      { path: "/VetClinic", label: "Clinique Vétérinaire", icon: Activity },
+      { path: "/VetClinic", label: "Veterinary Clinic", icon: Activity },
     ]
   },
   {
-    label: "Élevage",
+    label: "Breeding",
     icon: Heart,
     items: [
-      { path: "/Breeding", label: "Reproduction", icon: Heart },
-      { path: "/BreedingBook", label: "Carnet d'élevage", icon: BookOpen },
-      { path: "/Pedigree", label: "Lignées & Pedigree", icon: GitBranch },
-      { path: "/StallionMarket", label: "Marché des Saillies", icon: Dna },
-      { path: "/StallionInspection", label: "Inspection Étalons", icon: Award },
-      { path: "/GeneticTest", label: "Labo Génétique", icon: Dna },
+      { path: "/Breeding", label: "Breeding", icon: Heart },
+      { path: "/BreedingBook", label: "Breeding Book", icon: BookOpen },
+      { path: "/Pedigree", label: "Pedigree & Lineage", icon: GitBranch },
+      { path: "/StallionMarket", label: "Stallion Market", icon: Dna },
+      { path: "/StallionInspection", label: "Stallion Inspection", icon: Award },
+      { path: "/GeneticTest", label: "Genetic Lab", icon: Dna },
     ]
   },
   {
-    label: "Compétition",
+    label: "Competition",
     icon: Trophy,
     items: [
-      { path: "/Competitions", label: "Concours", icon: Trophy },
-      { path: "/ModeleAllures", label: "Modèles & Allures", icon: Sparkles },
-      { path: "/Rankings", label: "Classements", icon: Award },
-      { path: "/SeasonCalendar", label: "Calendrier", icon: Calendar },
+      { path: "/Competitions", label: "Competitions", icon: Trophy },
+      { path: "/ModeleAllures", label: "Model & Gaits", icon: Sparkles },
+      { path: "/Rankings", label: "Rankings", icon: Award },
+      { path: "/SeasonCalendar", label: "Calendar", icon: Calendar },
     ]
   },
   {
-    label: "Ville",
+    label: "Town",
     icon: MapPin,
     items: [
-      { path: "/Market", label: "Marché & Enchères", icon: ShoppingCart },
-      { path: "/Shop", label: "Boutique", icon: Store },
-      { path: "/Inventory", label: "Inventaire", icon: Package },
+      { path: "/Market", label: "Market & Auctions", icon: ShoppingCart },
+      { path: "/Shop", label: "Shop", icon: Store },
+      { path: "/Inventory", label: "Inventory", icon: Package },
       { path: "/Messages", label: "Messages", icon: Mail },
-      { path: "/Trades", label: "Échanges", icon: ArrowRightLeft },
-      { path: "/Guide", label: "Guide Débutant", icon: BookOpen },
-      { path: "/Profile", label: "Mon Profil", icon: UserCircle },
+      { path: "/Trades", label: "Trades", icon: ArrowRightLeft },
+      { path: "/Guide", label: "Beginner's Guide", icon: BookOpen },
+      { path: "/Profile", label: "My Profile", icon: UserCircle },
     ]
   }
 ];
@@ -178,7 +178,7 @@ export default function AppLayout() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                <span className="hidden xl:inline">Déconnexion</span>
+                <span className="hidden xl:inline">Logout</span>
               </button>
             </div>
 

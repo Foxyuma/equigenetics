@@ -174,12 +174,12 @@ export default function Market() {
     <div className="flex flex-col sm:flex-row gap-3">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-        <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-white/80" />
+        <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-white/80" />
       </div>
       <Select value={filterBreed} onValueChange={setFilterBreed}>
-        <SelectTrigger className="w-full sm:w-48 bg-white/80"><SelectValue placeholder="Race" /></SelectTrigger>
+        <SelectTrigger className="w-full sm:w-48 bg-white/80"><SelectValue placeholder="Breed" /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Toutes les races</SelectItem>
+          <SelectItem value="all">All breeds</SelectItem>
           {BREEDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
         </SelectContent>
       </Select>
@@ -190,8 +190,8 @@ export default function Market() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Marché & Enchères</h1>
-          <p className="text-stone-500 mt-1">Achetez, vendez et enchérissez en temps réel</p>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Market & Auctions</h1>
+          <p className="text-stone-500 mt-1">Buy, sell and bid in real time</p>
         </div>
         {currentUser && (
           <CreateAuctionDialog
@@ -205,15 +205,15 @@ export default function Market() {
       <Tabs defaultValue="auctions">
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="auctions" className="flex items-center gap-2">
-            <Gavel className="w-4 h-4" /> Enchères
+            <Gavel className="w-4 h-4" /> Auctions
             {activeAuctions.length > 0 && (
               <Badge className="bg-amber-500 text-white border-0 text-xs ml-1">{activeAuctions.length}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="market" className="flex items-center gap-2">
-            <ShoppingCart className="w-4 h-4" /> Vente directe
+            <ShoppingCart className="w-4 h-4" /> Direct sale
           </TabsTrigger>
-          <TabsTrigger value="ended">Terminées</TabsTrigger>
+          <TabsTrigger value="ended">Ended</TabsTrigger>
         </TabsList>
 
         {/* Enchères actives */}
@@ -225,8 +225,8 @@ export default function Market() {
           ) : activeAuctions.length === 0 ? (
             <div className="text-center py-20">
               <Gavel className="w-12 h-12 mx-auto text-stone-300 mb-3" />
-              <h3 className="text-lg font-semibold text-stone-600">Aucune enchère active</h3>
-              <p className="text-stone-400 mt-1">Créez une enchère pour mettre votre cheval en vente</p>
+              <h3 className="text-lg font-semibold text-stone-600">No active auctions</h3>
+              <p className="text-stone-400 mt-1">Create an auction to list your horse for sale</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -253,8 +253,8 @@ export default function Market() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-20">
               <ShoppingCart className="w-12 h-12 mx-auto text-stone-300 mb-3" />
-              <h3 className="text-lg font-semibold text-stone-600">Aucun cheval en vente directe</h3>
-              <p className="text-stone-400 mt-1">Mettez vos chevaux en vente depuis leur fiche détaillée</p>
+              <h3 className="text-lg font-semibold text-stone-600">No horses for direct sale</h3>
+              <p className="text-stone-400 mt-1">List your horses for sale from their detail page</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -269,7 +269,7 @@ export default function Market() {
                         <span className="text-5xl opacity-20">🐴</span>
                       )}
                       <Badge className="absolute top-3 left-3 bg-emerald-500 text-white border-0 font-bold">
-                        {horse.price || 0} pts
+                        {horse.price || 0} ₲
                       </Badge>
                     </div>
                     <CardContent className="p-4 space-y-3">
@@ -279,17 +279,17 @@ export default function Market() {
                       </div>
                       <div className="flex items-center gap-3 text-xs text-stone-500">
                         <span className={horse.sex === 'male' ? 'text-blue-600' : 'text-pink-600'}>{horse.sex === 'male' ? '♂' : '♀'}</span>
-                        <span>{horse.age || 0} ans</span>
+                        <span>{horse.age || 0} yrs</span>
                         <span className="flex items-center gap-1"><Trophy className="w-3 h-3" />{horse.competition_wins || 0}</span>
                         <span className="flex items-center gap-1"><Dna className="w-3 h-3" />Moy: {avgStat}</span>
                       </div>
 
                       <div className="flex gap-2 pt-2">
                         <Link to={`/HorseDetail?id=${horse.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full text-sm">Voir</Button>
+                          <Button variant="outline" className="w-full text-sm">View</Button>
                         </Link>
                         <Button onClick={() => buyMutation.mutate(horse)} className="flex-1 bg-stone-800 hover:bg-stone-900 text-sm">
-                          Acheter
+                          Buy
                         </Button>
                       </div>
                     </CardContent>
@@ -303,7 +303,7 @@ export default function Market() {
         {/* Enchères terminées */}
         <TabsContent value="ended" className="mt-4">
           {endedAuctions.length === 0 ? (
-            <div className="text-center py-16 text-stone-400">Aucune enchère terminée</div>
+            <div className="text-center py-16 text-stone-400">No ended auctions</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {endedAuctions.map(auction => (

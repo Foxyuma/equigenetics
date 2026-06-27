@@ -93,8 +93,8 @@ export default function Breeding() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Élevage</h1>
-        <p className="text-stone-500 mt-1">Croisez vos chevaux et découvrez les résultats génétiques</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Breeding</h1>
+        <p className="text-stone-500 mt-1">Cross your horses and discover genetic results</p>
       </div>
 
       <SeasonManager compact />
@@ -106,12 +106,12 @@ export default function Breeding() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-bold">♂</span>
-              Étalon
+              Stallion
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Select value={fatherId} onValueChange={setFatherId}>
-              <SelectTrigger className="bg-white"><SelectValue placeholder="Choisir un étalon..." /></SelectTrigger>
+              <SelectTrigger className="bg-white"><SelectValue placeholder="Choose a stallion..." /></SelectTrigger>
               <SelectContent>
                 {males.map(h => (
                   <SelectItem key={h.id} value={h.id}>
@@ -135,7 +135,7 @@ export default function Breeding() {
                   <div className="flex flex-wrap gap-1 mt-2">
                     {father.health_genes.map(g => (
                       <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'carrier' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
-                        {g.disease}: {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                        {g.disease}: {g.status === 'carrier' ? 'Carrier' : 'Affected'}
                       </Badge>
                     ))}
                   </div>
@@ -150,12 +150,12 @@ export default function Breeding() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <span className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 text-sm font-bold">♀</span>
-              Jument
+              Mare
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Select value={motherId} onValueChange={setMotherId}>
-              <SelectTrigger className="bg-white"><SelectValue placeholder="Choisir une jument..." /></SelectTrigger>
+              <SelectTrigger className="bg-white"><SelectValue placeholder="Choose a mare..." /></SelectTrigger>
               <SelectContent>
                 {females.map(h => (
                   <SelectItem key={h.id} value={h.id}>
@@ -179,7 +179,7 @@ export default function Breeding() {
                   <div className="flex flex-wrap gap-1 mt-2">
                     {mother.health_genes.map(g => (
                       <Badge key={g.disease} className={`text-xs border-0 ${g.status === 'carrier' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
-                        {g.disease}: {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                        {g.disease}: {g.status === 'carrier' ? 'Carrier' : 'Affected'}
                       </Badge>
                     ))}
                   </div>
@@ -211,7 +211,7 @@ export default function Breeding() {
           className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white shadow-lg shadow-rose-200/50 px-8"
         >
           <Heart className="w-5 h-5 mr-2" />
-          Simuler le croisement
+          Simulate breeding
         </Button>
       </div>
 
@@ -221,13 +221,13 @@ export default function Breeding() {
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <Dna className="w-5 h-5 text-pink-500" />
-              Simulation génétique
+              Genetic Simulation
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={`border-0 ${foalPreview.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
-                {foalPreview.sex === 'male' ? '♂ Mâle' : '♀ Femelle'}
+                {foalPreview.sex === 'male' ? '♂ Male' : '♀ Female'}
               </Badge>
               <Badge variant="outline">{foalPreview.breed}</Badge>
               <Badge className="bg-stone-100 text-stone-600 border-0">{foalPreview.coat_color}</Badge>
@@ -237,13 +237,13 @@ export default function Breeding() {
             <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
               <span className="text-blue-500 text-sm flex-shrink-0 mt-0.5">ℹ️</span>
               <p className="text-xs text-blue-700">
-                <strong>Prévision indicative :</strong> les compétences, le génotype et le sexe du poulain peuvent varier lors de la naissance réelle. Cette simulation est une estimation probabiliste.
+                <strong>Indicative forecast:</strong> the foal's skills, genotype and sex may vary at actual birth. This simulation is a probabilistic estimate.
               </p>
             </div>
 
             {/* Stats */}
             <div>
-              <h4 className="font-semibold text-stone-700 mb-2 flex items-center gap-2">Compétences <span className="text-xs font-normal text-stone-400">(estimées, peuvent varier)</span></h4>
+              <h4 className="font-semibold text-stone-700 mb-2 flex items-center gap-2">Skills <span className="text-xs font-normal text-stone-400">(estimated, may vary)</span></h4>
               <div className="space-y-2">
                 {Object.entries(foalPreview.stats).map(([s, v]) => (
                   <StatBar key={s} stat={s} value={v} />
@@ -253,7 +253,7 @@ export default function Breeding() {
 
             {/* Genotype */}
             <div>
-              <h4 className="font-semibold text-stone-700 mb-2 flex items-center gap-2">Génotype <span className="text-xs font-normal text-stone-400">(estimé, peut varier)</span></h4>
+              <h4 className="font-semibold text-stone-700 mb-2 flex items-center gap=2">Genotype <span className="text-xs font-normal text-stone-400">(estimated, may vary)</span></h4>
               <GeneticPanel genotype={foalPreview.genotype} />
             </div>
 
@@ -262,14 +262,14 @@ export default function Breeding() {
               <div>
                 <h4 className="font-semibold text-stone-700 mb-3 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-orange-500" />
-                  Alertes Santé
+                  Health Alerts
                 </h4>
                 <div className="space-y-1">
                   {foalPreview.health_genes.map(g => (
                     <div key={g.disease} className={`flex items-center justify-between p-3 rounded-lg ${g.status === 'affected' ? 'bg-red-50' : 'bg-orange-50'}`}>
                       <span className="font-medium text-sm">{g.disease}</span>
                       <Badge className={`border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {g.status === 'carrier' ? 'Porteur' : 'Atteint'}
+                        {g.status === 'carrier' ? 'Carrier' : 'Affected'}
                       </Badge>
                     </div>
                   ))}
@@ -281,12 +281,12 @@ export default function Breeding() {
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-stone-200">
               <div className="flex items-start gap-2 flex-1 p-3 rounded-xl bg-amber-50 border border-amber-200">
                 <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-700">Pour confirmer la saillie et enregistrer le poulain, rendez-vous sur la <strong>fiche de la jument</strong> → onglet <strong>Reproduction</strong>.</p>
+                <p className="text-sm text-amber-700">To confirm the breeding and register the foal, go to the <strong>mare's profile</strong> → <strong>Breeding</strong> tab.</p>
               </div>
               <div className="flex gap-2">
                 {mother && (
                   <Link to={`/HorseDetail?id=${mother.id}`}>
-                    <Button className="bg-pink-500 hover:bg-pink-600 text-white whitespace-nowrap">Fiche de {mother.name}</Button>
+                    <Button className="bg-pink-500 hover:bg-pink-600 text-white whitespace-nowrap">{mother.name}'s profile</Button>
                   </Link>
                 )}
                 <Button variant="outline" onClick={simulateBreeding}>🎲 Relancer</Button>
@@ -300,7 +300,7 @@ export default function Breeding() {
       {records.length > 0 && (
         <Card className="border-0 bg-white/60">
           <CardHeader>
-            <CardTitle className="text-lg">Historique des croisements</CardTitle>
+            <CardTitle className="text-lg">Breeding History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

@@ -69,7 +69,7 @@ function generateBaseStats() {
   return stats;
 }
 
-const STEPS = ['Identité', 'Affixe', 'Génétique', 'Confirmation'];
+const STEPS = ['Identity', 'Affix', 'Genetics', 'Confirmation'];
 
 export default function OnboardingWizard({ onComplete }) {
   const queryClient = useQueryClient();
@@ -183,9 +183,9 @@ export default function OnboardingWizard({ onComplete }) {
 
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-600 to-orange-500 p-8 text-white">
-          <p className="text-amber-100 text-sm font-medium uppercase tracking-widest mb-1">Bienvenue dans EquiGenesis</p>
-          <h2 className="text-3xl font-bold">Créez votre premier cheval</h2>
-          <p className="text-amber-100 mt-2 text-sm">Définissez son identité et sa génétique visible — quelques gènes resteront mystérieux…</p>
+          <p className="text-amber-100 text-sm font-medium uppercase tracking-widest mb-1">Welcome to EquiGenesis</p>
+          <h2 className="text-3xl font-bold">Create your first horse</h2>
+          <p className="text-amber-100 mt-2 text-sm">Define its identity and visible genetics — some genes will remain mysterious…</p>
           {/* Steps */}
           <div className="flex gap-2 mt-6">
             {STEPS.map((s, i) => (
@@ -206,11 +206,11 @@ export default function OnboardingWizard({ onComplete }) {
           {step === 0 && (
             <div className="space-y-5">
               <div>
-                <label className="text-sm font-semibold text-stone-700 block mb-1.5">Nom du cheval</label>
+                <label className="text-sm font-semibold text-stone-700 block mb-1.5">Horse name</label>
                 <Input
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="Ex: Sultan, Luna, Eclipse…"
+                  placeholder="E.g. Sultan, Luna, Eclipse…"
                   className="bg-stone-50 text-lg"
                   maxLength={32}
                 />
@@ -219,7 +219,7 @@ export default function OnboardingWizard({ onComplete }) {
                 <div>
                   <label className="text-sm font-semibold text-stone-700 block mb-1.5">Race</label>
                   <Select value={breed} onValueChange={setBreed}>
-                    <SelectTrigger className="bg-stone-50"><SelectValue placeholder="Choisir une race…" /></SelectTrigger>
+                    <SelectTrigger className="bg-stone-50"><SelectValue placeholder="Choose a breed…" /></SelectTrigger>
                     <SelectContent>
                       {BREEDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
                     </SelectContent>
@@ -228,10 +228,10 @@ export default function OnboardingWizard({ onComplete }) {
                 <div>
                   <label className="text-sm font-semibold text-stone-700 block mb-1.5">Sexe</label>
                   <Select value={sex} onValueChange={setSex}>
-                    <SelectTrigger className="bg-stone-50"><SelectValue placeholder="Sexe…" /></SelectTrigger>
+                    <SelectTrigger className="bg-stone-50"><SelectValue placeholder="Sex…" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">♂ Mâle (Étalon)</SelectItem>
-                      <SelectItem value="female">♀ Femelle (Jument)</SelectItem>
+                      <SelectItem value="male">♂ Male (Stallion)</SelectItem>
+                      <SelectItem value="female">♀ Female (Mare)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -243,21 +243,21 @@ export default function OnboardingWizard({ onComplete }) {
           {step === 1 && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-lg font-bold text-stone-800 mb-1">Votre affixe d'élevage</h3>
+                <h3 className="text-lg font-bold text-stone-800 mb-1">Your breeding affix</h3>
                 <p className="text-sm text-stone-500 mb-4">
-                  L'affixe est le nom de votre élevage. Il sera ajouté automatiquement en préfixe ou suffixe au nom des poulains nés dans votre haras. C'est <strong>facultatif</strong> mais recommandé !
+                  The affix is the name of your breeding farm. It will be automatically added as prefix or suffix to foals born in your stud. It's <strong>optional</strong> but recommended!
                 </p>
               </div>
               <div>
-                <label className="text-sm font-semibold text-stone-700 block mb-1.5">Nom de l'affixe</label>
+                <label className="text-sm font-semibold text-stone-700 block mb-1.5">Affix name</label>
                 <Input
                   value={affixeName}
                   onChange={e => setAffixeName(e.target.value)}
-                  placeholder="Ex: Du Val des Brumes, De la Plaine Dorée…"
+                  placeholder="E.g. Of the Misty Valley, From the Golden Plain…"
                   className="bg-stone-50"
                   maxLength={30}
                 />
-                <p className="text-xs text-stone-400 mt-1">2 à 30 caractères. Laisser vide pour ignorer.</p>
+                <p className="text-xs text-stone-400 mt-1">2 to 30 characters. Leave empty to skip.</p>
               </div>
               {affixeName.trim().length >= 2 && (
                 <div>
@@ -268,21 +268,21 @@ export default function OnboardingWizard({ onComplete }) {
                       className={`p-3 rounded-xl border-2 text-sm transition-all ${affixePosition === 'prefix' ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:border-stone-300'}`}
                     >
                       <p className="font-bold text-stone-800">{affixeName} {name || 'Sultan'}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">Affixe en préfixe</p>
+                      <p className="text-xs text-stone-400 mt-0.5">Affix as prefix</p>
                     </button>
                     <button
                       onClick={() => setAffixePosition('suffix')}
                       className={`p-3 rounded-xl border-2 text-sm transition-all ${affixePosition === 'suffix' ? 'border-amber-400 bg-amber-50' : 'border-stone-200 bg-white hover:border-stone-300'}`}
                     >
                       <p className="font-bold text-stone-800">{name || 'Sultan'} {affixeName}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">Affixe en suffixe</p>
+                      <p className="text-xs text-stone-400 mt-0.5">Affix as suffix</p>
                     </button>
                   </div>
                 </div>
               )}
               <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
                 <p className="text-xs text-amber-800">
-                  💡 <strong>Nouveaux affixes :</strong> vous en recevrez un supplémentaire tous les 5 niveaux de réputation (niveau 6, 11…). Choisissez bien votre premier !
+                  💡 <strong>New affixes:</strong> you'll receive an additional one every 5 reputation levels (level 6, 11…). Choose your first one wisely!
                 </p>
               </div>
             </div>
@@ -293,14 +293,14 @@ export default function OnboardingWizard({ onComplete }) {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-stone-500">Robe estimée avec ces gènes :</p>
+                  <p className="text-sm text-stone-500">Estimated coat with these genes:</p>
                   <p className="text-xl font-bold text-stone-800">{previewColor}</p>
                 </div>
                 <div className="text-right">
                   <Badge className="bg-amber-100 text-amber-700 border-0">
-                    🧬 {Object.keys(hiddenGenes).length} gènes cachés
+                    🧬 {Object.keys(hiddenGenes).length} hidden genes
                   </Badge>
-                  <p className="text-xs text-stone-400 mt-1">révélés par test génétique</p>
+                  <p className="text-xs text-stone-400 mt-1">revealed by genetic test</p>
                 </div>
               </div>
 
@@ -336,22 +336,22 @@ export default function OnboardingWizard({ onComplete }) {
                   <span className="text-4xl">{sex === 'male' ? '🐴' : '🐎'}</span>
                   <div>
                     <h3 className="text-2xl font-bold text-stone-800">{name}</h3>
-                    <p className="text-stone-500 text-sm">{breed} — {sex === 'male' ? 'Étalon' : 'Jument'}</p>
+                    <p className="text-stone-500 text-sm">{breed} — {sex === 'male' ? 'Stallion' : 'Mare'}</p>
                   </div>
                 </div>
                 <div className="border-t border-stone-200 pt-3 grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span className="text-stone-400">Robe</span>
+                    <span className="text-stone-400">Coat</span>
                     <p className="font-semibold text-stone-800">{previewColor}</p>
                   </div>
                   {affixeName.trim().length >= 2 && (
                     <div>
-                      <span className="text-stone-400">Affixe</span>
+                      <span className="text-stone-400">Affix</span>
                       <p className="font-semibold text-amber-700">{affixePosition === 'prefix' ? `${affixeName.trim()} …` : `… ${affixeName.trim()}`}</p>
                     </div>
                   )}
                   <div>
-                    <span className="text-stone-400">Gènes visibles</span>
+                    <span className="text-stone-400">Visible genes</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {Object.entries(visibleGenes).map(([k, v]) => (
                         <Badge key={k} className="bg-blue-100 text-blue-700 border-0 text-xs">{k}: {v}</Badge>
@@ -359,7 +359,7 @@ export default function OnboardingWizard({ onComplete }) {
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-stone-400">Gènes cachés ({Object.keys(hiddenGenes).length} loci)</span>
+                    <span className="text-stone-400">Hidden genes ({Object.keys(hiddenGenes).length} loci)</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {Object.keys(hiddenGenes).map(k => (
                         <Badge key={k} className="bg-stone-200 text-stone-500 border-0 text-xs">🔒 {k}</Badge>
@@ -369,7 +369,7 @@ export default function OnboardingWizard({ onComplete }) {
                 </div>
               </div>
               <p className="text-xs text-stone-400 text-center">
-                Les gènes cachés seront révélés uniquement par un test génétique en Clinique Vétérinaire.
+                Hidden genes will only be revealed by a genetic test at the Veterinary Clinic.
               </p>
             </div>
           )}
@@ -377,7 +377,7 @@ export default function OnboardingWizard({ onComplete }) {
           {/* Navigation */}
           <div className="flex justify-between mt-8 gap-3">
             {step > 0 ? (
-              <Button variant="outline" onClick={() => setStep(s => s - 1)}>Retour</Button>
+              <Button variant="outline" onClick={() => setStep(s => s - 1)}>Back</Button>
             ) : <div />}
             {step < 3 ? (
               <Button
@@ -385,7 +385,7 @@ export default function OnboardingWizard({ onComplete }) {
                 disabled={step === 0 && !canNextStep0}
                 className="bg-amber-500 hover:bg-amber-600 text-white ml-auto"
               >
-                {step === 1 && !affixeName.trim() ? 'Passer →' : 'Suivant →'}
+                {step === 1 && !affixeName.trim() ? 'Skip →' : 'Next →'}
               </Button>
             ) : (
               <Button
@@ -396,9 +396,10 @@ export default function OnboardingWizard({ onComplete }) {
                 {createMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Génération de la robe…
+                    Generating coat image…
+                  
                   </span>
-                ) : '🐴 Créer mon cheval'}
+                ) : '🐴 Create my horse'}
               </Button>
             )}
           </div>

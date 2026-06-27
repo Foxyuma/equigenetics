@@ -25,7 +25,7 @@ function EnergyBar({ label, icon: IconComp, value, color }) {
   );
 }
 
-export default function NewTrainingSession({ horse, recentTrainingTypes = [], onTrainingComplete }) {
+export default function NewTrainingSession({ horse, recentTrainingTypes = [], foalTrainedToday = false, onTrainingComplete }) {
   const [selectedTraining, setSelectedTraining] = useState(null);
   const [isTraining, setIsTraining] = useState(false);
   const [result, setResult] = useState(null);
@@ -39,6 +39,10 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], on
 
   const handleTrain = async () => {
     if (!selectedTraining || !horse) return;
+    if (isFoal && foalTrainedToday) {
+      setResult(null);
+      return;
+    }
     setIsTraining(true);
     setResult(null);
     await new Promise(r => setTimeout(r, 1200));
@@ -93,13 +97,19 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], on
         <p className="text-sm font-semibold text-stone-600 mb-2">
           {isFoal ? '🐴 Séance poulain (1 par jour)' : 'Choisir un entraînement'}
         </p>
+        {isFoal && foalTrainedToday && (
+          <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 mb-2">
+            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Ce poulain a déjà fait sa séance du jour. Revenez demain ! 🌙</span>
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {trainings.map(t => {
             const physCost = Math.max(0, t.energyCost || 0);
             const mentCost = Math.max(0, t.mentalCost || 0);
             const notEnoughPhys = physEnergy < physCost;
             const notEnoughMent = mentalEnergy < mentCost;
-            const disabled = notEnoughPhys || notEnoughMent;
+            const disabled = notEnoughPhys || notEnoughMent || (isFoal && foalTrainedToday);
             const isSelected = selectedTraining?.id === t.id;
 
             return (
@@ -161,11 +171,13 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], on
       {selectedTraining && (
         <Button
           onClick={handleTrain}
-          disabled={!canAfford || isTraining}
+          disabled={!canAfford || isTraining || (isFoal && foalTrainedToday)}
           className="w-full bg-indigo-600 hover:bg-indigo-700 py-5 text-base"
         >
           {isTraining ? (
             <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />Entraînement en cours...</>
+          ) : isFoal && foalTrainedToday ? (
+            <><CheckCircle2 className="w-4 h-4 mr-2" />Séance du jour déjà effectuée</>
           ) : (
             <><TrendingUp className="w-4 h-4 mr-2" />Lancer : {selectedTraining.icon} {selectedTraining.label}</>
           )}

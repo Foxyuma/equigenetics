@@ -29,6 +29,10 @@ export default function Training() {
   const selectedHorse = myHorses.find(h => h.id === selectedHorseId);
   const recentTypes = recentTrainings.map(t => t.training_type);
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isFoal = (selectedHorse?.age || 0) < 3;
+  const foalTrainedToday = isFoal && recentTrainings.some(t => t.is_foal_session && t.training_date === todayStr);
+
   const saveTrainingMutation = useMutation({
     mutationFn: async ({ training, result }) => {
       const newStats = { ...(selectedHorse.stats || {}) };
@@ -112,6 +116,7 @@ export default function Training() {
         <NewTrainingSession
           horse={selectedHorse}
           recentTrainingTypes={recentTypes}
+          foalTrainedToday={foalTrainedToday}
           onTrainingComplete={({ training, result }) => saveTrainingMutation.mutate({ training, result })}
         />
       ) : (

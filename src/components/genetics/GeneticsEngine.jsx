@@ -151,12 +151,10 @@ function randomAllele(locus) {
     agouti: ["A", "a"],
     cream: ["Cr", "n", "prl"],
     grey: ["G", "g"],
-    tobiano: ["TO", "n"],
-    roan: ["RN", "n"],
+    kit: ["To", "to", "Sb1", "sb1", "Rn", "rn", "n", "n"],
     dun: ["D", "nd1", "nd2"],
     champagne: ["CH", "n"],
     silver: ["Z", "z"],
-    sabino: ["Sb", "n"],
     splash: ["Spl", "n"],
     overo: ["Fr", "n"],
     mushroom: ["Mu", "mu"],
@@ -183,6 +181,7 @@ function parseGenotype(locus, genotypeStr) {
     dun: { "DD": ["D","D"], "Dnd1": ["D","nd1"], "Dnd2": ["D","nd2"], "nd1nd1": ["nd1","nd1"], "nd1nd2": ["nd1","nd2"], "nd2nd2": ["nd2","nd2"] },
     champagne: { "CHn": ["CH","n"], "nn": ["n","n"], "CHCH": ["CH","CH"] },
     silver: { "ZZ": ["Z","Z"], "Zz": ["Z","z"], "zz": ["z","z"] },
+    kit: { "ToTo": ["To","To"], "Toto": ["To","to"], "Sb1Sb1": ["Sb1","Sb1"], "Sb1sb1": ["Sb1","sb1"], "RnRn": ["Rn","Rn"], "Rnrn": ["Rn","rn"], "ToSb1": ["To","Sb1"], "ToRn": ["To","Rn"], "Sb1Rn": ["Sb1","Rn"], "toto": ["to","to"], "sb1sb1": ["sb1","sb1"], "rnrn": ["rn","rn"] },
     sabino: { "SbSb": ["Sb","Sb"], "Sbn": ["Sb","n"], "nn": ["n","n"] },
     splash: { "SplSpl": ["Spl","Spl"], "Spln": ["Spl","n"], "nn": ["n","n"] },
     overo: { "FrFr": ["Fr","Fr"], "Frn": ["Fr","n"], "nn": ["n","n"] },
@@ -200,7 +199,41 @@ function sortThreeAlleles(locus, a1, a2) {
   const i1 = order.indexOf(a1), i2 = order.indexOf(a2);
   return (i1 < i2 ? [a1, a2] : [a2, a1]).join("");
 }
+// Locus KIT : 6 allèles possibles (To>Sb1>Rn>to>sb1>rn)
+const KIT_DOM = ["To","Sb1","Rn"], KIT_REC = ["to","sb1","rn"];
+// Convertisseur ancien format (3 locus) → nouveau format "kit"
+// Priorité : To > Sb1 > Rn (un seul actif par cheval)
+export function migrateKit(genotype) {
+  if (genotype.kit && typeof genotype.kit === 'string' && genotype.kit.length >= 3 
+      && !genotype.tobiano && !genotype.roan && !genotype.sabino) return genotype.kit;
+  const toVal = genotype.tobiano;
+  const roVal = genotype.roan;
+  const sbVal = genotype.sabino;
+  const hasTo = toVal && ['TOTO','TOn','TO'].includes(toVal.toUpperCase());
+  const hasSb1 = sbVal && ['SBSB','SBN','SB'].includes(sbVal.toUpperCase());
+  const hasRo = roVal && ['RNRN','RNN','RN'].includes(roVal.toUpperCase());
+  if (hasTo) return toVal.toUpperCase() === 'TOTO' ? 'ToTo' : 'Toto';
+  if (hasSb1) return (sbVal.toUpperCase() === 'SBSB') ? 'Sb1Sb1' : 'Sb1sb1';
+  if (hasRo) return (roVal.toUpperCase() === 'RNRN') ? 'RnRn' : 'Rnrn';
+  return 'toto';
+}
+// Accesseurs pratiques
+export function hasKit(val) { return val && val !== 'toto' && typeof val === 'string'; }
+export function getKitLabel(val) {
+  if (!val || val === 'toto') return null;
+  const low = val.toLowerCase();
+  if (low.includes('sb1')) return 'Sabino';
+  if (low.includes('rn')) return 'Roan';
+  if (low.includes('to')) return 'Tobiano';
+  return 'Pattern KIT';
+}
+function sortKitAlleles(a1, a2) {
+  const getOrder = a => { const d = KIT_DOM.indexOf(a); if(d>=0)return d*2; const r = KIT_REC.indexOf(a); return r>=0?r*2+1:5; };
+  return getOrder(a1) <= getOrder(a2) ? a1 + a2 : a2 + a1;
+}
 function combineAlleles(locus, a1, a2) {
+  if (THREE_ALLELE_ORDER[locus]) return sortThreeAlleles(locus, a1, a2);
+  if (locus === "kit") return sortKitAlleles(a1, a2);
   const dominant = { extension: "E", agouti: "A", grey: "G", tobiano: "TO", roan: "RN", champagne: "CH", silver: "Z", sabino: "Sb", splash: "Spl", overo: "Fr", mushroom: "Mu" };
   const recessive = { extension: "e", agouti: "a", grey: "g", tobiano: "n", roan: "n", dun: "n", champagne: "n", silver: "z", sabino: "n", splash: "n", overo: "n", mushroom: "mu" };
   // Remarque : cream et dun (3 allèles) sont triés en ligne, pas ici.
@@ -213,7 +246,7 @@ function combineAlleles(locus, a1, a2) {
 }
 
 export function generateRandomGenotype(breed) {
-  const loci = ["extension", "agouti", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo", "mushroom"];
+  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "mushroom"];
   const genotype = {};
   
   loci.forEach(locus => {
@@ -249,63 +282,39 @@ export function generateRandomGenotype(breed) {
     genotype.grey = Math.random() < 0.3 ? "GG" : "Gg";
   }
 
-  // Patterns pie : fréquences par race
-  // Sabino : assez courant dans beaucoup de races
-  // Splash / Overo : plus rares, concentrés dans les races pie
+  // Patterns pie par race (locus KIT unifié) + patterns ponctuels
   if (breed === "Paint Horse") {
-    // Paint = pie obligatoire : tobiano OU overo
-    if (Math.random() < 0.7) genotype.tobiano = "TOn";
-    if (Math.random() < 0.4) genotype.overo = "Frn";
+    // Paint = pie obligatoire : tobiano OU overo dans le gène KIT
+    if (Math.random() < 0.65) genotype.kit = Math.random() < 0.5 ? "Toto" : "ToTo";
+    else { genotype.kit = "toto"; genotype.overo = "Frn"; }
     if (Math.random() < 0.25) genotype.splash = "Spln";
-    if (Math.random() < 0.3) genotype.sabino = "Sbn";
   } else if (breed === "Appaloosa") {
-    genotype.roan = "RNn";
+    genotype.kit = Math.random() < 0.4 ? (Math.random() < 0.5 ? "Rnrn" : "RnRn") : "toto";
     if (Math.random() < 0.3) genotype.sabino = "Sbn";
   } else {
-    // Autres races : sabino modéré, splash/overo rares
-    if (Math.random() < 0.15) genotype.sabino = "Sbn";
+    // Autres races : tobiano/sabino/roan modérés via kit
+    const r = Math.random();
+    if (r < 0.12) genotype.kit = "Toto";
+    else if (r < 0.22) genotype.kit = Math.random() < 0.5 ? "Sb1sb1" : "Sb1Sb1";
+    else if (r < 0.30) genotype.kit = Math.random() < 0.5 ? "Rnrn" : "RnRn";
     if (Math.random() < 0.04) genotype.splash = "Spln";
     if (Math.random() < 0.03) genotype.overo = "Frn";
   }
 
-  // Cas spéciaux legacy
-  if (breed === "Haflinger") {
-    genotype.extension = "ee";
-    genotype.cream = "nn";
-    genotype.grey = "gg";
-    genotype.tobiano = "nn";
-    genotype.roan = "nn";
-    genotype.sabino = "nn";
+  // Races sans pie
+  if (["Haflinger","Lipizzaner","Friesian","Arabian","Thoroughbred"].includes(breed)) {
+    genotype.kit = "toto";
     genotype.splash = "nn";
     genotype.overo = "nn";
   }
-  if (breed === "Lipizzaner") {
-    genotype.grey = Math.random() < 0.85 ? "Gg" : "gg";
-    genotype.tobiano = "nn";
-    genotype.sabino = "nn";
-    genotype.splash = "nn";
-    genotype.overo = "nn";
-  }
-  if (breed === "Friesian") {
-    genotype.tobiano = "nn";
-    genotype.sabino = "nn";
-    genotype.splash = "nn";
-    genotype.overo = "nn";
-    genotype.roan = "nn";
-  }
-  if (breed === "Arabian" || breed === "Thoroughbred") {
-    // Sang purs : pas de pie
-    genotype.tobiano = "nn";
-    genotype.sabino = "nn";
-    genotype.splash = "nn";
-    genotype.overo = "nn";
-  }
+  if (breed === "Haflinger") { genotype.extension = "ee"; genotype.cream = "nn"; genotype.grey = "gg"; }
+  if (breed === "Lipizzaner") { genotype.grey = Math.random() < 0.85 ? "Gg" : "gg"; }
 
   return genotype;
 }
 
 export function breedGenotype(fatherGenotype, motherGenotype) {
-  const loci = ["extension", "agouti", "grey", "tobiano", "roan", "dun", "champagne", "silver", "sabino", "splash", "overo", "mushroom"];
+  const loci = ["extension", "agouti", "grey", "kit", "dun", "champagne", "silver", "splash", "overo", "mushroom"];
   const childGenotype = {};
   
   loci.forEach(locus => {
@@ -426,22 +435,23 @@ function applyGrey(displayColor, baseColor, genotype) {
   };
 }
 
-// Étape D : Appliquer les patterns blancs (tobiano, sabino, splash, roan, overo)
+// Étape D : Appliquer les patterns blancs (kit, splash, overo)
 function applyPatterns(color, genotype) {
   if (!genotype) return color;
   
-  const hasTobiano = genotype.tobiano && genotype.tobiano !== 'nn';
-  const hasSabino = genotype.sabino && genotype.sabino !== 'nn';
+  const kit = genotype.kit;
   const hasSplash = genotype.splash && genotype.splash !== 'nn';
-  const hasRoan = genotype.roan && genotype.roan !== 'nn';
   const hasOvero = genotype.overo && genotype.overo !== 'nn';
   
   let patterns = [];
   
-  if (hasTobiano) patterns.push('Tobiano');
-  if (hasSabino) patterns.push('Sabino');
+  if (kit && kit !== 'toto') {
+    const lower = kit.toLowerCase();
+    if (lower.includes('to')) patterns.push('Tobiano');
+    else if (lower.includes('sb1')) patterns.push('Sabino');
+    else if (lower.includes('rn')) patterns.push('Roan');
+  }
   if (hasSplash) patterns.push('Splash');
-  if (hasRoan) patterns.push('Roan');
   if (hasOvero) patterns.push('Overo');
   
   return patterns.length > 0 ? color + ' ' + patterns.join(' ') : color;
@@ -714,7 +724,7 @@ const COAT_MULTIPLIERS = [
   { keywords: ['noir', 'gris'], multiplier: 1.15 },
   { keywords: ['palomino', 'isabelle', 'dun', 'cremello', 'perlino', 'smoky'], multiplier: 1.35 },
   { keywords: ['roan'], multiplier: 1.40 },
-  { keywords: ['silver', 'tobiano'], multiplier: 1.70 },
+  { keywords: ['silver', 'tobiano', 'sabino'], multiplier: 1.70 },
   { keywords: ['champagne'], multiplier: 1.85 },
   { keywords: ['mushroom'], multiplier: 2.00 },
   { keywords: ['perle', 'isabelle perle', 'smoky black perle', 'blanc', 'white'], multiplier: 2.50 },

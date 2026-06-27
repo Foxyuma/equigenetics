@@ -1,43 +1,51 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
+import { migrateKit, getKitLabel } from '../genetics/GeneticsEngine';
 
 const locusNames = {
-  extension: { name: "Extension (E)", desc: "Pigment noir" },
+  extension: { name: "Extension (E)", desc: "Pigment noir A" },
   agouti: { name: "Agouti (A)", desc: "Distribution du noir" },
-  cream: { name: "Crème (Cr)", desc: "Dilution crème" },
+  cream: { name: "Crème (Cr)", desc: "E (MATP)" },
   grey: { name: "Gris (G)", desc: "Grisonnement" },
-  tobiano: { name: "Tobiano (TO)", desc: "Patron pie" },
-  roan: { name: "Roan (RN)", desc: "Rouannage" },
-  dun: { name: "Dun (D)", desc: "Dilution dun" },
+  kit: { name: "Gène KIT", desc: "Allèles tobiano/roan/sabino" },
+  dun: { name: "Dun (D)", desc: "Locus D" },
   champagne: { name: "Champagne (CH)", desc: "Dilution champagne" },
   silver: { name: "Silver (Z)", desc: "Dilution silver" },
-  sabino: { name: "Sabino (Sb)", desc: "Marquage blanc diffus" },
-  splash: { name: "Splash (Spl)", desc: "Marquage blanc« éclaboussure »" },
-  overo: { name: "Overo (Fr)", desc: "Marquage pie gauche" },
+  splash: { name: "Splash (SW)", desc: "Éclaboussure large" },
+  overo: { name: "Overo (LWO)", desc: "Patron frame (2 = létal)" },
   mushroom: { name: "Mushroom (mu)", desc: "Dilution phéomélanine" },
 };
 
 function isHomozygousDominant(locus, value) {
-  const dominant = { extension: "EE", agouti: "AA", cream: "CrCr", grey: "GG", tobiano: "TOTO", roan: "RNRN", dun: "DD", champagne: "CHCH",     silver: "ZZ", mushroom: "MuMu" };
+  const dominant = { extension: "EE", agouti: "AA", cream: "CrCr", grey: "GG", kit: "ToTo", dun: "DD", champagne: "CHCH", silver: "ZZ", mushroom: "MuMu" };
   return value === dominant[locus];
 }
 
 function isHeterozygous(locus, value) {
-  const hetero = { extension: "Ee", agouti: "Aa", cream: "Crn", grey: "Gg", tobiano: "TOn", roan: "RNn", dun: "Dd", champagne: "CHn", silver: "Zz", mushroom: "Mumu" };
+  const hetero = { extension: "Ee", agouti: "Aa", cream: "Crn", grey: "Gg", kit: "Toto", dun: "Dnd1", champagne: "CHn", silver: "Zz", mushroom: "Mumu" };
   return value === hetero[locus];
+}
+
+// Améliore la lisibilité du locus KIT
+function kitDisplayLabel(val) {
+  const label = getKitLabel(val);
+  return label ? `${val} (${label})` : val;
 }
 
 export default function GeneticPanel({ genotype }) {
   if (!genotype) return <p className="text-stone-400 text-sm italic">Génotype non disponible</p>;
 
+  // Filtrer les anciens locus pie obsolètes (tobiano/roan/sabino déplacés dans kit)
+  const OBSOLETE = ['tobiano', 'roan', 'sabino'];
   return (
     <div className="space-y-2">
-      {Object.entries(genotype).map(([locus, value]) => {
+      {Object.entries(genotype).filter(([l]) => !OBSOLETE.includes(l)).map(([locus, value]) => {
         const info = locusNames[locus];
         if (!info) return null;
         const isHomoD = isHomozygousDominant(locus, value);
         const isHetero = isHeterozygous(locus, value);
         
+        const displayValue = (locus === 'kit') ? kitDisplayLabel(value) : value;
         return (
           <div key={locus} className="flex items-center justify-between py-2 px-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
             <div>
@@ -49,7 +57,7 @@ export default function GeneticPanel({ genotype }) {
               isHetero ? 'bg-amber-100 text-amber-700' :
               'bg-stone-100 text-stone-500'
             }`}>
-              {value}
+              {displayValue}
             </Badge>
           </div>
         );

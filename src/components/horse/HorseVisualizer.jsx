@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import { getHorsePhotoUrl, getCoatInfo } from '@/lib/horsePhotos';
-import { isPrimitiveMarked } from '@/components/genetics/GeneticsEngine';
+import { isPrimitiveMarked, migrateKit, getKitLabel } from '@/components/genetics/GeneticsEngine';
 
 const GENE_LABELS = {
   extension:  { label: "Extension (E)",  visible: true  },
   agouti:     { label: "Agouti (A)",     visible: true  },
   cream:      { label: "Crème (Cr)",     visible: true  },
   grey:       { label: "Gris (G)",       visible: true  },
-  tobiano:    { label: "Tobiano (TO)",   visible: true  },
-  sabino:     { label: "Sabino (Sb)",    visible: true  },
-  splash:     { label: "Splash (Spl)",   visible: true  },
-  overo:      { label: "Overo (Fr)",     visible: true  },
-  roan:       { label: "Rouan (RN)",     visible: true  },
+  kit:        { label: "Gène KIT",       visible: true  },
+  splash:     { label: "Splash (SW)",    visible: true  },
+  overo:      { label: "Overo (LWO)",    visible: true  },
   dun:        { label: "Dun (D)",        visible: true  },
   champagne:  { label: "Champagne (CH)", visible: true  },
   silver:     { label: "Silver (Z)",     visible: true  },
@@ -20,8 +18,8 @@ const GENE_LABELS = {
 
 const NEUTRAL = {
   extension: 'ee', agouti: 'aa', cream: 'nn', grey: 'gg',
-  tobiano: 'nn', sabino: 'nn', splash: 'nn', overo: 'nn',
-  roan: 'nn', dun: 'nd2nd2', champagne: 'nn', silver: 'zz', mushroom: 'MuMu',
+  kit: 'toto', splash: 'nn', overo: 'nn',
+  dun: 'nd2nd2', champagne: 'nn', silver: 'zz', mushroom: 'MuMu',
 };
 
 // Pasture background: sky → grass gradient

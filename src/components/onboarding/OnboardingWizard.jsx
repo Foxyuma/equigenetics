@@ -33,15 +33,14 @@ const VISIBLE_LOCI = [
   },
 ];
 
-// Gènes cachés (tirés aléatoirement — grey, cream, tobiano, roan, dun, champagne, silver)
-const HIDDEN_LOCI = ['grey', 'cream', 'tobiano', 'roan', 'dun', 'champagne', 'silver'];
+// Gènes cachés (tirés aléatoirement — grey, cream, kit, dun, champagne, silver)
+const HIDDEN_LOCI = ['grey', 'cream', 'kit', 'dun', 'champagne', 'silver'];
 
 const HIDDEN_OPTIONS = {
   grey: ['gg', 'Gg', 'GG'],
   cream: ['nn', 'Crn', 'CrCr'],
-  tobiano: ['nn', 'TOn', 'TOTO'],
-  roan: ['nn', 'RNn'],
-  dun: ['dd', 'Dd', 'DD'],
+  kit: ['toto', 'Toto', 'ToTo', 'Sb1sb1', 'Sb1Sb1', 'Rnrn', 'RnRn'],
+  dun: ['nd2nd2', 'Dnd1', 'Dnd2', 'DD'],
   champagne: ['nn', 'CHn', 'CHCH'],
   silver: ['zz', 'Zz', 'ZZ'],
 };

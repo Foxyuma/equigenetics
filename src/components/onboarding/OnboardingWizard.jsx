@@ -9,31 +9,31 @@ import { BREEDS, determineCoatColor, generateFoalTraits } from '../genetics/Gene
 import { buildHorseImagePrompt, extractMarkingsDescription } from '../../lib/horseImagePrompt';
 import { toast } from 'sonner';
 
-// Gènes visibles que le joueur peut choisir (seulement Extension et Agouti)
+// Visible genes the player can choose (only Extension and Agouti)
 const VISIBLE_LOCI = [
   {
     key: 'extension',
     label: 'Extension (E locus)',
-    desc: 'Détermine si le cheval exprime le noir ou le châtain',
+    desc: 'Determines if the horse expresses black or chestnut',
     options: [
-      { value: 'EE', label: 'EE — Noir dominant homozygote' },
-      { value: 'Ee', label: 'Ee — Noir dominant hétérozygote' },
-      { value: 'ee', label: 'ee — Châtain (alezan)' },
+      { value: 'EE', label: 'EE — Black dominant homozygous' },
+      { value: 'Ee', label: 'Ee — Black dominant heterozygous' },
+      { value: 'ee', label: 'ee — Chestnut (sorrel)' },
     ],
   },
   {
     key: 'agouti',
     label: 'Agouti (A locus)',
-    desc: 'Restreint le noir aux extrémités → bai',
+    desc: 'Restricts black to the extremities → bay',
     options: [
-      { value: 'AA', label: 'AA — Bai homozygote' },
-      { value: 'Aa', label: 'Aa — Bai porteur' },
-      { value: 'aa', label: 'aa — Pas d\'agouti (noir total si E/_)' },
+      { value: 'AA', label: 'AA — Bay homozygous' },
+      { value: 'Aa', label: 'Aa — Bay carrier' },
+      { value: 'aa', label: 'aa — No agouti (fully black if E/_)' },
     ],
   },
 ];
 
-// Gènes cachés (tirés aléatoirement — grey, cream, kit, dun, champagne, silver)
+// Hidden genes (drawn randomly — grey, cream, kit, dun, champagne, silver)
 const HIDDEN_LOCI = ['grey', 'cream', 'kit', 'dun', 'champagne', 'silver'];
 
 const HIDDEN_OPTIONS = {
@@ -45,12 +45,12 @@ const HIDDEN_OPTIONS = {
   silver: ['zz', 'Zz', 'ZZ'],
 };
 
-// Poids de probabilité : la majorité des loci seront à la valeur neutre
+// Probability weights: most loci will be at the neutral value
 function pickRandomHidden() {
   const result = {};
   HIDDEN_LOCI.forEach(l => {
     const opts = HIDDEN_OPTIONS[l];
-    // 70% chance valeur neutre (index 0), 30% chance valeur non-neutre
+    // 70% chance neutral value (index 0), 30% chance non-neutral
     const roll = Math.random();
     if (roll < 0.70) {
       result[l] = opts[0];
@@ -98,14 +98,14 @@ export default function OnboardingWizard({ onComplete }) {
       const coat_color = determineCoatColor(genotype);
       const stats = generateBaseStats();
 
-      // Générer une image poulain via IA
+      // Generate a foal image via AI
       const markings = extractMarkingsDescription(coat_color, genotype);
       let image_url = null;
       let foal_image_url = null;
       try {
         const prompt = buildHorseImagePrompt({ breed, coat_color, sex, isFoal: true, markings });
         const result = await base44.integrations.Core.GenerateImage({ prompt });
-        // Re-upload pour URL permanente
+        // Re-upload for permanent URL
         const response = await fetch(result.url);
         const blob = await response.blob();
         const file = new File([blob], `horse_foal_${Date.now()}.jpg`, { type: 'image/jpeg' });
@@ -113,11 +113,11 @@ export default function OnboardingWizard({ onComplete }) {
         image_url = file_url;
         foal_image_url = file_url;
       } catch (e) {
-        // image non bloquante
+        // non-blocking image
       }
 
       const foalTraits = generateFoalTraits(null, null, breed);
-      // Sauvegarder l'affixe si renseigné
+      // Save the affix if provided
       if (affixeName.trim().length >= 2) {
         await base44.auth.updateMe({
           affixes: [{
@@ -127,13 +127,13 @@ export default function OnboardingWizard({ onComplete }) {
           }]
         });
       }
-      // Récupérer le mois de jeu courant pour initialiser l'âge
+      // Get the current game month to initialize the age
       let currentMonth = 1;
       let currentYear = 1;
       try {
         const clocks = await base44.entities.GameClock.list();
         if (clocks?.length > 0) {
-          // Prendre le GameClock le plus avancé (total_days le plus grand)
+          // Take the most advanced GameClock (largest total_days)
           const best = clocks.reduce((a, b) => (a.total_days || 0) > (b.total_days || 0) ? a : b);
           currentMonth = best.month || 1;
           currentYear = best.year || 1;
@@ -169,13 +169,13 @@ export default function OnboardingWizard({ onComplete }) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['horses', data.email] });
-      toast.success(`${name} a rejoint votre écurie ! 🐴`);
+      toast.success(`${name} joins your stable! 🐴`);
       onComplete?.();
     },
   });
 
   const canNextStep0 = name.trim().length >= 2 && breed && sex;
-  // step 1 = affixe (optionnel, toujours valide)
+  // step 1 = affix (optional, always valid)
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
@@ -202,7 +202,7 @@ export default function OnboardingWizard({ onComplete }) {
         {/* Body */}
         <div className="p-8">
 
-          {/* STEP 0 — Identité */}
+          {/* STEP 0 — Identity */}
           {step === 0 && (
             <div className="space-y-5">
               <div>
@@ -217,7 +217,7 @@ export default function OnboardingWizard({ onComplete }) {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-semibold text-stone-700 block mb-1.5">Race</label>
+                  <label className="text-sm font-semibold text-stone-700 block mb-1.5">Breed</label>
                   <Select value={breed} onValueChange={setBreed}>
                     <SelectTrigger className="bg-stone-50"><SelectValue placeholder="Choose a breed…" /></SelectTrigger>
                     <SelectContent>
@@ -226,7 +226,7 @@ export default function OnboardingWizard({ onComplete }) {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-stone-700 block mb-1.5">Sexe</label>
+                  <label className="text-sm font-semibold text-stone-700 block mb-1.5">Sex</label>
                   <Select value={sex} onValueChange={setSex}>
                     <SelectTrigger className="bg-stone-50"><SelectValue placeholder="Sex…" /></SelectTrigger>
                     <SelectContent>
@@ -239,7 +239,7 @@ export default function OnboardingWizard({ onComplete }) {
             </div>
           )}
 
-          {/* STEP 1 — Affixe */}
+          {/* STEP 1 — Affix */}
           {step === 1 && (
             <div className="space-y-5">
               <div>
@@ -288,7 +288,7 @@ export default function OnboardingWizard({ onComplete }) {
             </div>
           )}
 
-          {/* STEP 2 — Génétique */}
+          {/* STEP 2 — Genetics */}
           {step === 2 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">

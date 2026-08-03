@@ -389,9 +389,9 @@ export function performFullInspection(horse, parentHorses, healthRecord) {
 const APPROVAL_THRESHOLDS = {
   elite: { min: 90, status: 'elite', label: 'Elite', icon: '⭐' },
   premium: { min: 80, status: 'provisional', label: 'Premium', icon: '🌟' },
-  approved: { min: 65, status: 'approved', label: 'Approuvé', icon: '✅' },
-  restricted: { min: 50, status: 'approved_restricted', label: 'Candidat restreint', icon: '⚠️' },
-  rejected: { min: 0, status: 'not_approved', label: 'Refusé', icon: '❌' }
+  approved: { min: 65, status: 'approved', label: 'Approved', icon: '✅' },
+  restricted: { min: 50, status: 'approved_restricted', label: 'Restricted candidate', icon: '⚠️' },
+  rejected: { min: 0, status: 'not_approved', label: 'Rejected', icon: '❌' }
 };
 
 // Zones de probabilités finales

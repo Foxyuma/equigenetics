@@ -20,7 +20,7 @@ const GENE_LABELS = {
   pattern1:   { label: "Pattern1",       visible: true  },
   sooty:      { label: "Sooty",          visible: true  },
   flaxen:     { label: "Flaxen (f)",     visible: true  },
-  pangare:    { label: "Pangaré (P)",    visible: true  },
+  pangare:    { label: "Pangare (P)",    visible: true  },
   bringe:     { label: "Brindle (BR1)",  visible: true  },
 };
 

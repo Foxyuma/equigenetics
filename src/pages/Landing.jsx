@@ -148,7 +148,7 @@ export default function Landing() {
               ❤️ PATREON
             </div>
             <h3 className="text-2xl font-bold text-amber-100 mb-2">Help Shape the Game. Unlock Exclusive Content.</h3>
-            <p className="text-stone-400 text-sm mb-8">Votre soutien aide à financer le développement et à rendre EquiGenesis possible.</p>
+            <p className="text-stone-400 text-sm mb-8">Your support helps fund development and makes EquiGenesis possible.</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {patreonPerks.map((p, i) => (
                 <div key={i} className="bg-black/20 rounded-xl p-4 border border-amber-900/20">
@@ -164,7 +164,7 @@ export default function Landing() {
               rel="noopener noreferrer"
               className="inline-block px-12 py-4 rounded-2xl bg-[#FF424D] text-white font-bold text-lg hover:bg-[#e6333e] transition-all duration-300 shadow-xl"
             >
-              Soutenir sur Patreon →
+              Support on Patreon →
             </a>
           </div>
         </div>
@@ -173,14 +173,14 @@ export default function Landing() {
       {/* CTA final */}
       <section className="text-center px-4 pb-24">
         <h2 className="text-3xl font-bold text-amber-200 mb-4" style={{ fontFamily: 'Georgia, serif' }}>
-          Prêt à construire votre haras ?
+          Ready to build your stud farm?
         </h2>
-        <p className="text-stone-400 mb-8">Rejoignez la communauté EquiGenesis — gratuit, passionnant, unique.</p>
+        <p className="text-stone-400 mb-8">Join the EquiGenesis community — free, exciting, unique.</p>
         <button
           onClick={() => base44.auth.redirectToLogin('/Stable')}
           className="px-12 py-4 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xl shadow-2xl hover:from-amber-500 hover:to-amber-400 transition-all duration-300 transform hover:scale-105"
         >
-          🐴 Commencer l'aventure
+          🐴 Start the adventure
         </button>
       </section>
 
@@ -199,7 +199,7 @@ export default function Landing() {
             Patreon
           </a>
         </div>
-        <p className="text-stone-600 text-xs">© 2025 EquiGenesis — Tous droits réservés</p>
+        <p className="text-stone-600 text-xs">© 2025 EquiGenesis — All rights reserved</p>
       </footer>
     </div>
   );

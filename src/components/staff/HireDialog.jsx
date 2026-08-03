@@ -15,10 +15,10 @@ const BONUS_ICONS = {
 };
 
 const NAMES = {
-  groom: ["Léa Martin", "Tom Dupont", "Sara Petit", "Jules Henry"],
+  groom: ["Lea Martin", "Tom Dupont", "Sara Petit", "Jules Henry"],
   vet: ["Dr. Claire Morin", "Dr. Paul Girard", "Dr. Nina Bernard"],
   trainer: ["Marc Rousseau", "Alice Mercier", "Luc Bonnet"],
-  manager: ["Sophie Laurent", "Éric Blanc", "Camille Roy"],
+  manager: ["Sophie Laurent", "Eric Blanc", "Camille Roy"],
 };
 
 export default function HireDialog({ balance, onHire }) {

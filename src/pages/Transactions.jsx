@@ -107,7 +107,7 @@ export default function Transactions() {
       }),
       base44.entities.Transaction.create({
         user_email: user.email, currency: 'genesis', amount: rate.genesis,
-        balance_after: newGenesis, reason: `Conversion depuis Crédits (${rate.label})`,
+        balance_after: newGenesis, reason: `Conversion from Credits (${rate.label})`,
       }),
     ]);
     queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -198,7 +198,7 @@ export default function Transactions() {
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="all">All ({transactions.length})</TabsTrigger>
           <TabsTrigger value="genesis">₲ Genesis</TabsTrigger>
-          <TabsTrigger value="credits">✦ Crédits</TabsTrigger>
+          <TabsTrigger value="credits">✦ Credits</TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">

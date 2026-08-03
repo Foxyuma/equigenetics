@@ -78,7 +78,7 @@ export default function ModeleAllures() {
       const competitionDate = tomorrow.toISOString().split('T')[0];
 
       await base44.entities.Competition.create({
-        name: `Modèles & Allures — ${horse.breed} (${getAgeClassLabel(horse.age || 0)})`,
+        name: `Conformation & Movement — ${horse.breed} (${getAgeClassLabel(horse.age || 0)})`,
         discipline: 'modele_allures',
         level: 'novice',
         is_olympic: false,
@@ -112,7 +112,7 @@ export default function ModeleAllures() {
         if (isDopingRisk) {
           await base44.entities.Competition.update(comp.id, {
             score: 0, rank: null, status: 'completed',
-            disqualified: true, disqualification_reason: 'Contrôle antidopage positif',
+            disqualified: true, disqualification_reason: 'Positive doping control',
           });
           if (currentUser) {
             await base44.auth.updateMe({
@@ -377,7 +377,7 @@ export default function ModeleAllures() {
                         <div>
                           <p className="font-medium text-stone-700 text-sm">{c.horse_name}</p>
                           <p className="text-xs text-stone-400">
-                            {c.breed} · {getAgeClassLabel(c.age_class)} · Année {c.game_year}
+                            {c.breed} · {getAgeClassLabel(c.age_class)} · Year {c.game_year}
                           </p>
                           {c.disqualified && (
                             <p className="text-xs text-red-600 flex items-center gap-1 mt-0.5">

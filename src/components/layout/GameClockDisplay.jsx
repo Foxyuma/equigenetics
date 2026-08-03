@@ -10,7 +10,7 @@ const SEASON_ICONS = {
 
 const SEASON_LABELS = {
   spring: 'Printemps',
-  summer: 'Été',
+  summer: 'Summer',
   autumn: 'Automne',
   winter: 'Hiver',
 };

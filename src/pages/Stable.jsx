@@ -9,8 +9,8 @@ import HorseCard from '../components/horse/HorseCard';
 import { BREEDS, estimateHorseValue } from '../components/genetics/GeneticsEngine';
 import OnboardingWizard from '../components/onboarding/OnboardingWizard';
 
-const HORSE_NAMES_MALE = ["Tornado", "Eclipse", "Sultan", "Orage", "Apollo", "Zéphyr", "Atlas", "Titan", "Merlin", "Sirius"];
-const HORSE_NAMES_FEMALE = ["Luna", "Aurore", "Perle", "Tempête", "Étoile", "Jade", "Iris", "Stella", "Naya", "Olympe"];
+const HORSE_NAMES_MALE = ["Tornado", "Eclipse", "Sultan", "Storm", "Apollo", "Zephyr", "Atlas", "Titan", "Merlin", "Sirius"];
+const HORSE_NAMES_FEMALE = ["Luna", "Aurora", "Pearl", "Tempest", "Star", "Jade", "Iris", "Stella", "Naya", "Olympia"];
 
 export default function Stable() {
   const navigate = useNavigate();

@@ -36,10 +36,10 @@ export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, i
   const getEffectDescription = (effect) => {
     if (!effect) return "";
     const parts = [];
-    if (effect.energy_boost) parts.push(`+${effect.energy_boost} énergie`);
-    if (effect.heals_disease) parts.push("Soigne maladie");
+    if (effect.energy_boost) parts.push(`+${effect.energy_boost} energy`);
+    if (effect.heals_disease) parts.push("Heals disease");
     if (effect.stat_boost && effect.boost_amount) parts.push(`+${effect.boost_amount} ${effect.stat_boost}`);
-    if (effect.duration_days) parts.push(`(${effect.duration_days}j)`);
+    if (effect.duration_days) parts.push(`(${effect.duration_days}d)`);
     return parts.join(" • ");
   };
 
@@ -75,7 +75,7 @@ export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, i
           </Button>
         ) : (() => {
           const mode = getCurrencyMode(item.rarity);
-          const creditsForRare = Math.max(1, Math.round(item.price * 0.1)); // 10% du prix en crédits
+          const creditsForRare = Math.max(1, Math.round(item.price * 0.1)); // 10% of price in credits
           if (mode === 'both') {
             return (
               <Button
@@ -90,7 +90,7 @@ export default function ItemCard({ item, onBuy, showQuantity, quantity, onUse, i
           if (mode === 'credits') {
             return (
               <Button onClick={() => onBuy?.('credits')} disabled={isBuying} className="w-full bg-violet-600 hover:bg-violet-700 text-sm">
-                <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1">✦</span> Crédits
+                <ShoppingCart className="w-3 h-3 mr-1" />{item.price} <span className="ml-1">✦</span> Credits
               </Button>
             );
           }

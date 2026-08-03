@@ -82,7 +82,7 @@ export default function Breeding() {
     fatherCarried.forEach(fg => {
       const match = motherCarried.find(mg => mg.disease === fg.disease);
       if (match) {
-        warnings.push(`Les deux parents portent le gène ${fg.disease} — risque de poulain atteint !`);
+        warnings.push(`Both parents carry the ${fg.disease} gene — risk of affected foal!`);
       }
     });
     return warnings;

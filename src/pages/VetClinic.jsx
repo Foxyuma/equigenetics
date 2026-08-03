@@ -13,55 +13,55 @@ import { Link } from 'react-router-dom';
 import SeasonManager from '../components/season/SeasonManager';
 
 const ILLNESSES = [
-  { name: "Colique", severity: "severe", symptoms: ["Douleur abdominale", "Refus de manger", "Transpiration"], energyPenalty: 40, performancePenalty: 60, treatment: ["Anti-douleur", "Antispasmodique"], duration: 3 },
-  { name: "Grippe équine", severity: "moderate", symptoms: ["Fièvre", "Toux", "Écoulement nasal"], energyPenalty: 30, performancePenalty: 40, treatment: ["Antibiotique", "Repos"], duration: 7 },
-  { name: "Fourbure", severity: "severe", symptoms: ["Boiterie", "Chaleur au sabot", "Douleur"], energyPenalty: 50, performancePenalty: 70, treatment: ["Anti-inflammatoire", "Maréchalerie"], duration: 14 },
-  { name: "Dermite estivale", severity: "mild", symptoms: ["Démangeaisons", "Plaies", "Irritation"], energyPenalty: 10, performancePenalty: 15, treatment: ["Crème apaisante", "Antihistaminique"], duration: 5 },
-  { name: "Abcès de pied", severity: "moderate", symptoms: ["Boiterie sévère", "Chaleur", "Pulsation"], energyPenalty: 35, performancePenalty: 50, treatment: ["Cataplasme", "Anti-inflammatoire"], duration: 10 },
-  { name: "Emphysème", severity: "moderate", symptoms: ["Toux chronique", "Difficultés respiratoires"], energyPenalty: 25, performancePenalty: 45, treatment: ["Bronchodilatateur", "Environnement sain"], duration: 30 },
+  { name: "Colic", severity: "severe", symptoms: ["Abdominal pain", "Refusal to eat", "Sweating"], energyPenalty: 40, performancePenalty: 60, treatment: ["Painkiller", "Antispasmodic"], duration: 3 },
+  { name: "Equine flu", severity: "moderate", symptoms: ["Fever", "Cough", "Nasal discharge"], energyPenalty: 30, performancePenalty: 40, treatment: ["Antibiotic", "Rest"], duration: 7 },
+  { name: "Laminitis", severity: "severe", symptoms: ["Lameness", "Hoof heat", "Pain"], energyPenalty: 50, performancePenalty: 70, treatment: ["Anti-inflammatory", "Farriery"], duration: 14 },
+  { name: "Summer eczema", severity: "mild", symptoms: ["Itching", "Sores", "Irritation"], energyPenalty: 10, performancePenalty: 15, treatment: ["Soothing cream", "Antihistamine"], duration: 5 },
+  { name: "Foot abscess", severity: "moderate", symptoms: ["Severe lameness", "Heat", "Pulsation"], energyPenalty: 35, performancePenalty: 50, treatment: ["Poultice", "Anti-inflammatory"], duration: 10 },
+  { name: "Emphysema", severity: "moderate", symptoms: ["Chronic cough", "Breathing difficulty"], energyPenalty: 25, performancePenalty: 45, treatment: ["Bronchodilator", "Healthy environment"], duration: 30 },
 ];
 
 const MEDICATIONS = [
-  { name: "Anti-douleur", price: 150, icon: "💊", doping_risk: true },
-  { name: "Antibiotique", price: 200, icon: "💉", doping_risk: false },
-  { name: "Anti-inflammatoire", price: 120, icon: "🩹", doping_risk: true },
-  { name: "Antispasmodique", price: 180, icon: "💊", doping_risk: false },
-  { name: "Antihistaminique", price: 100, icon: "💊", doping_risk: false },
-  { name: "Bronchodilatateur", price: 250, icon: "🫁", doping_risk: true },
-  { name: "Cataplasme", price: 80, icon: "🧴", doping_risk: false },
-  { name: "Crème apaisante", price: 60, icon: "🧴", doping_risk: false },
+  { name: "Painkiller", price: 150, icon: "💊", doping_risk: true },
+  { name: "Antibiotic", price: 200, icon: "💉", doping_risk: false },
+  { name: "Anti-inflammatory", price: 120, icon: "🩹", doping_risk: true },
+  { name: "Antispasmodic", price: 180, icon: "💊", doping_risk: false },
+  { name: "Antihistamine", price: 100, icon: "💊", doping_risk: false },
+  { name: "Bronchodilator", price: 250, icon: "🫁", doping_risk: true },
+  { name: "Poultice", price: 80, icon: "🧴", doping_risk: false },
+  { name: "Soothing cream", price: 60, icon: "🧴", doping_risk: false },
 ];
 
 const VACCINATIONS = [
-  { name: "Grippe", key: "influenza", price: 80, icon: "💉", validityMonths: 6 },
-  { name: "Tétanos", key: "tetanus", price: 70, icon: "💉", validityMonths: 12 },
-  { name: "Rhinopneumonie", key: "rhinopneumonie", price: 90, icon: "💉", validityMonths: 6 },
+  { name: "Flu", key: "influenza", price: 80, icon: "💉", validityMonths: 6 },
+  { name: "Tetanus", key: "tetanus", price: 70, icon: "💉", validityMonths: 12 },
+  { name: "Rhino-pneumonia", key: "rhinopneumonie", price: 90, icon: "💉", validityMonths: 6 },
 ];
 
 const TEST_TYPES = {
   health_panel: {
     label: "Health Panel",
-    description: "Détecte les maladies génétiques courantes",
+    description: "Detects common genetic diseases",
     price: 150,
     icon: "🔬",
     reveals: ["HYPP", "PSSM1", "HERDA", "GBED", "SCID", "LFS"],
-    time: "2-3 jours"
+    time: "2-3 days"
   },
   coat_test: {
     label: "Coat & Pattern Test",
-    description: "Analyse la génétique de la robe et des motifs",
+    description: "Analyzes coat and pattern genetics",
     price: 120,
     icon: "🎨",
-    reveals: ["Génotype complet de couleur", "Motifs cachés"],
-    time: "1-2 jours"
+    reveals: ["Full color genotype", "Hidden patterns"],
+    time: "1-2 days"
   },
   full_test: {
     label: "Full Genetic Profile",
-    description: "Test génétique complet : santé + robe + tous les loci",
+    description: "Complete genetic test: health + coat + all loci",
     price: 300,
     icon: "🧬",
-    reveals: ["Tous les gènes détectés", "Génotype complet", "Prédictions de descendance"],
-    time: "5-7 jours"
+    reveals: ["All detected genes", "Full genotype", "Offspring predictions"],
+    time: "5-7 days"
   }
 };
 

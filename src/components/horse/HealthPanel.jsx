@@ -27,7 +27,7 @@ export default function HealthPanel({ healthGenes, breed }) {
                 <span className="text-sm font-semibold text-stone-700">{disease.name}</span>
                 <span className="text-xs text-stone-400">— {disease.fullName}</span>
               </div>
-              <span className="text-xs text-stone-400">Sévérité: {disease.severity}</span>
+              <span className="text-xs text-stone-400">Severity: {disease.severity}</span>
             </div>
             <Badge className={`${config.color} border-0 flex items-center gap-1`}>
               <Icon className="w-3 h-3" />
@@ -55,7 +55,7 @@ export default function HealthPanel({ healthGenes, breed }) {
       {(!healthGenes || healthGenes.length === 0) && relevantDiseases.length === 0 && (
         <div className="text-center py-6 text-stone-400 text-sm">
           <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
-          Aucune maladie génétique connue pour cette race
+          No known genetic disease for this breed
         </div>
       )}
     </div>

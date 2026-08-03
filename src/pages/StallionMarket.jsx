@@ -298,7 +298,7 @@ export default function StallionMarket() {
         <p className="text-stone-500 mt-1">Choose a stallion to breed with your mare</p>
       </div>
 
-      {/* Info qualité */}
+      {/* Quality info */}
       <div className="text-xs text-stone-500 flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-200 p-3 rounded-xl">
         <Info className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
         <span>Stallions are ranked by approval level — the breeding fee is <strong>multiplied</strong> by their status.</span>

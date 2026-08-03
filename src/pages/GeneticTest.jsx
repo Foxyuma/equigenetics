@@ -11,24 +11,24 @@ import GeneticPanel from '../components/horse/GeneticPanel';
 const TEST_TYPES = {
   health_panel: {
     label: "Health Panel",
-    description: "Détecte les maladies génétiques courantes",
+    description: "Detects common genetic diseases",
     price: 150,
     icon: "🔬",
     reveals: ["HYPP", "PSSM1", "HERDA", "GBED", "SCID", "LFS"]
   },
   coat_test: {
     label: "Coat & Pattern Test",
-    description: "Analyse la génétique de la robe et des motifs",
+    description: "Analyzes coat and pattern genetics",
     price: 120,
     icon: "🎨",
-    reveals: ["Génotype complet de couleur", "Motifs cachés"]
+    reveals: ["Full color genotype", "Hidden patterns"]
   },
   full_test: {
     label: "Full Genetic Profile",
-    description: "Test génétique complet : santé + robe + tous les loci",
+    description: "Complete genetic test: health + coat + all loci",
     price: 300,
     icon: "🧬",
-    reveals: ["Tous les gènes détectés", "Génotype complet", "Prédictions de descendance"]
+    reveals: ["All detected genes", "Full genotype", "Offspring predictions"]
   }
 };
 
@@ -59,13 +59,13 @@ export default function GeneticTest() {
 
   const performTestMutation = useMutation({
     mutationFn: async (testType) => {
-      if (!currentUser || !selectedHorse) throw new Error('Données manquantes');
+      if (!currentUser || !selectedHorse) throw new Error('Missing data');
       
       const testConfig = TEST_TYPES[testType];
       const balance = currentUser.genesis_balance || 0;
       
       if (balance < testConfig.price) {
-        throw new Error(`Fonds insuffisants. Coût : ${testConfig.price} ₲`);
+        throw new Error(`Insufficient funds. Cost: ${testConfig.price} ₲`);
       }
 
       let results = {};
@@ -110,9 +110,9 @@ export default function GeneticTest() {
         sender_email: 'system@equigenesis.fr',
         sender_name: 'EquiGenesis',
         recipient_email: currentUser.email,
-        recipient_name: currentUser.full_name || 'Joueur',
-        subject: `🧬 Résultat test ADN — ${selectedHorse.name}`,
-        content: `Le test **${testConfig.label}** pour **${selectedHorse.name}** est terminé.\n\nConsultez les résultats dans le Laboratoire Génétique → Historique des tests.`,
+        recipient_name: currentUser.full_name || 'Player',
+        subject: `🧬 DNA test result — ${selectedHorse.name}`,
+        content: `The **${testConfig.label}** for **${selectedHorse.name}** is complete.\n\nView the results in the Genetics Lab → Test history.`,
         is_read: false,
       });
 
@@ -123,7 +123,7 @@ export default function GeneticTest() {
       queryClient.invalidateQueries({ queryKey: ['genetic-tests', selectedHorse.id] });
       queryClient.invalidateQueries({ queryKey: ['messages-nav'] });
       setShowResults(test);
-      toast.success(`Test ${TEST_TYPES[selectedTest].label} terminé ! Résultats disponibles.`);
+      toast.success(`Test ${TEST_TYPES[selectedTest].label} complete! Results available.`);
     },
     onError: (err) => toast.error(err.message),
   });

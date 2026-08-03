@@ -94,7 +94,7 @@ const STEPS = [
       
       Note: stallions must be approved for their foals to be registered
       in the studbook. An unapproved stallion produces an OC foal
-      (Origines Constatées).
+      (Observed Origins).
       
       Approval levels:
       \u2022 Elite (\u00d72.5) \u2022 Sport (\u00d71.8) \u2022 Approved (\u00d71.4) \u2022 Rejected (\u00d70.7)
@@ -294,7 +294,7 @@ export default function Guide() {
         "Quarter Horse", "Paint Horse", "Appaloosa", "Shire", "Shetland"
       ];
       const breed = BREEDS[Math.floor(Math.random() * BREEDS.length)];
-      const femaleNames = ["Luna", "Aurore", "Perle", "Tempête", "Étoile", "Jade", "Iris", "Stella", "Naya", "Olympe", "Diva", "Bella", "Ruby", "Velvet"];
+      const femaleNames = ["Luna", "Aurora", "Pearl", "Tempest", "Star", "Jade", "Iris", "Stella", "Naya", "Olympia", "Diva", "Bella", "Ruby", "Velvet"];
       const maleNames = ["Orion", "Tornado", "Apache", "Spirit", "Shadow", "King", "Thor", "Zeus", "Apache", "Diablo", "Ringo", "Flash", "Storm", "Rocket"];
       const isMale = Math.random() > 0.5;
       const namePool = isMale ? maleNames : femaleNames;

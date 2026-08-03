@@ -3,17 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { migrateKit, getKitLabel } from '../genetics/GeneticsEngine';
 
 const locusNames = {
-  extension: { name: "Extension (E)", desc: "Pigment noir A" },
-  agouti: { name: "Agouti (A)", desc: "Distribution du noir" },
-  cream: { name: "Crème (Cr)", desc: "E (MATP)" },
-  grey: { name: "Gris (G)", desc: "Grisonnement" },
-  kit: { name: "Gène KIT", desc: "Allèles tobiano/roan/sabino" },
-  dun: { name: "Dun (D)", desc: "Locus D" },
-  champagne: { name: "Champagne (CH)", desc: "Dilution champagne" },
-  silver: { name: "Silver (Z)", desc: "Dilution silver" },
-  splash: { name: "Splash (SW)", desc: "Éclaboussure large" },
-  overo: { name: "Overo (LWO)", desc: "Patron frame (2 = létal)" },
-  mushroom: { name: "Mushroom (mu)", desc: "Dilution phéomélanine" },
+  extension: { name: "Extension (E)", desc: "Black pigment A" },
+  agouti: { name: "Agouti (A)", desc: "Black distribution" },
+  cream: { name: "Cream (Cr)", desc: "E (MATP)" },
+  grey: { name: "Grey (G)", desc: "Greying" },
+  kit: { name: "KIT gene", desc: "Tobiano/roan/sabino alleles" },
+  dun: { name: "Dun (D)", desc: "D locus" },
+  champagne: { name: "Champagne (CH)", desc: "Champagne dilution" },
+  silver: { name: "Silver (Z)", desc: "Silver dilution" },
+  splash: { name: "Splash (SW)", desc: "Broad splash" },
+  overo: { name: "Overo (LWO)", desc: "Frame pattern (2 = lethal)" },
+  mushroom: { name: "Mushroom (mu)", desc: "Phaeomelanin dilution" },
 };
 
 function isHomozygousDominant(locus, value) {
@@ -26,14 +26,14 @@ function isHeterozygous(locus, value) {
   return value === hetero[locus];
 }
 
-// Améliore la lisibilité du locus KIT
+// Improves KIT locus readability
 function kitDisplayLabel(val) {
   const label = getKitLabel(val);
   return label ? `${val} (${label})` : val;
 }
 
 export default function GeneticPanel({ genotype }) {
-  if (!genotype) return <p className="text-stone-400 text-sm italic">Génotype non disponible</p>;
+  if (!genotype) return <p className="text-stone-400 text-sm italic">Genotype not available</p>;
 
   // Filtrer les anciens locus pie obsolètes (tobiano/roan/sabino déplacés dans kit)
   const OBSOLETE = ['tobiano', 'roan', 'sabino'];

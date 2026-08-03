@@ -55,12 +55,12 @@ export default function Market() {
 
   const buyMutation = useMutation({
     mutationFn: async (horse) => {
-      if (!currentUser) throw new Error('Non connecté');
+      if (!currentUser) throw new Error('Not logged in');
       const price = horse.price || 0;
       const balance = currentUser.genesis_balance ?? 0;
-      if (price > 0 && balance < price) throw new Error('Fonds insuffisants');
+      if (price > 0 && balance < price) throw new Error('Insufficient funds');
 
-      // Débiter l'acheteur
+      // Debit the buyer
       if (price > 0) {
         await base44.auth.updateMe({ genesis_balance: balance - price });
         await base44.entities.Transaction.create({
@@ -68,19 +68,19 @@ export default function Market() {
           currency: 'genesis',
           amount: -price,
           balance_after: balance - price,
-          reason: `Achat cheval — ${horse.name}`,
+          reason: `Horse purchase — ${horse.name}`,
           reference_id: horse.id,
         });
       }
 
-      // Transférer le cheval : retirer de la vente (on ne peut pas changer created_by, mais on marque propriétaire)
+      // Transfer the horse: remove from sale (can't change created_by, but we mark owner)
       await base44.entities.Horse.update(horse.id, {
         is_for_sale: false,
         price: 0,
         new_owner_email: currentUser.email,
       });
 
-      // Notifier le vendeur
+      // Notify the seller
       const sellerEmail = horse.owner_email || horse.created_by;
       if (sellerEmail && sellerEmail !== currentUser.email) {
         await base44.entities.Message.create({
@@ -88,8 +88,8 @@ export default function Market() {
           sender_name: 'EquiGenesis',
           recipient_email: sellerEmail,
           recipient_name: '',
-          subject: `💰 ${horse.name} vendu !`,
-          content: `Votre cheval **${horse.name}** a été acheté par **${currentUser.full_name || currentUser.email}** pour **${horse.price || 0} ₲**.\n\nLe montant a été crédité à votre compte.`,
+          subject: `💰 ${horse.name} sold!`,
+          content: `Your horse **${horse.name}** was purchased by **${currentUser.full_name || currentUser.email}** for **${horse.price || 0} ₲**.\n\nThe amount has been credited to your account.`,
           is_read: false,
         });
       }
@@ -101,7 +101,7 @@ export default function Market() {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['messages-nav'] });
-      toast.success(`${horse.name} rejoint votre écurie !`);
+      toast.success(`${horse.name} joins your stable!`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -129,7 +129,7 @@ export default function Market() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auctions'] });
       queryClient.invalidateQueries({ queryKey: ['my-horses-market'] });
-      toast.success('Enchère créée !');
+      toast.success('Auction created!');
     }
   });
 
@@ -153,14 +153,14 @@ export default function Market() {
           sender_name: 'EquiGenes',
           recipient_email: prevBidderEmail,
           recipient_name: prevBidderName || '',
-          subject: `Surenchère sur ${auction.horse_name}`,
-          content: `Votre mise de ${prevBid} pts sur "${auction.horse_name}" a été dépassée par une offre de ${amount} pts. Enchérissez à nouveau pour reprendre la tête !`,
+          subject: `Outbid on ${auction.horse_name}`,
+          content: `Your bid of ${prevBid} pts on "${auction.horse_name}" has been outbid by an offer of ${amount} pts. Bid again to take the lead!`,
         });
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auctions'] });
-      toast.success('Enchère placée !');
+      toast.success('Bid placed!');
     }
   });
 
@@ -216,7 +216,7 @@ export default function Market() {
           <TabsTrigger value="ended">Ended</TabsTrigger>
         </TabsList>
 
-        {/* Enchères actives */}
+        {/* Active auctions */}
         <TabsContent value="auctions" className="mt-4 space-y-4">
           {auctionsLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -243,7 +243,7 @@ export default function Market() {
           )}
         </TabsContent>
 
-        {/* Vente directe */}
+        {/* Direct sale */}
         <TabsContent value="market" className="mt-4 space-y-4">
           <SearchBar />
           {horsesLoading ? (
@@ -281,7 +281,7 @@ export default function Market() {
                         <span className={horse.sex === 'male' ? 'text-blue-600' : 'text-pink-600'}>{horse.sex === 'male' ? '♂' : '♀'}</span>
                         <span>{horse.age || 0} yrs</span>
                         <span className="flex items-center gap-1"><Trophy className="w-3 h-3" />{horse.competition_wins || 0}</span>
-                        <span className="flex items-center gap-1"><Dna className="w-3 h-3" />Moy: {avgStat}</span>
+                        <span className="flex items-center gap-1"><Dna className="w-3 h-3" />Avg: {avgStat}</span>
                       </div>
 
                       <div className="flex gap-2 pt-2">
@@ -300,7 +300,7 @@ export default function Market() {
           )}
         </TabsContent>
 
-        {/* Enchères terminées */}
+        {/* Ended auctions */}
         <TabsContent value="ended" className="mt-4">
           {endedAuctions.length === 0 ? (
             <div className="text-center py-16 text-stone-400">No ended auctions</div>

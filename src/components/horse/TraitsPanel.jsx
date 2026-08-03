@@ -13,19 +13,19 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Brain, Dna, Sparkles, Stethoscope, Dumbbell } from 'lucide-react';
 
 const DISCIPLINE_LABELS = {
-  dressage: 'Dressage', show_jumping: 'CSO', cross_country: 'Cross',
-  endurance: 'Endurance', racing: 'Course', reining: 'Reining',
-  barrel_racing: 'Barrel Racing', eventing: 'Concours Complet',
-  vaulting: 'Voltige', driving: 'Attelage', trail: 'Trail',
+  dressage: 'Dressage', show_jumping: 'Show Jumping', cross_country: 'Cross Country',
+  endurance: 'Endurance', racing: 'Racing', reining: 'Reining',
+  barrel_racing: 'Barrel Racing', eventing: 'Eventing',
+  vaulting: 'Vaulting', driving: 'Driving', trail: 'Trail',
   western_pleasure: 'Western Pleasure', polo: 'Polo',
 };
 
 const STAT_LABELS = {
-  speed: 'Vitesse', endurance: 'Endurance', agility: 'Agilité',
-  strength: 'Force', temperament: 'Tempérament', jumping: 'Saut', dressage: 'Dressage',
+  speed: 'Speed', endurance: 'Endurance', agility: 'Agility',
+  strength: 'Strength', temperament: 'Temperament', jumping: 'Jumping', dressage: 'Dressage',
 };
 
-// ─── Potentiel individuel ────────────────────────────────────────────────────
+// ─── Individual potential ────────────────────────────────────────────────────
 function PotentialSection({ stats, potential }) {
   if (!potential) return null;
   return (
@@ -44,7 +44,7 @@ function PotentialSection({ stats, potential }) {
                 }`}
                 style={{ width: `${(current / 100) * 100}%` }}
               />
-              {/* Marqueur plafond */}
+              {/* Ceiling marker */}
               <div
                 className="absolute top-0 bottom-0 w-0.5 bg-stone-400 opacity-60"
                 style={{ left: `${ceiling}%` }}
@@ -61,10 +61,10 @@ function PotentialSection({ stats, potential }) {
   );
 }
 
-// ─── Affinité raciale ────────────────────────────────────────────────────────
+// ─── Breed affinity ────────────────────────────────────────────────────────
 function AffinitySection({ breed }) {
   const affinity = BREED_AFFINITY[breed];
-  if (!affinity) return <p className="text-xs text-stone-400">Aucune affinité définie pour cette race.</p>;
+  if (!affinity) return <p className="text-xs text-stone-400">No affinity defined for this breed.</p>;
 
   const positive = Object.entries(affinity).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
   const negative = Object.entries(affinity).filter(([, v]) => v < 0).sort((a, b) => a[1] - b[1]);
@@ -73,7 +73,7 @@ function AffinitySection({ breed }) {
     <div className="space-y-3">
       {positive.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-emerald-700 mb-1.5">Prédispositions ✅</p>
+          <p className="text-xs font-medium text-emerald-700 mb-1.5">Predispositions ✅</p>
           <div className="flex flex-wrap gap-1.5">
             {positive.map(([disc, val]) => (
               <Badge key={disc} className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-normal">
@@ -85,7 +85,7 @@ function AffinitySection({ breed }) {
       )}
       {negative.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-red-600 mb-1.5">Désavantages ⚠️</p>
+          <p className="text-xs font-medium text-red-600 mb-1.5">Disadvantages ⚠️</p>
           <div className="flex flex-wrap gap-1.5">
             {negative.map(([disc, val]) => (
               <Badge key={disc} className="bg-red-50 text-red-600 border border-red-200 text-xs font-normal">
@@ -99,16 +99,16 @@ function AffinitySection({ breed }) {
   );
 }
 
-// ─── Traits mentaux ──────────────────────────────────────────────────────────
+// ─── Mental traits ──────────────────────────────────────────────────────────
 function MentalTraitsSection({ traits, isOwner }) {
   const navigate = useNavigate();
   if (!traits || traits.length === 0) {
     return (
       <div className="space-y-2">
-        <p className="text-xs text-stone-400">Traits mentaux non révélés — effectuez un test comportemental.</p>
+        <p className="text-xs text-stone-400">Mental traits not revealed — perform a behavioral test.</p>
         {isOwner && (
           <Button size="sm" variant="outline" onClick={() => navigate('/Training')} className="text-xs border-sky-200 text-sky-700 hover:bg-sky-50">
-            <Dumbbell className="w-3.5 h-3.5 mr-1.5" /> S'entraîner pour révéler
+            <Dumbbell className="w-3.5 h-3.5 mr-1.5" /> Train to reveal
           </Button>
         )}
       </div>
@@ -136,16 +136,16 @@ function MentalTraitsSection({ traits, isOwner }) {
   );
 }
 
-// ─── Morphologie cachée ──────────────────────────────────────────────────────
+// ─── Hidden morphology ──────────────────────────────────────────────────────
 function MorphologySection({ morphology, revealed, isOwner }) {
   const navigate = useNavigate();
   if (!morphology || morphology.length === 0) {
     return (
       <div className="space-y-2">
-        <p className="text-xs text-stone-400">Morphologie non évaluée — consultez un vétérinaire.</p>
+        <p className="text-xs text-stone-400">Morphology not evaluated — consult a vet.</p>
         {isOwner && (
           <Button size="sm" variant="outline" onClick={() => navigate('/VetClinic')} className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
-            <Stethoscope className="w-3.5 h-3.5 mr-1.5" /> Consulter le vétérinaire
+            <Stethoscope className="w-3.5 h-3.5 mr-1.5" /> Consult the vet
           </Button>
         )}
       </div>
@@ -156,7 +156,7 @@ function MorphologySection({ morphology, revealed, isOwner }) {
     return (
       <div className="flex items-center gap-2 p-3 rounded-lg bg-stone-100 border border-stone-200">
         <EyeOff className="w-4 h-4 text-stone-400" />
-        <p className="text-xs text-stone-500">Morphologie cachée — traits révélés au vétérinaire ou à l'inspection.</p>
+        <p className="text-xs text-stone-500">Hidden morphology — traits revealed by vet or inspection.</p>
       </div>
     );
   }
@@ -183,7 +183,7 @@ function MorphologySection({ morphology, revealed, isOwner }) {
   );
 }
 
-// ─── Composant principal ─────────────────────────────────────────────────────
+// ─── Main component ─────────────────────────────────────────────────────
 export default function TraitsPanel({ horse, isOwner }) {
   const [morphRevealed, setMorphRevealed] = useState(false);
 
@@ -194,12 +194,12 @@ export default function TraitsPanel({ horse, isOwner }) {
   return (
     <div className="space-y-4">
 
-      {/* Affinité raciale */}
+      {/* Breed affinity */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-sm flex items-center gap-2 text-stone-700">
             <Dna className="w-4 h-4 text-amber-600" />
-            Affinité raciale — {horse.breed}
+            Breed affinity — {horse.breed}
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
@@ -212,24 +212,24 @@ export default function TraitsPanel({ horse, isOwner }) {
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-sm flex items-center gap-2 text-stone-700">
             <Sparkles className="w-4 h-4 text-purple-500" />
-            Potentiel génétique individuel
+            Individual genetic potential
           </CardTitle>
-          <p className="text-xs text-stone-400">La barre indique les stats actuelles. Le trait vertical = plafond génétique.</p>
+          <p className="text-xs text-stone-400">The bar shows current stats. The vertical line = genetic ceiling.</p>
         </CardHeader>
         <CardContent className="px-4 pb-4">
           {hasPotential
             ? <PotentialSection stats={horse.stats} potential={horse.genetic_potential} />
-            : <p className="text-xs text-stone-400">Potentiel non calculé pour ce cheval.</p>
+            : <p className="text-xs text-stone-400">Potential not calculated for this horse.</p>
           }
         </CardContent>
       </Card>
 
-      {/* Traits mentaux */}
+      {/* Mental traits */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-sm flex items-center gap-2 text-stone-700">
             <Brain className="w-4 h-4 text-sky-500" />
-            Traits mentaux
+            Mental traits
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
@@ -237,18 +237,18 @@ export default function TraitsPanel({ horse, isOwner }) {
         </CardContent>
       </Card>
 
-      {/* Morphologie cachée */}
+      {/* Hidden morphology */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-sm flex items-center gap-2 text-stone-700">
             <Eye className="w-4 h-4 text-teal-500" />
-            Morphologie cachée
+            Hidden morphology
             {hasMorpho && isOwner && (
               <button
                 onClick={() => setMorphRevealed(v => !v)}
                 className="ml-auto text-xs px-2 py-0.5 rounded bg-stone-100 text-stone-500 hover:bg-stone-200 transition-colors flex items-center gap-1"
               >
-                {morphRevealed ? <><EyeOff className="w-3 h-3" /> Masquer</> : <><Eye className="w-3 h-3" /> Révéler</>}
+                {morphRevealed ? <><EyeOff className="w-3 h-3" /> Hide</> : <><Eye className="w-3 h-3" /> Reveal</>}
               </button>
             )}
           </CardTitle>

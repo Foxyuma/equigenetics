@@ -44,8 +44,8 @@ export default function PublicHorseProfile() {
 
   if (!horse) return (
     <div className="text-center py-20">
-      <p className="text-stone-400">Cheval introuvable</p>
-      <Link to="/Rankings"><Button variant="outline" className="mt-4">Retour au classement</Button></Link>
+      <p className="text-stone-400">Horse not found</p>
+      <Link to="/Rankings"><Button variant="outline" className="mt-4">Back to rankings</Button></Link>
     </div>
   );
 
@@ -62,7 +62,7 @@ export default function PublicHorseProfile() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <Link to="/Rankings" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors">
-        <ArrowLeft className="w-4 h-4" />Retour au classement
+       <ArrowLeft className="w-4 h-4" />Back to rankings
       </Link>
 
       {/* Header */}
@@ -73,13 +73,13 @@ export default function PublicHorseProfile() {
               <h1 className="text-3xl font-bold text-stone-800">{horse.name}</h1>
               <div className="flex flex-wrap gap-2 mt-2">
                 <Badge className={`border-0 ${horse.sex === 'male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
-                  {horse.sex === 'male' ? '♂ Mâle' : '♀ Femelle'}
-                </Badge>
-                <Badge variant="outline">{getDisplayBreed(horse.breed)}</Badge>
-                <Badge variant="outline">{horse.age || 0} ans</Badge>
-                {horse.coat_color && <Badge className="bg-stone-100 text-stone-600 border-0">{horse.coat_color}</Badge>}
-              </div>
-              <p className="text-xs text-stone-400 mt-2">Profil public · Informations limitées</p>
+                  {horse.sex === 'male' ? '♂ Male' : '♀ Female'}
+                  </Badge>
+                  <Badge variant="outline">{getDisplayBreed(horse.breed)}</Badge>
+                  <Badge variant="outline">{horse.age || 0} yrs</Badge>
+                  {horse.coat_color && <Badge className="bg-stone-100 text-stone-600 border-0">{horse.coat_color}</Badge>}
+                  </div>
+                  <p className="text-xs text-stone-400 mt-2">Public profile · Limited information</p>
             </div>
             {horse.image_url && (
               <img src={horse.image_url} alt={horse.name} className="w-24 h-24 rounded-xl object-cover" />
@@ -89,11 +89,11 @@ export default function PublicHorseProfile() {
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="p-3 rounded-xl bg-white/60 text-center">
               <p className="text-2xl font-bold text-amber-700">{horse.competition_wins || 0}</p>
-              <p className="text-xs text-stone-500">Victoires</p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/60 text-center">
+              <p className="text-xs text-stone-500">Wins</p>
+              </div>
+              <div className="p-3 rounded-xl bg-white/60 text-center">
               <p className="text-2xl font-bold text-stone-700">{competitions.length}</p>
-              <p className="text-xs text-stone-500">Compétitions</p>
+              <p className="text-xs text-stone-500">Competitions</p>
             </div>
           </div>
         </CardContent>
@@ -104,24 +104,24 @@ export default function PublicHorseProfile() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Dna className="w-5 h-5 text-violet-500" />
-            Gènes connus (publics)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {knownGenes.length === 0 ? (
-            <p className="text-stone-400 text-sm">Aucun gène problématique connu publiquement</p>
+            Known genes (public)
+            </CardTitle>
+            </CardHeader>
+            <CardContent>
+            {knownGenes.length === 0 ? (
+            <p className="text-stone-400 text-sm">No problematic genes publicly known</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {knownGenes.map(g => (
                 <Badge key={g.disease} className={`border-0 ${g.status === 'affected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                  {g.disease} — {g.status === 'affected' ? 'Atteint' : 'Porteur'}
-                </Badge>
-              ))}
-            </div>
-          )}
-          <p className="text-xs text-stone-400 mt-3">
-            ℹ️ Seuls les gènes révélés par des tests ADN effectués sont visibles publiquement.
-          </p>
+                  {g.disease} — {g.status === 'affected' ? 'Affected' : 'Carrier'}
+                  </Badge>
+                  ))}
+                  </div>
+                  )}
+                  <p className="text-xs text-stone-400 mt-3">
+                  ℹ️ Only genes revealed by DNA tests performed are publicly visible.
+                  </p>
         </CardContent>
       </Card>
 
@@ -130,12 +130,12 @@ export default function PublicHorseProfile() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-500" />
-            Résultats en compétition
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {competitions.length === 0 ? (
-            <p className="text-stone-400 text-sm text-center py-6">Aucun résultat de compétition</p>
+            Competition results
+            </CardTitle>
+            </CardHeader>
+            <CardContent>
+            {competitions.length === 0 ? (
+            <p className="text-stone-400 text-sm text-center py-6">No competition results</p>
           ) : (
             <div className="space-y-2">
               {competitions.map(c => (
@@ -149,7 +149,7 @@ export default function PublicHorseProfile() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-stone-800 text-sm">{c.score?.toFixed(1)} pts</p>
-                    {c.is_olympic && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Olympique</Badge>}
+                    {c.is_olympic && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Olympic</Badge>}
                   </div>
                 </div>
               ))}

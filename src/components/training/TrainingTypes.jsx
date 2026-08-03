@@ -1,4 +1,4 @@
-// Définition de tous les types d'entraînements avec leurs effets multi-compétences
+// Definition of all training types with their multi-skill effects
 
 export const FOAL_TRAININGS = [
   {
@@ -21,7 +21,7 @@ export const FOAL_TRAININGS = [
     mentalCost: 15,
     foalSkill: 'desensibilisation',
     statGains: { temperament: [2, 4], agility: [1, 3] },
-    sideEffects: ['légère nervosité'],
+    sideEffects: ['slight nervousness'],
   },
   {
     id: 'embarquement',
@@ -32,7 +32,7 @@ export const FOAL_TRAININGS = [
     mentalCost: 20,
     foalSkill: 'embarquement',
     statGains: { temperament: [2, 5] },
-    sideEffects: ['stress possible'],
+    sideEffects: ['possible stress'],
   },
 ];
 
@@ -46,7 +46,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 10,
     statGains: { strength: [2, 6], dressage: [2, 5], speed: [1, 4] },
     synergies: ['dressage'],
-    sideEffects: ['fatigue musculaire légère'],
+    sideEffects: ['slight muscle fatigue'],
   },
   {
     id: 'liberte',
@@ -61,9 +61,9 @@ export const ADULT_TRAININGS = [
   },
   {
     id: 'desensibilisation_adulte',
-    label: 'Désensibilisation',
+    label: 'Desensitization',
     icon: '🎭',
-    description: 'Mental, confiance, gestion du stress',
+    description: 'Mental, confidence, stress management',
     energyCost: 10,
     mentalCost: 5,
     statGains: { temperament: [3, 8], agility: [1, 3] },
@@ -79,7 +79,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 20,
     statGains: { dressage: [3, 8], agility: [2, 5], endurance: [1, 4] },
     synergies: ['longe'],
-    sideEffects: ['concentration intensive'],
+    sideEffects: ['intense concentration'],
   },
   {
     id: 'barres_sol',
@@ -101,7 +101,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 15,
     statGains: { jumping: [3, 8], agility: [2, 6], dressage: [1, 4] },
     synergies: ['barres_sol'],
-    sideEffects: ['risque blessure légère'],
+    sideEffects: ['minor injury risk'],
   },
   {
     id: 'balade',
@@ -123,7 +123,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 10,
     statGains: { endurance: [3, 7], speed: [2, 5], strength: [1, 4] },
     synergies: ['cross'],
-    sideEffects: ['fatigue physique'],
+    sideEffects: ['physical fatigue'],
   },
   {
     id: 'galop_terrain',
@@ -134,7 +134,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 15,
     statGains: { speed: [3, 8], endurance: [2, 6], agility: [2, 5] },
     synergies: [],
-    sideEffects: ['fatigue élevée'],
+    sideEffects: ['high fatigue'],
   },
   {
     id: 'parcours_obstacles',
@@ -145,7 +145,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 25,
     statGains: { jumping: [3, 8], agility: [2, 6], temperament: [1, 4] },
     synergies: ['gym_obstacle'],
-    sideEffects: ['stress compétitif'],
+    sideEffects: ['competitive stress'],
   },
   {
     id: 'cross',
@@ -156,7 +156,7 @@ export const ADULT_TRAININGS = [
     mentalCost: 20,
     statGains: { endurance: [4, 8], speed: [3, 7], temperament: [1, 4] },
     synergies: ['trotting'],
-    sideEffects: ['fatigue élevée', 'risque blessure'],
+    sideEffects: ['high fatigue', 'injury risk'],
   },
   {
     id: 'marche_main',
@@ -183,14 +183,14 @@ export const ADULT_TRAININGS = [
   },
 ];
 
-// Synergies bonus : si le cheval a été entraîné avec ces deux types récemment
+// Synergy bonus: if the horse was trained with these two types recently
 export const SYNERGY_BONUSES = {
   'barres_sol+dressage': { stat: 'agility', bonus: 2,   label: 'Poles + Dressage = improved balance' },
   'trotting+cross': { stat: 'endurance', bonus: 3,   label: 'Trotting + Cross = endurance bonus' },
   'gym_obstacle+barres_sol': { stat: 'jumping', bonus: 2,   label: 'Gym + Poles = better jumping' },
 };
 
-// Modificateurs selon le caractère du cheval
+// Modifiers based on the horse's character
 export const CHARACTER_MODIFIERS = {
   energique: { energyCostMult: 0.9, mentalCostMult: 0.8, statBonusMult: 1.1, label: '⚡ Energetic' },
   anxieux: { energyCostMult: 1.0, mentalCostMult: 1.3, statBonusMult: 0.9, label: '😰 Anxious' },
@@ -200,14 +200,14 @@ export const CHARACTER_MODIFIERS = {
   docile: { energyCostMult: 0.95, mentalCostMult: 0.95, statBonusMult: 1.0, label: '🕊️ Docile' },
 };
 
-// Calcule les gains réels en tenant compte du caractère et des synergies
+// Computes real gains taking into account character and synergies
 export function computeTrainingResult(training, horse, recentTrainingTypes = []) {
   const charMod = CHARACTER_MODIFIERS[horse.character] || { energyCostMult: 1, mentalCostMult: 1, statBonusMult: 1 };
   
   const physCost = Math.max(0, Math.round((training.energyCost || 0) * charMod.energyCostMult));
   const mentalCost = Math.round((training.mentalCost || 0) * charMod.mentalCostMult);
   
-  // Calcul des gains par stat — entre min et max, modulé par le caractère
+  // Stat gain calculation — between min and max, modulated by character
   const statsGained = {};
   let totalGain = 0;
   
@@ -223,7 +223,7 @@ export function computeTrainingResult(training, horse, recentTrainingTypes = [])
     }
   }
 
-  // Bonus synergie
+  // Synergy bonus
   let synergyBonus = null;
   for (const [key, bonus] of Object.entries(SYNERGY_BONUSES)) {
     const parts = key.split('+');
@@ -236,7 +236,7 @@ export function computeTrainingResult(training, horse, recentTrainingTypes = [])
     }
   }
 
-  // Effets secondaires aléatoires
+  // Random side effects
   const sideEffects = [];
   for (const effect of training.sideEffects || []) {
     if (Math.random() < 0.3) sideEffects.push(effect);
@@ -253,7 +253,7 @@ export function computeTrainingResult(training, horse, recentTrainingTypes = [])
   };
 }
 
-// Calcule les gains pour une séance poulain
+// Computes gains for a foal training session
 export function computeFoalTrainingResult(training, horse) {
   const skill = training.foalSkill;
   const current = horse.foal_training_completed?.[skill] || 0;
@@ -267,8 +267,8 @@ export function computeFoalTrainingResult(training, horse) {
     if (current < 100) statsGained[stat] = Math.min(gain, 100 - current);
   }
 
-  // Gain sur la compétence poulain (0-50)
-  const foalSkillGain = 5 + Math.floor(Math.random() * 6); // 5 à 10 points
+  // Foal skill gain (0-50)
+  const foalSkillGain = 5 + Math.floor(Math.random() * 6); // 5 to 10 points
   const newSkillValue = Math.min(maxFoalSkill, current + foalSkillGain);
 
   return {

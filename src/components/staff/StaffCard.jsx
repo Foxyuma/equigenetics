@@ -6,11 +6,11 @@ import { Zap, Shield, TrendingUp, Star, Heart, Trophy, UserX } from 'lucide-reac
 import { ROLE_CONFIG, LEVEL_CONFIG, SPECIALITIES } from '@/lib/staffConfig';
 
 const BONUS_ICONS = {
-  energy_recovery_bonus: { icon: Zap, color: 'text-amber-500', label: 'Récup. énergie' },
-  illness_risk_reduction: { icon: Shield, color: 'text-blue-500', label: 'Risque maladie' },
-  training_success_bonus: { icon: TrendingUp, color: 'text-purple-500', label: 'Entraînement' },
-  breeding_success_bonus: { icon: Heart, color: 'text-pink-500', label: 'Élevage' },
-  competition_score_bonus: { icon: Trophy, color: 'text-emerald-500', label: 'Compétition' },
+  energy_recovery_bonus: { icon: Zap, color: 'text-amber-500', label: 'Energy recovery' },
+  illness_risk_reduction: { icon: Shield, color: 'text-blue-500', label: 'Disease risk' },
+  training_success_bonus: { icon: TrendingUp, color: 'text-purple-500', label: 'Training' },
+  breeding_success_bonus: { icon: Heart, color: 'text-pink-500', label: 'Breeding' },
+  competition_score_bonus: { icon: Trophy, color: 'text-emerald-500', label: 'Competition' },
 };
 
 export default function StaffCard({ staff, onFire }) {
@@ -70,10 +70,10 @@ export default function StaffCard({ staff, onFire }) {
         <div className="flex items-center justify-between pt-1 border-t border-stone-200/60">
           <div className="flex items-center gap-1 text-xs text-stone-500">
             <Heart className="w-3 h-3 text-rose-400" />
-            Moral: <span className="font-medium text-stone-700">{staff.morale || 100}%</span>
-          </div>
-          <Badge variant="outline" className="text-xs font-semibold text-stone-700">
-            💰 {staff.salary} pts/mois
+            Morale: <span className="font-medium text-stone-700">{staff.morale || 100}%</span>
+            </div>
+            <Badge variant="outline" className="text-xs font-semibold text-stone-700">
+            💰 {staff.salary} pts/month
           </Badge>
         </div>
       </CardContent>

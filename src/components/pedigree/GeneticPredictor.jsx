@@ -38,7 +38,7 @@ function predictOffspring(fatherGenotype, motherGenotype) {
   }
 
   function determineCoatColor(genotype) {
-    if (genotype.grey === "GG" || genotype.grey === "Gg") return "Gris";
+    if (genotype.grey === "GG" || genotype.grey === "Gg") return "Grey";
     
     const isBlack = genotype.extension !== "ee";
     const hasAgouti = genotype.agouti !== "aa";
@@ -53,22 +53,22 @@ function predictOffspring(fatherGenotype, motherGenotype) {
     let base = "";
     
     if (!isBlack) {
-      base = "Alezan";
+      base = "Chestnut";
       if (hasCream) base = "Palomino";
       if (doubleCream) base = "Cremello";
-      if (hasChampagne) base = "Alezan Champagne";
+      if (hasChampagne) base = "Chestnut Champagne";
     } else if (hasAgouti) {
-      base = "Bai";
-      if (hasCream) base = "Isabelle";
+      base = "Bay";
+      if (hasCream) base = "Buckskin";
       if (doubleCream) base = "Perlino";
-      if (hasChampagne) base = "Ambre Champagne";
-      if (hasSilver) base = "Bai Silver";
+      if (hasChampagne) base = "Amber Champagne";
+      if (hasSilver) base = "Bay Silver";
     } else {
-      base = "Noir";
+      base = "Black";
       if (hasCream) base = "Smoky Black";
       if (doubleCream) base = "Smoky Cream";
-      if (hasChampagne) base = "Noir Champagne";
-      if (hasSilver) base = "Noir Silver";
+      if (hasChampagne) base = "Black Champagne";
+      if (hasSilver) base = "Black Silver";
     }
     
     if (hasDun) base += " Dun";
@@ -130,7 +130,7 @@ export default function GeneticPredictor({ father, mother }) {
       <Card className="border-0 bg-gradient-to-br from-violet-50 to-purple-50">
         <CardContent className="p-8 text-center">
           <Sparkles className="w-12 h-12 mx-auto text-violet-300 mb-3" />
-          <p className="text-stone-500">Sélectionnez un père et une mère pour voir les prédictions</p>
+          <p className="text-stone-500">Select a sire and a dam to see predictions</p>
         </CardContent>
       </Card>
     );
@@ -154,11 +154,11 @@ export default function GeneticPredictor({ father, mother }) {
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-violet-600" />
-          Prédictions Génétiques
-        </CardTitle>
-        <p className="text-sm text-stone-500 mt-1">
-          Probabilités de couleurs de robe pour {father.name} × {mother.name}
-        </p>
+          Genetic Predictions
+          </CardTitle>
+          <p className="text-sm text-stone-500 mt-1">
+          Coat color probabilities for {father.name} × {mother.name}
+          </p>
       </CardHeader>
       <CardContent className="space-y-3">
         {topPredictions.map((pred, i) => (
@@ -187,7 +187,7 @@ export default function GeneticPredictor({ father, mother }) {
         {othersProbability > 0 && (
           <div className="pt-3 border-t border-violet-200">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-stone-500">Autres combinaisons possibles</span>
+              <span className="text-stone-500">Other possible combinations</span>
               <span className="font-semibold text-stone-600">{othersProbability.toFixed(1)}%</span>
             </div>
           </div>
@@ -196,19 +196,19 @@ export default function GeneticPredictor({ father, mother }) {
         <div className="pt-4 border-t border-violet-200">
           <div className="grid grid-cols-2 gap-4 text-center">
             <div className="p-3 rounded-lg bg-white/50">
-              <p className="text-xs text-stone-500 mb-1">Combinaisons totales</p>
+              <p className="text-xs text-stone-500 mb-1">Total combinations</p>
               <p className="text-2xl font-bold text-violet-700">{predictions.length}</p>
             </div>
             <div className="p-3 rounded-lg bg-white/50">
-              <p className="text-xs text-stone-500 mb-1">Résultat le plus probable</p>
+              <p className="text-xs text-stone-500 mb-1">Most likely outcome</p>
               <p className="text-sm font-semibold text-violet-700">{predictions[0]?.color}</p>
             </div>
           </div>
         </div>
 
         <div className="pt-3 text-xs text-stone-500 bg-white/50 p-3 rounded-lg">
-          <p className="font-medium mb-1">ℹ️ Note sur les prédictions :</p>
-          <p>Ces probabilités sont calculées selon les lois de Mendel basées sur les génotypes des parents. Les résultats réels peuvent varier légèrement en raison de la complexité des interactions génétiques.</p>
+          <p className="font-medium mb-1">ℹ️ Note on predictions:</p>
+          <p>These probabilities are calculated using Mendel's laws based on the parents' genotypes. Actual results may vary slightly due to the complexity of genetic interactions.</p>
         </div>
       </CardContent>
     </Card>

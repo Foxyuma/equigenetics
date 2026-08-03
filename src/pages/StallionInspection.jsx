@@ -205,7 +205,7 @@ export default function StallionInspection() {
   const gameYear = clocks[0]?.year || 1;
   const stallionSeasonOpen = isStallionCompetitionOpen(currentSeason);
 
-  // Filter eligible stallions — âge minimum selon la race
+  // Filter eligible stallions — minimum age by breed
   const eligibleStallions = horses.filter(h => {
     if (h.sex !== 'male') return false;
     if (!INSPECTION_CRITERIA[h.breed]) return false;
@@ -307,7 +307,7 @@ export default function StallionInspection() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Score visuel */}
+            {/* Visual score */}
             <div className={`bg-gradient-to-r ${colorGradient} rounded-xl p-6 text-white`}>
               <div className="text-center">
                 <p className="text-5xl font-bold mb-2">{Math.round(score)}</p>
@@ -315,7 +315,7 @@ export default function StallionInspection() {
               </div>
             </div>
 
-            {/* Infos chevaux */}
+            {/* Horse info */}
             <div className="grid grid-cols-3 gap-4">
               <div className="p-3 rounded-lg bg-stone-50 text-center">
                 <p className="text-lg font-bold text-stone-800">{stallion.breed}</p>
@@ -333,7 +333,7 @@ export default function StallionInspection() {
               </div>
             </div>
 
-            {/* Breakdown du score */}
+            {/* Score breakdown */}
             <div className="p-4 rounded-lg bg-stone-50 border border-stone-200">
               <h4 className="font-semibold text-stone-700 mb-3">Scoring Breakdown (/100)</h4>
               <div className="space-y-2">
@@ -351,7 +351,7 @@ export default function StallionInspection() {
               </div>
             </div>
 
-            {/* Bonus et pénalités */}
+            {/* Bonuses and penalties */}
             {scoreData && (scoreData.bonuses.length > 0 || scoreData.penalties.length > 0) && (
               <div className="space-y-2">
                 {scoreData.bonuses.length > 0 && (
@@ -440,7 +440,7 @@ export default function StallionInspection() {
               </div>
             </div>
 
-            {/* Alerte test ADN manquant */}
+            {/* Missing DNA test alert */}
             {!hasTest && (
               <div className="p-4 rounded-lg bg-red-50 border-2 border-red-300">
                 <div className="flex items-center gap-2 text-red-700 font-semibold">
@@ -582,7 +582,7 @@ export default function StallionInspection() {
                       <Badge className="bg-blue-100 text-blue-700 border-0">Avg {avgStat}</Badge>
                     </div>
 
-                    {/* Statut test ADN */}
+                    {/* DNA test status */}
                     {!hasTest && (
                       <div className="p-2 rounded bg-red-50 border border-red-300 text-xs font-semibold text-red-700 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5" />

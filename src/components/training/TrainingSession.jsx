@@ -7,20 +7,20 @@ import { Progress } from "@/components/ui/progress";
 import { Zap, TrendingUp, Award, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 
 const STAT_OPTIONS = [
-  { id: "speed", label: "Vitesse", icon: "⚡", color: "text-sky-600" },
+  { id: "speed", label: "Speed", icon: "⚡", color: "text-sky-600" },
   { id: "endurance", label: "Endurance", icon: "💪", color: "text-emerald-600" },
-  { id: "agility", label: "Agilité", icon: "🌀", color: "text-violet-600" },
-  { id: "strength", label: "Force", icon: "🔥", color: "text-red-600" },
-  { id: "temperament", label: "Tempérament", icon: "🧘", color: "text-amber-600" },
-  { id: "jumping", label: "Saut", icon: "🦘", color: "text-blue-600" },
+  { id: "agility", label: "Agility", icon: "🌀", color: "text-violet-600" },
+  { id: "strength", label: "Strength", icon: "🔥", color: "text-red-600" },
+  { id: "temperament", label: "Temperament", icon: "🧘", color: "text-amber-600" },
+  { id: "jumping", label: "Jumping", icon: "🦘", color: "text-blue-600" },
   { id: "dressage", label: "Dressage", icon: "🎭", color: "text-pink-600" },
 ];
 
 const DIFFICULTIES = [
-  { id: "easy", label: "Facile", energyCost: 10, baseSuccessRate: 90, statGain: [1, 2], color: "bg-green-100 text-green-700" },
-  { id: "medium", label: "Moyen", energyCost: 20, baseSuccessRate: 70, statGain: [2, 4], color: "bg-blue-100 text-blue-700" },
-  { id: "hard", label: "Difficile", energyCost: 30, baseSuccessRate: 50, statGain: [3, 6], color: "bg-orange-100 text-orange-700" },
-  { id: "extreme", label: "Extrême", energyCost: 40, baseSuccessRate: 30, statGain: [5, 10], color: "bg-red-100 text-red-700" },
+  { id: "easy", label: "Easy", energyCost: 10, baseSuccessRate: 90, statGain: [1, 2], color: "bg-green-100 text-green-700" },
+  { id: "medium", label: "Medium", energyCost: 20, baseSuccessRate: 70, statGain: [2, 4], color: "bg-blue-100 text-blue-700" },
+  { id: "hard", label: "Hard", energyCost: 30, baseSuccessRate: 50, statGain: [3, 6], color: "bg-orange-100 text-orange-700" },
+  { id: "extreme", label: "Extreme", energyCost: 40, baseSuccessRate: 30, statGain: [5, 10], color: "bg-red-100 text-red-700" },
 ];
 
 export default function TrainingSession({ horse, onTrainingComplete }) {
@@ -81,19 +81,19 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-indigo-600" />
-          Séance d'Entraînement
-        </CardTitle>
-        <p className="text-sm text-stone-500 mt-1">
-          Améliorez les compétences de {horse?.name}
-        </p>
+          Training Session
+          </CardTitle>
+          <p className="text-sm text-stone-500 mt-1">
+          Improve {horse?.name}'s skills
+          </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Stat Selection */}
         <div>
-          <label className="text-sm font-medium text-stone-600 mb-2 block">Compétence à entraîner</label>
+          <label className="text-sm font-medium text-stone-600 mb-2 block">Skill to train</label>
           <Select value={selectedStat} onValueChange={setSelectedStat}>
             <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Choisir une compétence..." />
+             <SelectValue placeholder="Choose a skill..." />
             </SelectTrigger>
             <SelectContent>
               {STAT_OPTIONS.map(stat => (
@@ -118,7 +118,7 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
 
         {/* Difficulty Selection */}
         <div>
-          <label className="text-sm font-medium text-stone-600 mb-2 block">Difficulté</label>
+          <label className="text-sm font-medium text-stone-600 mb-2 block">Difficulty</label>
           <div className="grid grid-cols-2 gap-2">
             {DIFFICULTIES.map(diff => (
               <button
@@ -133,7 +133,7 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
               >
                 <p className="font-semibold text-sm text-stone-800">{diff.label}</p>
                 <p className="text-xs text-stone-500 mt-1">
-                  <Zap className="w-3 h-3 inline mr-1" />-{diff.energyCost} énergie
+                  <Zap className="w-3 h-3 inline mr-1" />-{diff.energyCost} energy
                 </p>
                 <p className="text-xs text-indigo-600 font-medium mt-1">
                   +{diff.statGain[0]}-{diff.statGain[1]} pts
@@ -147,14 +147,14 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
         {selectedStat && difficulty && (
           <div className="p-3 rounded-lg bg-white border border-indigo-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-stone-600">Taux de réussite</span>
+              <span className="text-sm font-medium text-stone-600">Success rate</span>
               <Badge className="bg-indigo-100 text-indigo-700 border-0">
                 {successRate.toFixed(0)}%
               </Badge>
             </div>
             <Progress value={successRate} className="h-2 bg-indigo-100" />
             <p className="text-xs text-stone-500 mt-2">
-              Bonus tempérament : +{((horse?.stats?.temperament || 50) / 10).toFixed(1)}%
+              Temperament bonus: +{((horse?.stats?.temperament || 50) / 10).toFixed(1)}%
             </p>
           </div>
         )}
@@ -164,7 +164,7 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
           <div className="flex items-center gap-2 p-3 rounded-lg bg-orange-50 border border-orange-200">
             <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
             <p className="text-sm text-orange-700">
-              Énergie insuffisante. Votre cheval a besoin de repos ou de nourriture.
+              Insufficient energy. Your horse needs rest or food.
             </p>
           </div>
         )}
@@ -178,12 +178,12 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
           {isTraining ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-              Entraînement en cours...
-            </>
-          ) : (
-            <>
+              Training in progress...
+              </>
+              ) : (
+              <>
               <Award className="w-5 h-5 mr-2" />
-              Commencer l'entraînement
+              Start training
             </>
           )}
         </Button>
@@ -203,26 +203,26 @@ export default function TrainingSession({ horse, onTrainingComplete }) {
               )}
               <div>
                 <h4 className={`font-bold ${result.success ? 'text-green-700' : 'text-red-700'}`}>
-                  {result.success ? 'Entraînement réussi !' : 'Entraînement échoué'}
-                </h4>
-                <p className="text-sm text-stone-600">
+                  {result.success ? 'Training successful!' : 'Training failed'}
+                  </h4>
+                  <p className="text-sm text-stone-600">
                   {result.success 
                     ? `${statInfo?.label} +${result.statGain} points`
-                    : 'Aucun gain de compétence cette fois'
+                   : 'No skill gained this time'
                   }
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm text-stone-500">
               <Zap className="w-4 h-4" />
-              <span>Énergie consommée : {result.energyCost}</span>
+              <span>Energy consumed: {result.energyCost}</span>
             </div>
           </div>
         )}
 
         {/* Info */}
         <div className="text-xs text-stone-500 bg-white/50 p-3 rounded-lg">
-          💡 <strong>Astuce :</strong> Un cheval avec un bon tempérament a plus de chances de réussir son entraînement. Les difficultés élevées offrent plus de gains mais ont un taux d'échec plus important.
+          💡 <strong>Tip:</strong> A horse with a good temperament has a better chance of successful training. Higher difficulties offer more gains but have a higher failure rate.
         </div>
       </CardContent>
     </Card>

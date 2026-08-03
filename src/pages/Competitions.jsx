@@ -84,12 +84,12 @@ export default function Competitions() {
   const discipline = DISCIPLINES.find(d => d.id === selectedDiscipline);
   const level = LEVELS.find(l => l.id === selectedLevel);
 
-  // Probabilités de contrôle antidopage par niveau (affichage du risque)
+  // Doping control probabilities by level (risk display)
   const DOPING_CHECK_PROBABILITY = { novice: 0.05, intermediate: 0.10, advanced: 0.20, elite: 0.35, olympic: 0.60 };
 
-  // Les compétitions de la veille sont résolues automatiquement par le tick
-  // quotidien à 3h30 UTC (cf. useGameClock → runDailyTick).
-  // On NE résout PAS ici au chargement de la page pour respecter le timing.
+  // Yesterday's competitions are resolved automatically by the daily
+  // tick at 3:30 UTC (see useGameClock → runDailyTick).
+  // We do NOT resolve here on page load to respect the timing.
 
   const competeMutation = useMutation({
     mutationFn: async () => {
@@ -117,7 +117,7 @@ export default function Competitions() {
       queryClient.invalidateQueries({ queryKey: ['pending-competitions', currentUser?.email] });
       setSelectedHorseId('');
       setSelectedDiscipline('');
-      toast.success('Inscription confirmée ! Résultats demain à 3h30 UTC 🌙');
+      toast.success('Registration confirmed! Results tomorrow at 3:30 AM UTC 🌙');
     }
   });
 
@@ -265,7 +265,7 @@ export default function Competitions() {
                   {pendingCompetitions.map(c => (
                     <div key={c.id} className="flex items-center justify-between text-sm text-blue-700 bg-white/60 rounded-lg p-2">
                       <span>{c.horse_name} — {c.name}</span>
-                      <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">Le {c.competition_date}</Badge>
+                      <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">{c.competition_date}</Badge>
                     </div>
                   ))}
                 </div>
@@ -298,7 +298,7 @@ export default function Competitions() {
             </CardHeader>
             <CardContent>
               {allCompetitions.length === 0 ? (
-                <p className="text-center text-stone-400 py-8">Aucune compétition enregistrée</p>
+                <p className="text-center text-stone-400 py-8">No competitions recorded</p>
               ) : (
                 <div className="space-y-2">
                   {allCompetitions.map(c => (
@@ -318,11 +318,11 @@ export default function Competitions() {
                       </div>
                       <div className="text-right">
                         {c.disqualified ? (
-                          <Badge className="bg-red-100 text-red-700 border-0 text-xs">Disqualifié</Badge>
-                        ) : (
+                          <Badge className="bg-red-100 text-red-700 border-0 text-xs">Disqualified</Badge>
+                          ) : (
                           <>
                             <p className="font-bold text-stone-800">{c.score?.toFixed(1)} pts</p>
-                            {c.is_olympic && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Olympique</Badge>}
+                           {c.is_olympic && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Olympic</Badge>}
                           </>
                         )}
                       </div>

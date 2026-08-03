@@ -26,7 +26,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      if (!price || Number(price) < 0) throw new Error('Prix invalide');
+      if (!price || Number(price) < 0) throw new Error('Invalid price');
       await base44.entities.StallionOffer.create({
         stallion_id: stallion.id,
         stallion_name: stallion.name,
@@ -37,7 +37,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
         stats: stallion.stats,
         health_genes: stallion.health_genes,
         price: Number(price),
-        owner_name: currentUser?.full_name || 'Joueur',
+        owner_name: currentUser?.full_name || 'Player',
         owner_email: currentUser?.email,
         is_npc: false,
         description,
@@ -51,7 +51,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stallion-offers-mine'] });
       queryClient.invalidateQueries({ queryKey: ['stallion-offers'] });
-      toast.success('Offre de saillie publiée !');
+      toast.success('Stud service offer published!');
       setShowForm(false);
       setPrice('5000'); setDescription(''); setIsOpen(true); setReservedEmail(''); setReservedName('');
     },
@@ -63,7 +63,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stallion-offers-mine'] });
       queryClient.invalidateQueries({ queryKey: ['stallion-offers'] });
-      toast.success('Offre retirée');
+      toast.success('Offer removed');
     },
   });
 
@@ -71,8 +71,8 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-stone-700">Offres de saillie</h3>
-          <p className="text-xs text-stone-400">Proposez {stallion.name} comme reproducteur</p>
+          <h3 className="font-semibold text-stone-700">Stud service offers</h3>
+          <p className="text-xs text-stone-400">Offer {stallion.name} as a breeding stallion</p>
         </div>
         {!showForm && (
           <Button
@@ -80,7 +80,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
             onClick={() => setShowForm(true)}
             className="bg-stone-800 hover:bg-stone-900"
           >
-            <Plus className="w-4 h-4 mr-1" /> Nouvelle offre
+            <Plus className="w-4 h-4 mr-1" /> New offer
           </Button>
         )}
       </div>
@@ -89,7 +89,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
         <Card className="border-2 border-amber-200 bg-amber-50/50">
           <CardContent className="p-4 space-y-4">
             <div className="space-y-1.5">
-              <Label>Prix de la saillie (₲ Genesis)</Label>
+              <Label>Stud fee (₲ Genesis)</Label>
               <Input
                 type="number"
                 min={0}
@@ -100,9 +100,9 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Description (optionnel)</Label>
+              <Label>Description (optional)</Label>
               <Input
-                placeholder="Ex: Lignée de champion, spécialiste saut..."
+               placeholder="e.g. Champion bloodline, jumping specialist..."
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 className="bg-white"
@@ -114,11 +114,11 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
                 {isOpen ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-amber-500" />}
                 <div>
                   <p className="text-sm font-semibold text-stone-700">
-                    {isOpen ? 'Vente libre' : 'Réservé à un joueur'}
-                  </p>
-                  <p className="text-xs text-stone-400">
-                    {isOpen ? 'Accessible à tous les joueurs' : 'Uniquement pour le joueur désigné'}
-                  </p>
+                    {isOpen ? 'Open sale' : 'Reserved for a player'}
+                    </p>
+                    <p className="text-xs text-stone-400">
+                    {isOpen ? 'Available to all players' : 'Only for the designated player'}
+                    </p>
                 </div>
               </div>
               <Switch checked={!isOpen} onCheckedChange={v => setIsOpen(!v)} />
@@ -127,18 +127,18 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
             {!isOpen && (
               <div className="space-y-2">
                 <div className="space-y-1.5">
-                  <Label>Email du joueur réservé</Label>
+                  <Label>Reserved player email</Label>
                   <Input
-                    placeholder="joueur@example.com"
+                   placeholder="player@example.com"
                     value={reservedEmail}
                     onChange={e => setReservedEmail(e.target.value)}
                     className="bg-white"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Nom du joueur (optionnel)</Label>
+                  <Label>Player name (optional)</Label>
                   <Input
-                    placeholder="Nom du joueur..."
+                   placeholder="Player name..."
                     value={reservedName}
                     onChange={e => setReservedName(e.target.value)}
                     className="bg-white"
@@ -153,9 +153,9 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
                 disabled={createMutation.isPending}
                 className="flex-1 bg-amber-600 hover:bg-amber-700"
               >
-                Publier l'offre
-              </Button>
-              <Button variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
+                Publish offer
+                </Button>
+                <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
             </div>
           </CardContent>
         </Card>
@@ -168,9 +168,9 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
               <CardContent className="p-3 flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-stone-800">{offer.price.toLocaleString('fr-FR')} ₲</p>
+                    <p className="font-semibold text-stone-800">{offer.price.toLocaleString('en-GB')} ₲</p>
                     <Badge className={`text-xs border-0 ${offer.is_open ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {offer.is_open ? <><Globe className="w-3 h-3 mr-1" />Vente libre</> : <><Lock className="w-3 h-3 mr-1" />Réservé</>}
+                      {offer.is_open ? <><Globe className="w-3 h-3 mr-1" />Open sale</> : <><Lock className="w-3 h-3 mr-1" />Reserved</>}
                     </Badge>
                   </div>
                   {!offer.is_open && offer.reserved_for_email && (
@@ -193,7 +193,7 @@ export default function StallionOfferPanel({ stallion, currentUser }) {
       ) : (
         !showForm && (
           <p className="text-sm text-stone-400 text-center py-4">
-            Aucune offre publiée pour {stallion.name}
+            No offers published for {stallion.name}
           </p>
         )
       )}

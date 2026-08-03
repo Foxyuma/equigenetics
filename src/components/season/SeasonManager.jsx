@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 const SEASON_CONFIG = {
   spring: {
-    label: "Printemps",
+    label: "Spring",
     icon: Flower,
     color: "from-green-400 to-emerald-500",
     bgColor: "bg-green-50",
@@ -18,10 +18,10 @@ const SEASON_CONFIG = {
     illness: 12,
     competitions: ["dressage", "show_jumping", "eventing", "trail"],
     weather: "sunny",
-    description: "Saison idéale pour la reproduction"
+    description: "Ideal season for breeding"
   },
   summer: {
-    label: "Été",
+    label: "Summer",
     icon: Sun,
     color: "from-yellow-400 to-orange-500",
     bgColor: "bg-yellow-50",
@@ -30,10 +30,10 @@ const SEASON_CONFIG = {
     illness: 20,
     competitions: ["endurance", "barrel_racing", "polo", "western_pleasure"],
     weather: "sunny",
-    description: "Attention aux coups de chaleur"
+    description: "Watch out for heat strokes"
   },
   autumn: {
-    label: "Automne",
+    label: "Autumn",
     icon: CloudRain,
     color: "from-orange-400 to-red-500",
     bgColor: "bg-orange-50",
@@ -42,10 +42,10 @@ const SEASON_CONFIG = {
     illness: 18,
     competitions: ["cross_country", "reining", "driving", "vaulting"],
     weather: "rainy",
-    description: "Saison des compétitions d'extérieur"
+    description: "Outdoor competition season"
   },
   winter: {
-    label: "Hiver",
+    label: "Winter",
     icon: Snowflake,
     color: "from-blue-400 to-cyan-500",
     bgColor: "bg-blue-50",
@@ -54,7 +54,7 @@ const SEASON_CONFIG = {
     illness: 25,
     competitions: ["dressage", "show_jumping", "vaulting", "driving"],
     weather: "snowy",
-    description: "Risque accru de maladies respiratoires"
+    description: "Increased risk of respiratory diseases"
   }
 };
 
@@ -103,7 +103,7 @@ export default function SeasonManager({ compact = false }) {
         available_competitions: nextConfig.competitions,
       };
 
-      // +1 réputation par saison d'activité
+      // +1 reputation per active season
       if (currentUser) {
         await base44.auth.updateMe({ breeding_reputation: (currentUser.breeding_reputation ?? 0) + 1 });
       }
@@ -118,7 +118,7 @@ export default function SeasonManager({ compact = false }) {
       queryClient.invalidateQueries({ queryKey: ['seasons'] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['me-season'] });
-      toast.success('Nouvelle saison commencée ! +1 pt réputation 🌿');
+      toast.success('New season started! +1 reputation pt 🌿');
     },
   });
 
@@ -133,7 +133,7 @@ export default function SeasonManager({ compact = false }) {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-stone-800 text-sm">{config.label}</span>
-                <Badge variant="outline" className="text-xs">Saison {currentSeason.season_number}</Badge>
+                <Badge variant="outline" className="text-xs">Season {currentSeason.season_number}</Badge>
               </div>
               <p className="text-xs text-stone-500">{config.description}</p>
             </div>
@@ -153,7 +153,7 @@ export default function SeasonManager({ compact = false }) {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-stone-800">{config.label}</h2>
-              <p className="text-sm text-stone-500">Saison #{currentSeason.season_number}</p>
+              <p className="text-sm text-stone-500">Season #{currentSeason.season_number}</p>
             </div>
           </div>
           <Button
@@ -163,7 +163,7 @@ export default function SeasonManager({ compact = false }) {
             className="bg-white"
           >
             <Calendar className="w-4 h-4 mr-2" />
-            Saison Suivante
+            Next Season
           </Button>
         </div>
 
@@ -173,28 +173,28 @@ export default function SeasonManager({ compact = false }) {
           <div className="p-3 bg-white rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-green-600" />
-              <span className="text-xs font-medium text-stone-600">Fertilité</span>
-            </div>
-            <p className="text-xl font-bold text-green-600">{currentSeason.fertility_modifier}%</p>
+              <span className="text-xs font-medium text-stone-600">Fertility</span>
+              </div>
+              <p className="text-xl font-bold text-green-600">{currentSeason.fertility_modifier}%</p>
           </div>
           <div className="p-3 bg-white rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <Activity className="w-4 h-4 text-red-600" />
-              <span className="text-xs font-medium text-stone-600">Risque Maladie</span>
+              <span className="text-xs font-medium text-stone-600">Disease Risk</span>
             </div>
             <p className="text-xl font-bold text-red-600">{currentSeason.illness_probability}%</p>
           </div>
           <div className="p-3 bg-white rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <Trophy className="w-4 h-4 text-indigo-600" />
-              <span className="text-xs font-medium text-stone-600">Compétitions</span>
+              <span className="text-xs font-medium text-stone-600">Competitions</span>
             </div>
             <p className="text-xl font-bold text-indigo-600">{currentSeason.available_competitions?.length || 0}</p>
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-stone-700 mb-2">Disciplines disponibles</h3>
+          <h3 className="text-sm font-semibold text-stone-700 mb-2">Available disciplines</h3>
           <div className="flex flex-wrap gap-2">
             {currentSeason.available_competitions?.map(comp => (
               <Badge key={comp} className={`${config.bgColor} ${config.textColor} border-0`}>

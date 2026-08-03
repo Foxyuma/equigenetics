@@ -7,8 +7,8 @@ import { Zap, Brain, TrendingUp, Sparkles, AlertTriangle, CheckCircle2 } from 'l
 import { ADULT_TRAININGS, FOAL_TRAININGS, CHARACTER_MODIFIERS, computeTrainingResult, computeFoalTrainingResult } from './TrainingTypes';
 
 const STAT_LABELS = {
-  speed: 'Vitesse', endurance: 'Endurance', agility: 'Agilité',
-  strength: 'Force', temperament: 'Tempérament', jumping: 'Saut', dressage: 'Dressage',
+  speed: 'Speed', endurance: 'Endurance', agility: 'Agility',
+  strength: 'Strength', temperament: 'Temperament', jumping: 'Jumping', dressage: 'Dressage',
 };
 
 function EnergyBar({ label, icon: IconComp, value, color }) {
@@ -63,20 +63,20 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], fo
 
   return (
     <div className="space-y-4">
-      {/* Énergie du cheval */}
+      {/* Horse energy */}
       <Card className="border-0 bg-white/70">
         <CardContent className="p-4 space-y-2">
           <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-3">
-            État de {horse?.name}
+            {horse?.name}'s status
             {charMod && <span className="ml-2 font-normal normal-case text-stone-400">{charMod.label}</span>}
           </p>
-          <EnergyBar label="Énergie physique" icon={Zap} value={physEnergy} color="text-amber-500" />
-          <EnergyBar label="Moral" icon={Brain} value={mentalEnergy} color="text-violet-500" />
+          <EnergyBar label="Physical energy" icon={Zap} value={physEnergy} color="text-amber-500" />
+          <EnergyBar label="Morale" icon={Brain} value={mentalEnergy} color="text-violet-500" />
           {isFoal && (
             <div className="mt-3 pt-3 border-t border-stone-100">
-              <p className="text-xs font-semibold text-stone-500 mb-2">Compétences poulain</p>
+              <p className="text-xs font-semibold text-stone-500 mb-2">Foal skills</p>
               <div className="grid grid-cols-3 gap-2">
-                {[['manipulation', '🤲 Manipulation'], ['desensibilisation', '🎭 Désensib.'], ['embarquement', '🚛 Embarquement']].map(([k, label]) => {
+                {[['manipulation', '🤲 Handling'], ['desensibilisation', '🎭 Desens.'], ['embarquement', '🚛 Loading']].map(([k, label]) => {
                   const val = horse?.foal_training_completed?.[k] || 0;
                   return (
                     <div key={k} className="text-center">
@@ -92,15 +92,15 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], fo
         </CardContent>
       </Card>
 
-      {/* Sélection entraînement */}
+      {/* Training selection */}
       <div>
         <p className="text-sm font-semibold text-stone-600 mb-2">
-          {isFoal ? '🐴 Séance poulain (1 par jour)' : 'Choisir un entraînement'}
+          {isFoal ? '🐴 Foal session (1 per day)' : 'Choose a training'}
         </p>
         {isFoal && foalTrainedToday && (
           <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 mb-2">
             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>Ce poulain a déjà fait sa séance du jour. Revenez demain ! 🌙</span>
+            <span>This foal already did today's session. Come back tomorrow! 🌙</span>
           </div>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -142,12 +142,12 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], fo
                   )}
                   {t.energyCost < 0 && (
                     <span className="text-xs text-green-600 flex items-center gap-0.5">
-                      <Zap className="w-3 h-3" />+{Math.abs(t.energyCost)} récup.
+                      <Zap className="w-3 h-3" />+{Math.abs(t.energyCost)} recovery
                     </span>
-                  )}
-                  {t.mentalCost < 0 && (
+                    )}
+                    {t.mentalCost < 0 && (
                     <span className="text-xs text-green-600 flex items-center gap-0.5">
-                      <Brain className="w-3 h-3" />+{Math.abs(t.mentalCost)} récup.
+                      <Brain className="w-3 h-3" />+{Math.abs(t.mentalCost)} recovery
                     </span>
                   )}
                 </div>
@@ -167,7 +167,7 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], fo
         </div>
       </div>
 
-      {/* Bouton lancer */}
+      {/* Launch button */}
       {selectedTraining && (
         <Button
           onClick={handleTrain}
@@ -175,28 +175,28 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], fo
           className="w-full bg-indigo-600 hover:bg-indigo-700 py-5 text-base"
         >
           {isTraining ? (
-            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />Entraînement en cours...</>
+            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />Training in progress...</>
           ) : isFoal && foalTrainedToday ? (
-            <><CheckCircle2 className="w-4 h-4 mr-2" />Séance du jour déjà effectuée</>
+            <><CheckCircle2 className="w-4 h-4 mr-2" />Today's session already done</>
           ) : (
-            <><TrendingUp className="w-4 h-4 mr-2" />Lancer : {selectedTraining.icon} {selectedTraining.label}</>
+            <><TrendingUp className="w-4 h-4 mr-2" />Start: {selectedTraining.icon} {selectedTraining.label}</>
           )}
         </Button>
       )}
 
-      {/* Résultat */}
+      {/* Result */}
       {result && (
         <Card className="border-2 border-green-300 bg-green-50">
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-green-600" />
-              <h4 className="font-bold text-green-700">Séance terminée !</h4>
+              <h4 className="font-bold text-green-700">Session complete!</h4>
             </div>
 
-            {/* Stats gagnées */}
+            {/* Stats gained */}
             {Object.keys(result.statsGained || {}).length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-stone-500 mb-1.5">Gains de compétences :</p>
+                <p className="text-xs font-semibold text-stone-500 mb-1.5">Skill gains:</p>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(result.statsGained).map(([stat, gain]) => (
                     <Badge key={stat} className="bg-emerald-100 text-emerald-700 border-0">
@@ -207,33 +207,33 @@ export default function NewTrainingSession({ horse, recentTrainingTypes = [], fo
               </div>
             )}
 
-            {/* Compétence poulain */}
+            {/* Foal skill */}
             {result.foalSkill && (
               <div className="text-xs text-violet-700 bg-violet-50 p-2 rounded-lg">
-                🐴 <strong>{selectedTraining.label}</strong> : +{result.foalSkillGain} pts ({result.newSkillValue}/50)
+                🐴 <strong>{selectedTraining.label}</strong>: +{result.foalSkillGain} pts ({result.newSkillValue}/50)
               </div>
             )}
 
-            {/* Synergie */}
+            {/* Synergy */}
             {result.synergyBonus && (
               <div className="flex items-center gap-2 text-xs text-indigo-700 bg-indigo-50 p-2 rounded-lg">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Synergie : {result.synergyBonus}</span>
+                <span>Synergy: {result.synergyBonus}</span>
               </div>
             )}
 
-            {/* Effets secondaires */}
+            {/* Side effects */}
             {result.sideEffects?.length > 0 && (
               <div className="flex items-start gap-2 text-xs text-orange-700 bg-orange-50 p-2 rounded-lg">
                 <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                <span>Effets secondaires : {result.sideEffects.join(', ')}</span>
+                <span>Side effects: {result.sideEffects.join(', ')}</span>
               </div>
             )}
 
-            {/* Coûts */}
+            {/* Costs */}
             <div className="flex gap-3 text-xs text-stone-500 pt-1 border-t border-green-200">
-              {result.physCost > 0 && <span><Zap className="w-3 h-3 inline" /> -{result.physCost} énergie physique</span>}
-              {result.mentalCost > 0 && <span><Brain className="w-3 h-3 inline" /> -{result.mentalCost} moral</span>}
+              {result.physCost > 0 && <span><Zap className="w-3 h-3 inline" /> -{result.physCost} physical energy</span>}
+              {result.mentalCost > 0 && <span><Brain className="w-3 h-3 inline" /> -{result.mentalCost} morale</span>}
             </div>
           </CardContent>
         </Card>

@@ -106,7 +106,7 @@ export default function Rankings() {
             );
           })}
           {horses.length === 0 && (
-            <p className="text-center text-stone-400 py-8 text-sm">Aucune donnée disponible</p>
+            <p className="text-center text-stone-400 py-8 text-sm">No data available</p>
           )}
         </div>
       </CardContent>
@@ -116,8 +116,8 @@ export default function Rankings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Classement Général</h1>
-        <p className="text-stone-500 mt-1">Les meilleurs chevaux et performances d'EquiGenes</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Overall Ranking</h1>
+        <p className="text-stone-500 mt-1">The best horses and performances on EquiGenes</p>
       </div>
 
       {/* Stats Overview */}
@@ -126,7 +126,7 @@ export default function Rankings() {
           <CardContent className="p-4 text-center">
             <Trophy className="w-6 h-6 mx-auto text-yellow-600 mb-2" />
             <p className="text-2xl font-bold text-yellow-800">{topByWins[0]?.competition_wins || 0}</p>
-            <p className="text-xs text-yellow-600">Record de victoires</p>
+            <p className="text-xs text-yellow-600">Wins record</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-gradient-to-br from-blue-50 to-cyan-50">
@@ -135,14 +135,14 @@ export default function Rankings() {
             <p className="text-2xl font-bold text-blue-800">
               {topByStats[0]?.avgStats?.toFixed(1) || 0}
             </p>
-            <p className="text-xs text-blue-600">Meilleure moyenne</p>
+            <p className="text-xs text-blue-600">Best average</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-gradient-to-br from-green-50 to-emerald-50">
           <CardContent className="p-4 text-center">
             <Award className="w-6 h-6 mx-auto text-green-600 mb-2" />
             <p className="text-2xl font-bold text-green-800">{horses.length}</p>
-            <p className="text-xs text-green-600">Chevaux enregistrés</p>
+            <p className="text-xs text-green-600">Registered horses</p>
           </CardContent>
         </Card>
       </div>
@@ -151,26 +151,26 @@ export default function Rankings() {
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="wins">
             <Trophy className="w-4 h-4 mr-2" />
-            Par Victoires
+            By Wins
           </TabsTrigger>
           <TabsTrigger value="stats">
             <TrendingUp className="w-4 h-4 mr-2" />
-            Par Stats
+            By Stats
           </TabsTrigger>
           <TabsTrigger value="energy">
             <Zap className="w-4 h-4 mr-2" />
-            Par Énergie
+            By Energy
           </TabsTrigger>
           <TabsTrigger value="recent">
             <Award className="w-4 h-4 mr-2" />
-            Compétitions Récentes
+            Recent Competitions
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="wins" className="mt-6">
           <RankingCard 
             horses={topByWins}
-            title="Top 20 - Victoires"
+            title="Top 20 - Wins"
             icon={Trophy}
             statKey="competition_wins"
             suffix=" 🏆"
@@ -180,7 +180,7 @@ export default function Rankings() {
         <TabsContent value="stats" className="mt-6">
           <RankingCard 
             horses={topByStats}
-            title="Top 20 - Moyenne des Stats"
+            title="Top 20 - Stats Average"
             icon={TrendingUp}
             statKey="avgStats"
             suffix="/100"
@@ -190,7 +190,7 @@ export default function Rankings() {
         <TabsContent value="energy" className="mt-6">
           <RankingCard 
             horses={topByEnergy}
-            title="Top 20 - Énergie"
+            title="Top 20 - Energy"
             icon={Zap}
             statKey="energy"
             suffix="%"
@@ -202,7 +202,7 @@ export default function Rankings() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-600" />
-                Dernières Compétitions
+                Recent Competitions
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -227,7 +227,7 @@ export default function Rankings() {
                   </div>
                 ))}
                 {recentCompetitions.length === 0 && (
-                  <p className="text-center text-stone-400 py-8 text-sm">Aucune compétition récente</p>
+                  <p className="text-center text-stone-400 py-8 text-sm">No recent competitions</p>
                 )}
               </div>
             </CardContent>

@@ -44,7 +44,7 @@ export default function PlayerProfile() {
       sender_name: currentUser.full_name,
       recipient_email: player.email,
       recipient_name: player.full_name,
-      subject: subject || 'Sans objet',
+      subject: subject || 'No subject',
       content,
       is_read: false,
     }),
@@ -52,15 +52,15 @@ export default function PlayerProfile() {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       setSubject('');
       setContent('');
-      toast.success('Message envoyé !');
+      toast.success('Message sent!');
     },
-    onError: () => toast.error('Erreur lors de l\'envoi'),
+    onError: () => toast.error('Error sending message'),
   });
 
   if (!player) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <p className="text-stone-400">Chargement du profil...</p>
+        <p className="text-stone-400">Loading profile...</p>
       </div>
     );
   }
@@ -83,11 +83,11 @@ export default function PlayerProfile() {
           {player.full_name?.charAt(0)?.toUpperCase() || player.email?.charAt(0)?.toUpperCase() || '?'}
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-stone-800">{player.full_name || 'Éleveur'}</h1>
+          <h1 className="text-2xl font-bold text-stone-800">{player.full_name || 'Breeder'}</h1>
           <p className="text-stone-500 text-sm">{player.email}</p>
           <div className="flex gap-2 mt-1">
             <Badge variant="outline" className="text-xs capitalize">{player.role || 'user'}</Badge>
-            {isOwnProfile && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Votre profil</Badge>}
+            {isOwnProfile && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Your profile</Badge>}
           </div>
         </div>
       </div>
@@ -97,9 +97,9 @@ export default function PlayerProfile() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Chevaux', value: horses.length, icon: Dna, color: 'text-amber-600 bg-amber-50' },
-          { label: 'Victoires', value: totalWins, icon: Trophy, color: 'text-yellow-600 bg-yellow-50' },
-          { label: 'Compétitions', value: competitions.length, icon: Star, color: 'text-indigo-600 bg-indigo-50' },
+          { label: 'Horses', value: horses.length, icon: Dna, color: 'text-amber-600 bg-amber-50' },
+          { label: 'Wins', value: totalWins, icon: Trophy, color: 'text-yellow-600 bg-yellow-50' },
+          { label: 'Competitions', value: competitions.length, icon: Star, color: 'text-indigo-600 bg-indigo-50' },
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label} className="border-0 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
@@ -117,16 +117,16 @@ export default function PlayerProfile() {
 
       <Tabs defaultValue="horses">
         <TabsList className="bg-stone-100/80">
-          <TabsTrigger value="horses">Chevaux</TabsTrigger>
-          <TabsTrigger value="competitions">Compétitions</TabsTrigger>
+          <TabsTrigger value="horses">Horses</TabsTrigger>
+          <TabsTrigger value="competitions">Competitions</TabsTrigger>
           {!isOwnProfile && <TabsTrigger value="message">Message</TabsTrigger>}
         </TabsList>
 
-        {/* Onglet Chevaux */}
+        {/* Horses tab */}
         <TabsContent value="horses" className="mt-4">
           {horses.length === 0 ? (
             <Card className="border-dashed border-2 border-stone-200">
-              <CardContent className="p-8 text-center text-stone-400">Aucun cheval</CardContent>
+              <CardContent className="p-8 text-center text-stone-400">No horses</CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -146,12 +146,12 @@ export default function PlayerProfile() {
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-stone-800 truncate">{horse.name}</p>
-                            <p className="text-xs text-stone-500 truncate">{horse.breed} · {horse.sex === 'male' ? '♂' : '♀'} · {horse.age} ans</p>
+                            <p className="text-xs text-stone-500 truncate">{horse.breed} · {horse.sex === 'male' ? '♂' : '♀'} · {horse.age} yrs</p>
                             <p className="text-xs text-stone-400 truncate">{horse.coat_color || '—'}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-amber-600">{avg}</p>
-                            <p className="text-xs text-stone-400">moy.</p>
+                            <p className="text-xs text-stone-400">avg</p>
                           </div>
                         </div>
                       </CardContent>
@@ -163,15 +163,15 @@ export default function PlayerProfile() {
           )}
         </TabsContent>
 
-        {/* Onglet Compétitions */}
+        {/* Competitions tab */}
         <TabsContent value="competitions" className="mt-4">
           <Card className="border-0 bg-white/60">
             <CardHeader>
-              <CardTitle className="text-lg">Palmarès de {player.full_name}</CardTitle>
+              <CardTitle className="text-lg">{player.full_name}'s record</CardTitle>
             </CardHeader>
             <CardContent>
               {competitions.length === 0 ? (
-                <p className="text-center text-stone-400 py-8">Aucune compétition</p>
+                <p className="text-center text-stone-400 py-8">No competitions</p>
               ) : (
                 <div className="space-y-2">
                   {competitions.map(c => (
@@ -197,23 +197,23 @@ export default function PlayerProfile() {
           </Card>
         </TabsContent>
 
-        {/* Onglet Message (seulement vers un autre joueur) */}
+        {/* Message tab (only to another player) */}
         {!isOwnProfile && (
           <TabsContent value="message" className="mt-4">
             <Card className="border-0 bg-white/60">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-indigo-500" />
-                  Envoyer un message à {player.full_name}
+                  Send a message to {player.full_name}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-stone-600 mb-2 block">Sujet</label>
+                  <label className="text-sm font-medium text-stone-600 mb-2 block">Subject</label>
                   <Input
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
-                    placeholder="Objet du message..."
+                    placeholder="Message subject..."
                   />
                 </div>
                 <div>
@@ -221,7 +221,7 @@ export default function PlayerProfile() {
                   <Textarea
                     value={content}
                     onChange={e => setContent(e.target.value)}
-                    placeholder="Votre message..."
+                    placeholder="Your message..."
                     rows={5}
                   />
                 </div>
@@ -231,7 +231,7 @@ export default function PlayerProfile() {
                   className="w-full bg-indigo-600 hover:bg-indigo-700"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Envoyer
+                  Send
                 </Button>
               </CardContent>
             </Card>

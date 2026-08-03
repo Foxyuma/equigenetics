@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollText, CheckCircle, AlertTriangle, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enGB } from 'date-fns/locale';
 
 const STUDBOOK_FEE = 1000;
 const OC_FEE = 300;
@@ -39,12 +39,12 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
 
   const registerMutation = useMutation({
     mutationFn: async (type) => {
-      if (!currentUser) throw new Error('Non connecté');
+      if (!currentUser) throw new Error('Not logged in');
       const fee = type === 'studbook' ? STUDBOOK_FEE : OC_FEE;
       const balance = currentUser.genesis_balance ?? 0;
-      if (balance < fee) throw new Error(`Fonds insuffisants. Coût : ${fee} ₲`);
+      if (balance < fee) throw new Error(`Insufficient funds. Cost: ${fee} ₲`);
 
-      // La demande est mise en attente — la commission statue au prochain tick (3h30 UTC)
+      // The request is put on hold — the committee rules at the next daily tick (3:30 UTC)
       await base44.entities.Horse.update(horse.id, {
         studbook_request_status: 'pending',
         studbook_request_type: type,
@@ -56,13 +56,13 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
         currency: 'genesis',
         amount: -fee,
         balance_after: balance - fee,
-        reason: `Demande studbook ${type === 'studbook' ? 'plein registre' : 'OC'} - ${horse.name}`,
+        reason: `Studbook request ${type === 'studbook' ? 'full registry' : 'OC'} - ${horse.name}`,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horse', horse.id] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
-      toast.success('Demande envoyée ! La commission statue au prochain changement de jour (3h30 UTC). 📜');
+      toast.success('Request sent! The committee rules at the next day change (3:30 UTC). 📜');
     },
     onError: (err) => toast.error(err.message),
   });
@@ -73,9 +73,9 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
         <CardContent className="p-4 flex items-center gap-3">
           <ScrollText className="w-5 h-5 text-stone-400" />
           <div>
-            <p className="text-sm font-semibold text-stone-700">Statut studbook</p>
+            <p className="text-sm font-semibold text-stone-700">Studbook status</p>
             <p className="text-xs text-stone-500">
-              {isRegistered ? 'Inscrit au studbook' : isOC ? 'Inscrit comme OC' : 'Non inscrit'}
+              {isRegistered ? 'Registered in studbook' : isOC ? 'Registered as OC' : 'Not registered'}
             </p>
           </div>
         </CardContent>
@@ -92,30 +92,30 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <ScrollText className="w-5 h-5 text-stone-600" />
-          <h3 className="font-semibold text-stone-800 text-sm">Inscription au studbook</h3>
-          {isRegistered && <Badge className="bg-emerald-100 text-emerald-700 border-0">✅ Plein registre</Badge>}
+          <h3 className="font-semibold text-stone-800 text-sm">Studbook Registration</h3>
+          {isRegistered && <Badge className="bg-emerald-100 text-emerald-700 border-0">✅ Full Registry</Badge>}
           {isOC && <Badge className="bg-amber-100 text-amber-700 border-0">OC</Badge>}
-          {isPending && <Badge className="bg-blue-100 text-blue-700 border-0"><Loader2 className="w-3 h-3 mr-1 animate-spin" />En attente</Badge>}
-          {isRejected && <Badge className="bg-red-100 text-red-700 border-0">❌ Refusé</Badge>}
-          {isNotRegistered && <Badge variant="outline" className="text-stone-500">Non inscrit</Badge>}
+          {isPending && <Badge className="bg-blue-100 text-blue-700 border-0"><Loader2 className="w-3 h-3 mr-1 animate-spin" />Pending</Badge>}
+          {isRejected && <Badge className="bg-red-100 text-red-700 border-0">❌ Rejected</Badge>}
+          {isNotRegistered && <Badge variant="outline" className="text-stone-500">Not registered</Badge>}
         </div>
 
         {(isRegistered || isOC) && horse.studbook_registration_date && (
           <p className="text-xs text-stone-500">
-            Inscrit le {format(new Date(horse.studbook_registration_date), 'd MMMM yyyy', { locale: fr })}
+            Registered on {format(new Date(horse.studbook_registration_date), 'd MMMM yyyy', { locale: enGB })}
           </p>
         )}
 
         {isPending && (
           <p className="text-xs text-blue-600">
-            Demande de {horse.studbook_request_type === 'studbook' ? 'plein registre' : 'OC'} en cours d'examen.
-            La commission statue au prochain changement de jour (3h30 UTC).
+            {horse.studbook_request_type === 'studbook' ? 'Full registry' : 'OC'} request under review.
+            The committee rules at the next day change (3:30 UTC).
           </p>
         )}
 
         {isRejected && (
           <div className="space-y-2">
-            <p className="text-xs text-red-600 font-semibold">Demande refusée le {format(new Date(horse.studbook_registration_date), 'd MMMM yyyy', { locale: fr })}</p>
+            <p className="text-xs text-red-600 font-semibold">Request rejected on {format(new Date(horse.studbook_registration_date), 'd MMMM yyyy', { locale: enGB })}</p>
             <div className="p-2 rounded-lg bg-red-50 border border-red-100 space-y-1">
               {(horse.studbook_rejection_reasons || []).map((reason, i) => (
                 <p key={i} className="text-xs text-red-700 flex items-start gap-1.5">
@@ -130,7 +130,7 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
         {isNotRegistered && !isPending && (
           <>
             {isRejected && (
-              <p className="text-xs text-stone-500 italic">Vous pouvez corriger les points ci-dessus et soumettre une nouvelle demande.</p>
+              <p className="text-xs text-stone-500 italic">You can fix the points above and submit a new request.</p>
             )}
             <div className="space-y-2 text-xs">
               <div className="flex items-center gap-2">
@@ -138,16 +138,16 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
                   ? <CheckCircle className="w-4 h-4 text-emerald-500" />
                   : <AlertTriangle className="w-4 h-4 text-amber-500" />}
                 <span className={fatherApproved ? 'text-stone-600' : 'text-amber-700'}>
-                  Père {fatherApproved ? 'approuvé ✅' : 'non approuvé ou inconnu'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasDnaTest
+                  Sire {fatherApproved ? 'approved ✅' : 'not approved or unknown'}
+                  </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                  {hasDnaTest
                   ? <CheckCircle className="w-4 h-4 text-emerald-500" />
                   : <AlertTriangle className="w-4 h-4 text-amber-500" />}
-                <span className={hasDnaTest ? 'text-stone-600' : 'text-amber-700'}>
-                  Test ADN {hasDnaTest ? 'effectué ✅' : 'requis pour le studbook'}
-                </span>
+                  <span className={hasDnaTest ? 'text-stone-600' : 'text-amber-700'}>
+                  DNA test {hasDnaTest ? 'done ✅' : 'required for studbook'}
+                  </span>
               </div>
             </div>
 
@@ -160,30 +160,30 @@ export default function StudbookRegistration({ horse, parents, currentUser }) {
                   size="sm"
                 >
                   {registerMutation.isPending
-                    ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />En cours…</>
-                    : <><FileText className="w-3 h-3 mr-1" /> Inscrire au studbook ({STUDBOOK_FEE} ₲)</>}
-                </Button>
-              )}
-              {canRegisterOC && (
-                <Button
+                    ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Processing…</>
+                    : <><FileText className="w-3 h-3 mr-1" /> Register in studbook ({STUDBOOK_FEE} ₲)</>}
+                  </Button>
+                  )}
+                  {canRegisterOC && (
+                  <Button
                   onClick={() => registerMutation.mutate('oc')}
                   disabled={registerMutation.isPending}
                   variant="outline"
                   size="sm"
-                >
+                  >
                   {registerMutation.isPending
-                    ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />En cours…</>
-                    : <>Inscrire comme OC ({OC_FEE} ₲)</>}
+                    ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Processing…</>
+                    : <>Register as OC ({OC_FEE} ₲)</>}
                 </Button>
               )}
             </div>
 
             {!canRegisterStudbook && !canRegisterOC && (
-              <p className="text-xs text-stone-400 italic">Ce cheval ne peut pas être inscrit au studbook.</p>
-            )}
-            {canRegisterOC && !canRegisterStudbook && (
+              <p className="text-xs text-stone-400 italic">This horse cannot be registered in the studbook.</p>
+              )}
+              {canRegisterOC && !canRegisterStudbook && (
               <p className="text-xs text-amber-600">
-                Le père n'étant pas approuvé, ce cheval ne peut être inscrit qu'en OC (Origines Constatées).
+               As the sire is not approved, this horse can only be registered as OC (Recorded Origins).
               </p>
             )}
           </>

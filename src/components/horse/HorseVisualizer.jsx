@@ -5,9 +5,9 @@ import { isPrimitiveMarked, migrateKit, getKitLabel } from '@/components/genetic
 const GENE_LABELS = {
   extension:  { label: "Extension (E)",  visible: true  },
   agouti:     { label: "Agouti (A)",     visible: true  },
-  cream:      { label: "Crème (Cr)",     visible: true  },
-  grey:       { label: "Gris (G)",       visible: true  },
-  kit:        { label: "Gène KIT",       visible: true  },
+  cream:      { label: "Cream (Cr)",     visible: true  },
+  grey:       { label: "Grey (G)",        visible: true  },
+  kit:        { label: "KIT gene",        visible: true  },
   splash:     { label: "Splash (SW)",    visible: true  },
   overo:      { label: "Overo (LWO)",    visible: true  },
   frame:      { label: "Frame (LWO)",    visible: true  },
@@ -16,12 +16,12 @@ const GENE_LABELS = {
   silver:     { label: "Silver (Z)",     visible: true  },
   mushroom:   { label: "Mushroom (mu)",  visible: true  },
   rabicano:   { label: "Rabicano (Rb)",  visible: true  },
-  leopard:    { label: "Léopard (LP)",   visible: true  },
+  leopard:    { label: "Leopard (LP)",   visible: true  },
   pattern1:   { label: "Pattern1",       visible: true  },
   sooty:      { label: "Sooty",          visible: true  },
   flaxen:     { label: "Flaxen (f)",     visible: true  },
   pangare:    { label: "Pangaré (P)",    visible: true  },
-  bringe:     { label: "Bringé (BR1)",   visible: true  },
+  bringe:     { label: "Brindle (BR1)",  visible: true  },
 };
 
 const NEUTRAL = {
@@ -67,7 +67,7 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
         ) : (
           <img
             src={photoUrl}
-            alt={coatColor || 'Cheval'}
+            alt={coatColor || 'Horse'}
             className="w-full h-full object-contain"
             onError={() => setImgError(true)}
             loading="lazy"
@@ -89,9 +89,9 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
           </div>
         )}
 
-          {/* Marques primitives (Zébrure/chaperon/morsure de cigogne) */}
-        {hasPrimitiveMarkings && (
-          <div title="Marques primitives (nd1)" className="absolute bottom-4 right-3 flex flex-col gap-0.5 opacity-80">
+          {/* Primitive markings (Stripes/dun markings/stonewalling) */}
+          {hasPrimitiveMarkings && (
+          <div title="Primitive markings (nd1)" className="absolute bottom-4 right-3 flex flex-col gap-0.5 opacity-80">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="w-6 h-1 rounded bg-amber-700/70" style={{ transform: `rotate(${((i / 4) * 60 - 30)}deg)` }} />
             ))}
@@ -101,10 +101,10 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
       {/* Coat label */}
         {showGenotype && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold text-center backdrop-blur-sm">
-            <div className="whitespace-nowrap">{coatInfo?.display || coatColor || 'Couleur inconnue'}</div>
+            <div className="whitespace-nowrap">{coatInfo?.display || coatColor || 'Unknown color'}</div>
             {showBirth && (
               <div className="whitespace-nowrap text-[9px] text-stone-300/80 font-normal mt-0.5">
-                Sous : {coatInfo.birth}
+               Under: {coatInfo.birth}
               </div>
             )}
           </div>
@@ -113,7 +113,7 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
         {/* Foal badge */}
         {isFoal && (
           <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow">
-            🍼 Poulain
+           🍼 Foal
           </div>
         )}
       </div>
@@ -123,12 +123,12 @@ export default function HorseVisualizer({ genotype, coatColor, horseId, breed, a
         <div className="w-full max-w-xs">
           <div className="flex gap-3 flex-wrap justify-center">
             <span className="flex items-center gap-1 text-xs text-stone-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-200 border border-amber-400 inline-block" />
-              Gène visible
+             <span className="w-2.5 h-2.5 rounded-full bg-amber-200 border border-amber-400 inline-block" />
+             Visible gene
             </span>
             <span className="flex items-center gap-1 text-xs text-stone-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-stone-100 border border-stone-300 inline-block" />
-              Récessif
+             <span className="w-2.5 h-2.5 rounded-full bg-stone-100 border border-stone-300 inline-block" />
+             Recessive
             </span>
           </div>
         </div>

@@ -73,7 +73,7 @@ export default function ReproductionPanel({ mare }) {
   const [breedFilter, setBreedFilter] = useState('');
   const ownMales = ownHorses.filter(h => h.sex === 'male');
   const allStallions = stallionSource === 'own'
-    ? ownMales.map(h => ({ ...h, stallion_name: h.name, price: 0, owner_name: 'Mon écurie', is_own: true }))
+    ? ownMales.map(h => ({ ...h, stallion_name: h.name, price: 0, owner_name: 'My stable', is_own: true }))
     : stallionOffers;
   const stallionsToShow = breedFilter
     ? allStallions.filter(s => s.breed === breedFilter)
@@ -118,26 +118,26 @@ export default function ReproductionPanel({ mare }) {
       death_age: deathAge,
       ...foalTraits,
     });
-    // Note: sex, stats et couleur sont des surprises — non révélés avant la naissance
+    // Note: sex, stats and color are surprises — not revealed before birth
   };
 
   const confirmBreedingMutation = useMutation({
     mutationFn: async () => {
-      if (!currentUser) throw new Error('Non connecté');
+      if (!currentUser) throw new Error('Not logged in');
       const price = selectedStallion.is_own ? 0 : calcDynamicPrice(selectedStallion);
       if (price > 0) {
         const balance = currentUser.genesis_balance ?? 0;
-        if (balance < price) throw new Error('Fonds insuffisants');
+        if (balance < price) throw new Error('Insufficient funds');
         await base44.auth.updateMe({ genesis_balance: balance - price });
         await base44.entities.Transaction.create({
           user_email: currentUser.email,
           currency: 'genesis',
           amount: -price,
           balance_after: balance - price,
-          reason: `Saillie - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
+          reason: `Breeding - ${selectedStallion.stallion_name} (${selectedStallion.breed})`,
         });
       }
-      // Consomme 25 d'énergie à la jument
+      // Consumes 25 energy from the mare
       const newEnergy = Math.max(0, (mare.energy ?? 100) - 25);
       await base44.entities.Horse.update(mare.id, { energy: newEnergy });
 
@@ -180,10 +180,10 @@ export default function ReproductionPanel({ mare }) {
     try {
       const affixes = currentUser?.affixes ?? [];
       const affixInfo = selectedAffixe
-        ? `L'affixe d'élevage est "${selectedAffixe.name}" (placé en ${selectedAffixe.position === 'prefix' ? 'préfixe' : 'suffixe'}).`
+        ? `The breeding affix is "${selectedAffixe.name}" (placed as ${selectedAffixe.position === 'prefix' ? 'prefix' : 'suffixe'}).`
         : affixes.length > 0
-          ? `L'éleveur a l'affixe "${affixes[0].name}" mais ne l'a pas sélectionné.`
-          : 'Pas d\'affixe d\'élevage.';
+          ? `The breeder has affix "${affixes[0].name}" but has not selected it.`
+          : 'No breeding affix.';
       const prompt = `You are an expert in naming purebred horses. Suggest 5 short elegant names for a ${birthingFoal.foal_breed} foal, ${birthingFoal.foal_coat_color} coat, born from sire ${birthingFoal.father_name} and dam ${mare.name}. ${affixInfo} The names should sound noble, poetic, and fitting for equestrian tradition. Return only the 5 names, one per line, no numbering or explanation.`;
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const names = result.split('\n').map(n => n.trim()).filter(Boolean).slice(0, 5);
@@ -208,7 +208,7 @@ export default function ReproductionPanel({ mare }) {
 
   const birthFoalMutation = useMutation({
     mutationFn: async () => {
-      if (!currentUser || !birthingFoal || !foalName) throw new Error('Données manquantes');
+      if (!currentUser || !birthingFoal || !foalName) throw new Error('Missing data');
       const foalTraits = generateFoalTraits(
         birthingFoal.father_id ? { id: birthingFoal.father_id } : null,
         mare,
@@ -248,7 +248,7 @@ export default function ReproductionPanel({ mare }) {
       queryClient.invalidateQueries({ queryKey: ['horses'] });
       queryClient.invalidateQueries({ queryKey: ['breeding-pending', mare.id] });
       queryClient.invalidateQueries({ queryKey: ['me'] });
-      toast.success(`${foalName} est né(e) ! 🐴`);
+      toast.success(`${foalName} is born! 🐴`);
       setBirthingFoal(null);
       setFoalName('');
       setSelectedAffixe(null);
@@ -260,7 +260,7 @@ export default function ReproductionPanel({ mare }) {
   const readyToBeborn = pendingBreedings.filter(b => isPast(parseISO(b.foal_due_date)));
   const waitingBreedings = pendingBreedings.filter(b => !isPast(parseISO(b.foal_due_date)));
 
-  // Vérification âge minimum pour la reproduction
+  // Minimum age check for breeding
   if ((mare.age ?? 0) < 3) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
@@ -273,17 +273,17 @@ export default function ReproductionPanel({ mare }) {
     );
   }
 
-  // Vérification consanguinité directe (parent × enfant)
+  // Direct inbreeding check (parent × child)
   const isIncestPair = (stallion) => {
     if (!stallion || !mare) return false;
-    // Poulain × sa mère
+    // Foal × its dam
     if (stallion.mother_id && stallion.mother_id === mare.id) return true;
-    // Fille × son père
+    // Filly × her sire
     if (mare.father_id && mare.father_id === stallion.id) return true;
     return false;
   };
 
-  // Bloque l'étalon sélectionné s'il est dans une relation incestueuse
+  // Blocks the selected stallion if in an incestuous relationship
   const breedingBlocked = selectedStallion && isIncestPair(selectedStallion);
 
   return (
@@ -314,7 +314,7 @@ export default function ReproductionPanel({ mare }) {
                     {/* Sélection affixe */}
                     {(currentUser?.affixes ?? []).length > 0 && (
                       <div>
-                        <p className="text-xs text-stone-500 font-medium mb-1.5">Affixe d'élevage</p>
+                        <p className="text-xs text-stone-500 font-medium mb-1.5">Breeding affix</p>
                         <div className="flex flex-wrap gap-1.5">
                           <button
                             onClick={() => { setSelectedAffixe(null); localStorage.removeItem('equigenesis_last_affixe'); }}
@@ -477,12 +477,12 @@ export default function ReproductionPanel({ mare }) {
                   const breedingImpact = getBreedingImpact(approvalStatus);
                   const incestBlocked = isIncestPair(s);
                   const approvalConfig = {
-                    elite_approved: { label: '⭐ Élite ×2.5', color: 'bg-yellow-100 text-yellow-700', multLabel: '×2.5', mult: 2.5 },
+                    elite_approved: { label: '⭐ Elite ×2.5', color: 'bg-yellow-100 text-yellow-700', multLabel: '×2.5', mult: 2.5 },
                     approved_for_sport_breeding: { label: '🏆 Sport ×1.8', color: 'bg-green-100 text-green-700', multLabel: '×1.8', mult: 1.8 },
-                    approved_for_breeding: { label: '✅ Approuvé ×1.4', color: 'bg-blue-100 text-blue-700', multLabel: '×1.4', mult: 1.4 },
-                    not_evaluated: { label: '⏳ En attente ×1.0', color: 'bg-stone-100 text-stone-400', multLabel: '×1.0', mult: 1.0 },
-                    rejected: { label: '❌ Refusé ×0.7', color: 'bg-red-100 text-red-700', multLabel: '×0.7', mult: 0.7 },
-                  }[s.breeding_approval_status] || { label: '⏳ En attente ×1.0', color: 'bg-stone-100 text-stone-400', multLabel: '×1.0', mult: 1.0 };
+                    approved_for_breeding: { label: '✅ Approved ×1.4', color: 'bg-blue-100 text-blue-700', multLabel: '×1.4', mult: 1.4 },
+                    not_evaluated: { label: '⏳ Pending ×1.0', color: 'bg-stone-100 text-stone-400', multLabel: '×1.0', mult: 1.0 },
+                    rejected: { label: '❌ Rejected ×0.7', color: 'bg-red-100 text-red-700', multLabel: '×0.7', mult: 0.7 },
+                    }[s.breeding_approval_status] || { label: '⏳ Pending ×1.0', color: 'bg-stone-100 text-stone-400', multLabel: '×1.0', mult: 1.0 };
                   return (
                    <Card
                       key={s.id}
@@ -496,13 +496,13 @@ export default function ReproductionPanel({ mare }) {
                             <p className="text-xs text-stone-400">{s.owner_name}</p>
                           </div>
                           {incestBlocked && (
-                            <Badge className="bg-red-100 text-red-700 border-0 text-xs">🚫 Parent/enfant</Badge>
-                          )}
-                          {s.is_own
-                              ? <span className="text-emerald-600 font-bold text-sm">Gratuit</span>
+                            <Badge className="bg-red-100 text-red-700 border-0 text-xs">🚫 Parent/child</Badge>
+                            )}
+                            {s.is_own
+                             ? <span className="text-emerald-600 font-bold text-sm">Free</span>
                               : <div className="text-right">
                                   <p className="text-amber-700 font-bold text-sm">{calcDynamicPrice(s).toLocaleString('en-GB')} ₲</p>
-                                  <Badge className={`border-0 text-[10px] ${approvalConfig.color}`} title={`Multiplicateur de prix : ${approvalConfig.multLabel}`}>
+                                  <Badge className={`border-0 text-[10px] ${approvalConfig.color}`} title={`Price multiplier: ${approvalConfig.multLabel}`}>
                                     {approvalConfig.label}
                                   </Badge>
                                 </div>
@@ -516,7 +516,7 @@ export default function ReproductionPanel({ mare }) {
                           <div className="flex items-center gap-1">
                             <TrendingUp className="w-3 h-3 text-emerald-500" />
                             <span className="text-xs text-stone-500">
-                              Moy. <strong>{Math.round(Object.values(s.stats).reduce((a, b) => a + b, 0) / Object.keys(s.stats).length)}</strong>
+                              Avg <strong>{Math.round(Object.values(s.stats).reduce((a, b) => a + b, 0) / Object.keys(s.stats).length)}</strong>
                             </span>
                           </div>
                         )}
@@ -529,7 +529,7 @@ export default function ReproductionPanel({ mare }) {
                              ))}
                            </div>
                          )}
-                         {/* Statut d'approbation — visible seulement si restriction ou non évalué */}
+                         {/* Approval status — visible only if restriction or not evaluated */}
                          {(approvalStatus === 'not_evaluated' || breedingImpact.restrictions.length > 0) && (
                            <div className="text-xs text-stone-600 mt-1.5 p-2 rounded bg-stone-50">
                              <div className="flex items-center gap-2 mb-1">
@@ -570,7 +570,7 @@ export default function ReproductionPanel({ mare }) {
 
         {selectedStallion && !breedingBlocked && (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-stone-600">Date de la saillie</p>
+            <p className="text-sm font-medium text-stone-600">Breeding date</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setBreedingDateChoice('immediate')}
@@ -588,7 +588,7 @@ export default function ReproductionPanel({ mare }) {
               >
                 <Calendar className="w-4 h-4 text-blue-500" />
                 <div className="text-left">
-                  <p className="font-semibold text-stone-800">Dans 30 jours</p>
+                  <p className="font-semibold text-stone-800">In 30 days</p>
                   <p className="text-xs text-stone-400">
                     Birth on {format(addDays(new Date(new Date().setDate(new Date().getDate() + 30)), GESTATION_DAYS), 'd MMM yyyy', { locale: enGB })}
                   </p>
@@ -634,7 +634,7 @@ export default function ReproductionPanel({ mare }) {
         {foalPreview && (
           <Card className="border-0 bg-gradient-to-br from-amber-50/60 to-pink-50/60">
             <CardContent className="p-5 space-y-4">
-              {/* Impact de l'approbation du père */}
+              {/* Sire approval impact */}
               {selectedStallion && (() => {
                 const impact = getBreedingImpact(selectedStallion.breeding_approval_status || 'not_evaluated');
                 const statusColors = {
@@ -699,7 +699,7 @@ export default function ReproductionPanel({ mare }) {
                 </div>
               )}
 
-              {/* Surprise : on ne révèle pas le sexe, les stats ni la couleur */}
+              {/* Surprise: sex, stats and color are not revealed */}
               <div className="p-4 rounded-xl bg-gradient-to-br from-pink-50 to-amber-50 border-2 border-dashed border-amber-300 text-center">
                 <p className="text-2xl mb-1">🎁</p>
                 <p className="font-semibold text-amber-800">It's a surprise!</p>

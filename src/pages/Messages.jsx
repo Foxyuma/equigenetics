@@ -43,7 +43,7 @@ export default function Messages() {
         sender_name: currentUser.full_name,
         recipient_email: recipientEmail,
         recipient_name: recipient?.full_name || recipientEmail,
-        subject: subject || 'Sans objet',
+        subject: subject || 'No subject',
         content,
         is_read: false,
       });
@@ -54,7 +54,7 @@ export default function Messages() {
       setRecipientEmail('');
       setSubject('');
       setContent('');
-      toast.success('Message envoyé !');
+      toast.success('Message sent!');
     },
   });
 
@@ -68,7 +68,7 @@ export default function Messages() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       setSelectedMessage(null);
-      toast.success('Message supprimé');
+      toast.success('Message deleted');
     },
   });
 
@@ -86,7 +86,7 @@ export default function Messages() {
   const MessageList = ({ messages, type }) => (
     <div className="space-y-2">
       {messages.length === 0 ? (
-        <p className="text-center text-stone-400 py-8">Aucun message</p>
+        <p className="text-center text-stone-400 py-8">No messages</p>
       ) : (
         messages.map(msg => (
           <div
@@ -107,10 +107,10 @@ export default function Messages() {
                     {type === 'received' ? msg.sender_name : msg.recipient_name}
                   </p>
                   {!msg.is_read && type === 'received' && (
-                    <Badge className="bg-blue-600 text-white border-0 text-xs">Nouveau</Badge>
+                    <Badge className="bg-blue-600 text-white border-0 text-xs">New</Badge>
                   )}
                 </div>
-                <p className="text-xs text-stone-500">{msg.subject || 'Sans objet'}</p>
+                <p className="text-xs text-stone-500">{msg.subject || 'No subject'}</p>
               </div>
               <span className="text-xs text-stone-400">
                 {format(new Date(msg.created_date), 'dd/MM HH:mm')}
@@ -127,40 +127,40 @@ export default function Messages() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Messagerie</h1>
-          <p className="text-stone-500 mt-1">Communiquez avec les autres joueurs</p>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Messages</h1>
+          <p className="text-stone-500 mt-1">Communicate with other players</p>
         </div>
         <Dialog open={newMessageOpen} onOpenChange={setNewMessageOpen}>
           <DialogTrigger asChild>
             <Button className="bg-indigo-600 hover:bg-indigo-700">
               <Send className="w-4 h-4 mr-2" />
-              Nouveau Message
+              New Message
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Nouveau Message</DialogTitle>
+              <DialogTitle>New Message</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-stone-600 mb-2 block">Destinataire</label>
+                <label className="text-sm font-medium text-stone-600 mb-2 block">Recipient</label>
                 <select
                   value={recipientEmail}
                   onChange={(e) => setRecipientEmail(e.target.value)}
                   className="w-full px-3 py-2 rounded-md border border-stone-200 text-sm"
                 >
-                  <option value="">Sélectionner un joueur...</option>
+                  <option value="">Select a player...</option>
                   {users.filter(u => u.email !== currentUser?.email).map(u => (
                     <option key={u.id} value={u.email}>{u.full_name} ({u.email})</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium text-stone-600 mb-2 block">Sujet</label>
+                <label className="text-sm font-medium text-stone-600 mb-2 block">Subject</label>
                 <Input
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Objet du message..."
+                  placeholder="Message subject..."
                 />
               </div>
               <div>
@@ -168,7 +168,7 @@ export default function Messages() {
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Votre message..."
+                  placeholder="Your message..."
                   rows={6}
                 />
               </div>
@@ -178,7 +178,7 @@ export default function Messages() {
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
               >
                 <Send className="w-4 h-4 mr-2" />
-                Envoyer
+                Send
               </Button>
             </div>
           </DialogContent>
@@ -190,14 +190,14 @@ export default function Messages() {
           <CardContent className="p-4 text-center">
             <Inbox className="w-6 h-6 mx-auto text-blue-600 mb-2" />
             <p className="text-2xl font-bold text-blue-800">{receivedMessages.length}</p>
-            <p className="text-xs text-blue-600">Messages reçus</p>
+            <p className="text-xs text-blue-600">Received messages</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-purple-50">
           <CardContent className="p-4 text-center">
             <Mail className="w-6 h-6 mx-auto text-purple-600 mb-2" />
             <p className="text-2xl font-bold text-purple-800">{unreadCount}</p>
-            <p className="text-xs text-purple-600">Non lus</p>
+            <p className="text-xs text-purple-600">Unread</p>
           </CardContent>
         </Card>
       </div>
@@ -205,7 +205,7 @@ export default function Messages() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-0 bg-white/60">
           <CardHeader>
-            <CardTitle className="text-lg">Boîte de réception</CardTitle>
+            <CardTitle className="text-lg">Inbox</CardTitle>
           </CardHeader>
           <CardContent className="max-h-[600px] overflow-y-auto">
             <MessageList messages={receivedMessages} type="received" />
@@ -228,29 +228,29 @@ export default function Messages() {
             <CardContent className="space-y-4">
               <div>
                 <p className="text-xs text-stone-500 mb-1">
-                  De: <strong>{selectedMessage.sender_name}</strong> ({selectedMessage.sender_email})
+                  From: <strong>{selectedMessage.sender_name}</strong> ({selectedMessage.sender_email})
                 </p>
                 <p className="text-xs text-stone-500 mb-1">
-                  À: <strong>{selectedMessage.recipient_name}</strong>
+                  To: <strong>{selectedMessage.recipient_name}</strong>
                 </p>
                 <p className="text-xs text-stone-500">
-                  {format(new Date(selectedMessage.created_date), 'dd/MM/yyyy à HH:mm')}
+                  {format(new Date(selectedMessage.created_date), 'dd/MM/yyyy HH:mm')}
                 </p>
               </div>
               <div className="border-t border-stone-200 pt-4">
-                <h3 className="font-semibold text-stone-800 mb-2">{selectedMessage.subject || 'Sans objet'}</h3>
+                <h3 className="font-semibold text-stone-800 mb-2">{selectedMessage.subject || 'No subject'}</h3>
                 <p className="text-sm text-stone-600 whitespace-pre-wrap">{selectedMessage.content}</p>
               </div>
               <Button
                 onClick={() => {
                   setRecipientEmail(selectedMessage.sender_email);
-                  setSubject(`Re: ${selectedMessage.subject || 'Sans objet'}`);
+                  setSubject(`Re: ${selectedMessage.subject || 'No subject'}`);
                   setNewMessageOpen(true);
                 }}
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
-                Répondre
+                Reply
               </Button>
             </CardContent>
           </Card>
@@ -258,8 +258,8 @@ export default function Messages() {
           <Card className="border-0 bg-gradient-to-br from-stone-50 to-indigo-50">
             <CardContent className="p-12 text-center">
               <Mail className="w-16 h-16 mx-auto text-stone-300 mb-4" />
-              <h3 className="text-lg font-semibold text-stone-600 mb-2">Aucun message sélectionné</h3>
-              <p className="text-stone-400">Cliquez sur un message pour le lire</p>
+              <h3 className="text-lg font-semibold text-stone-600 mb-2">No message selected</h3>
+              <p className="text-stone-400">Click a message to read it</p>
             </CardContent>
           </Card>
         )}

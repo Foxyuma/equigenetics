@@ -10,15 +10,15 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-yellow-300',
     textColor: 'text-yellow-800',
     icon: '⭐',
-    title: 'Étalon Star',
-    subtitle: 'Reproducteur d\'élite',
+    title: 'Star Stallion',
+    subtitle: 'Elite breeding stallion',
     benefits: [
-      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
-      { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 2.0' },
-      { icon: <Award className="w-4 h-4" />, text: 'Prix de saillie majoré de 50%' },
-      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation augmenté' },
-      { icon: <Award className="w-4 h-4" />, text: 'Filtre premium sur le marché' },
-      { icon: <Award className="w-4 h-4" />, text: 'Visibilité maximale des poulains' }
+      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Full studbook registration for foals' },
+      { icon: <TrendingUp className="w-4 h-4" />, text: 'Value multiplied by 2.0' },
+      { icon: <Award className="w-4 h-4" />, text: 'Stud fee increased by 50%' },
+      { icon: <Zap className="w-4 h-4" />, text: 'Increased reputation bonus' },
+      { icon: <Award className="w-4 h-4" />, text: 'Premium market filter' },
+      { icon: <Award className="w-4 h-4" />, text: 'Maximum foal visibility' }
     ]
   },
   provisional: {
@@ -27,14 +27,14 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-green-300',
     textColor: 'text-green-800',
     icon: '✅',
-    title: 'Approbation Provisoire',
-    subtitle: 'Étalon jeune en période probatoire',
+    title: 'Provisional Approval',
+    subtitle: 'Young stallion in probationary period',
     benefits: [
-      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
-      { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.5' },
-      { icon: <Award className="w-4 h-4" />, text: 'Prix de saillie standard' },
-      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation réduit' },
-      { icon: <Award className="w-4 h-4" />, text: 'Inspection future obligatoire' }
+      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Full studbook registration for foals' },
+      { icon: <TrendingUp className="w-4 h-4" />, text: 'Value multiplied by 1.5' },
+      { icon: <Award className="w-4 h-4" />, text: 'Standard stud fee' },
+      { icon: <Zap className="w-4 h-4" />, text: 'Reduced reputation bonus' },
+      { icon: <Award className="w-4 h-4" />, text: 'Mandatory future inspection' }
     ]
   },
   approved: {
@@ -43,13 +43,13 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-blue-300',
     textColor: 'text-blue-800',
     icon: '📋',
-    title: 'Approuvé',
-    subtitle: 'Reproducteur reconnu',
+    title: 'Approved',
+    subtitle: 'Recognized breeding stallion',
     benefits: [
-      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
-      { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.2' },
-      { icon: <Award className="w-4 h-4" />, text: 'Prix de saillie standard' },
-      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation normal' }
+      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Full studbook registration for foals' },
+      { icon: <TrendingUp className="w-4 h-4" />, text: 'Value multiplied by 1.2' },
+      { icon: <Award className="w-4 h-4" />, text: 'Standard stud fee' },
+      { icon: <Zap className="w-4 h-4" />, text: 'Normal reputation bonus' }
     ]
   },
   approved_restricted: {
@@ -58,14 +58,14 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-amber-300',
     textColor: 'text-amber-800',
     icon: '⚠️',
-    title: 'Approuvé avec Restrictions',
-    subtitle: 'Approbation limitée',
+    title: 'Approved with Restrictions',
+    subtitle: 'Limited approval',
     benefits: [
-      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Inscription studbook complète des poulains' },
-      { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 1.1' },
-      { icon: <AlertTriangle className="w-4 h-4" />, text: 'Saillies limitées' },
-      { icon: <Award className="w-4 h-4" />, text: 'Juments sélectionnées uniquement' },
-      { icon: <Zap className="w-4 h-4" />, text: 'Bonus de réputation réduit' }
+      { icon: <CheckCircle2 className="w-4 h-4" />, text: 'Full studbook registration for foals' },
+      { icon: <TrendingUp className="w-4 h-4" />, text: 'Value multiplied by 1.1' },
+      { icon: <AlertTriangle className="w-4 h-4" />, text: 'Limited breedings' },
+      { icon: <Award className="w-4 h-4" />, text: 'Selected mares only' },
+      { icon: <Zap className="w-4 h-4" />, text: 'Reduced reputation bonus' }
     ]
   },
   not_approved: {
@@ -74,13 +74,13 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-red-300',
     textColor: 'text-red-800',
     icon: '❌',
-    title: 'Non Approuvé',
-    subtitle: 'Reproduction en OC uniquement',
+    title: 'Not Approved',
+    subtitle: 'Breeding in OC registry only',
     benefits: [
-      { icon: <XCircle className="w-4 h-4" />, text: 'Reproduction possible mais poulains en OC' },
-      { icon: <TrendingUp className="w-4 h-4" />, text: 'Valeur multipliée par 0.6' },
-      { icon: <Lock className="w-4 h-4" />, text: 'Pas de reconnaissance studbook du père' },
-      { icon: <XCircle className="w-4 h-4" />, text: 'Marché fermé aux poulains approuvés' }
+      { icon: <XCircle className="w-4 h-4" />, text: 'Breeding possible but foals registered as OC' },
+      { icon: <TrendingUp className="w-4 h-4" />, text: 'Value multiplied by 0.6' },
+      { icon: <Lock className="w-4 h-4" />, text: 'No studbook recognition from the sire' },
+      { icon: <XCircle className="w-4 h-4" />, text: 'Market closed to approved foals' }
     ]
   },
   not_evaluated: {
@@ -89,12 +89,12 @@ const APPROVAL_BENEFITS = {
     borderColor: 'border-stone-300',
     textColor: 'text-stone-800',
     icon: '❓',
-    title: 'Non Évalué',
-    subtitle: 'En attente d\'inspection studbook',
+    title: 'Not Evaluated',
+    subtitle: 'Pending studbook inspection',
     benefits: [
-      { icon: <Zap className="w-4 h-4" />, text: 'Reproduction avec poulains potentiellement OC' },
-      { icon: <Award className="w-4 h-4" />, text: 'Valeur neutre' },
-      { icon: <Award className="w-4 h-4" />, text: 'Accès à l\'inspection pour le statut' }
+      { icon: <Zap className="w-4 h-4" />, text: 'Breeding with potentially OC foals' },
+      { icon: <Award className="w-4 h-4" />, text: 'Neutral value' },
+      { icon: <Award className="w-4 h-4" />, text: 'Access to inspection for status' }
     ]
   }
 };

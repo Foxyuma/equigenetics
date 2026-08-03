@@ -10,10 +10,10 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const PACKAGES = [
-  { id: 'p1', label: '100 Crédits', credits: 100, price: '3,99 €', rate: 'RATE_100', popular: false },
-  { id: 'p2', label: '300 Crédits', credits: 300, price: '8,99 €', rate: 'RATE_300', popular: true },
-  { id: 'p3', label: '700 Crédits', credits: 700, price: '17,99 €', rate: 'RATE_700', popular: false },
-  { id: 'p4', label: '1500 Crédits', credits: 1500, price: '39,99 €', rate: 'RATE_1500', popular: false },
+  { id: 'p1', label: '100 Credits', credits: 100, price: '€3.99', rate: 'RATE_100', popular: false },
+  { id: 'p2', label: '300 Credits', credits: 300, price: '€8.99', rate: 'RATE_300', popular: true },
+  { id: 'p3', label: '700 Credits', credits: 700, price: '€17.99', rate: 'RATE_700', popular: false },
+  { id: 'p4', label: '1500 Credits', credits: 1500, price: '€39.99', rate: 'RATE_1500', popular: false },
 ];
 
 export default function BuyCredits() {
@@ -48,13 +48,13 @@ export default function BuyCredits() {
         currency: 'credits',
         amount: selectedPackage.credits,
         balance_after: newBalance,
-        reason: `Achat de crédits - ${selectedPackage.label}`,
+        reason: `Credit purchase - ${selectedPackage.label}`,
       });
       queryClient.invalidateQueries({ queryKey: ['me'] });
       setSuccess(true);
-      toast.success(`+${selectedPackage.credits} crédits ajoutés !`);
+      toast.success(`+${selectedPackage.credits} credits added!`);
     } else {
-      toast.error('Code invalide ou déjà utilisé. Veuillez réessayer.');
+      toast.error('Invalid or already used code. Please try again.');
     }
     setValidating(false);
   };
@@ -62,15 +62,15 @@ export default function BuyCredits() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <Link to="/Profile" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors">
-        <ArrowLeft className="w-4 h-4" />Retour
+        <ArrowLeft className="w-4 h-4" />Back
       </Link>
 
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-200 mb-2">
           <Sparkles className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-stone-800">Acheter des Crédits</h1>
-        <p className="text-stone-500">Solde actuel : <span className="font-bold text-violet-600">{user?.credits_balance ?? 0} ✦</span></p>
+        <h1 className="text-3xl font-bold text-stone-800">Buy Credits</h1>
+        <p className="text-stone-500">Current balance: <span className="font-bold text-violet-600">{user?.credits_balance ?? 0} ✦</span></p>
       </div>
 
       {success ? (
@@ -79,10 +79,10 @@ export default function BuyCredits() {
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
               <Check className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-green-800">Paiement validé !</h2>
-            <p className="text-green-700">+{selectedPackage.credits} crédits ont été ajoutés à votre compte.</p>
+            <h2 className="text-2xl font-bold text-green-800">Payment validated!</h2>
+            <p className="text-green-700">+{selectedPackage.credits} credits have been added to your account.</p>
             <Button onClick={() => { setSuccess(false); setSelectedPackage(null); setCode(''); }} variant="outline">
-              Acheter plus de crédits
+              Buy more credits
             </Button>
           </CardContent>
         </Card>
@@ -90,7 +90,7 @@ export default function BuyCredits() {
         <>
           {/* Step 1: Choose package */}
           <div>
-            <p className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-3">1. Choisissez votre offre</p>
+            <p className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-3">1. Choose your offer</p>
             <div className="grid grid-cols-2 gap-3">
               {PACKAGES.map(pkg => (
                 <button
@@ -103,7 +103,7 @@ export default function BuyCredits() {
                   }`}
                 >
                   {pkg.popular && (
-                    <Badge className="absolute -top-2.5 right-3 bg-violet-500 text-white border-0 text-xs">Populaire</Badge>
+                    <Badge className="absolute -top-2.5 right-3 bg-violet-500 text-white border-0 text-xs">Popular</Badge>
                   )}
                   <p className="text-lg font-bold text-stone-800">{pkg.label}</p>
                   <p className="text-2xl font-extrabold text-violet-600 mt-1">{pkg.price}</p>
@@ -121,13 +121,13 @@ export default function BuyCredits() {
           {selectedPackage && (
             <Card className="border-0 bg-white/80">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base text-stone-700">2. Payez via Dedipass</CardTitle>
+                <CardTitle className="text-base text-stone-700">2. Pay via Dedipass</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200">
                   <AlertTriangle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-blue-700">
-                    Rendez-vous sur <strong>dedipass.com</strong>, sélectionnez l'offre correspondant à <strong>{selectedPackage.label}</strong>, effectuez le paiement et entrez le code reçu ci-dessous.
+                   Go to <strong>dedipass.com</strong>, select the offer matching <strong>{selectedPackage.label}</strong>, complete the payment and enter the received code below.
                   </p>
                 </div>
 
@@ -138,7 +138,7 @@ export default function BuyCredits() {
                   className="block"
                 >
                   <Button className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-lg">
-                    Payer {selectedPackage.price} sur Dedipass →
+                   Pay {selectedPackage.price} on Dedipass →
                   </Button>
                 </a>
               </CardContent>
@@ -149,11 +149,11 @@ export default function BuyCredits() {
           {selectedPackage && (
             <Card className="border-0 bg-white/80">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base text-stone-700">3. Entrez votre code</CardTitle>
+                <CardTitle className="text-base text-stone-700">3. Enter your code</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Input
-                  placeholder="Code reçu après paiement..."
+                  placeholder="Code received after payment..."
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   className="text-center font-mono text-lg tracking-widest"
@@ -163,7 +163,7 @@ export default function BuyCredits() {
                   disabled={!code.trim() || validating}
                   className="w-full bg-stone-800 hover:bg-stone-900"
                 >
-                  {validating ? 'Validation...' : 'Valider le code'}
+                  {validating ? 'Validating...' : 'Validate code'}
                 </Button>
               </CardContent>
             </Card>

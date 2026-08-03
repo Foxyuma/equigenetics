@@ -1,7 +1,7 @@
 // Paddock type configuration - effects and visuals
 export const PADDOCK_TYPES = {
   pasture: {
-    label: "Prairie",
+    label: "Pasture",
     icon: "🌿",
     color: "from-green-400 to-emerald-500",
     bg: "bg-green-50",
@@ -10,10 +10,10 @@ export const PADDOCK_TYPES = {
     morale_bonus: 10,
     energy_recovery_rate: 12,
     capacity: 6,
-    description: "Grand espace vert. Excellent pour le moral et la récupération naturelle.",
+    description: "Large green space. Excellent for morale and natural recovery.",
   },
   training: {
-    label: "Entraînement",
+    label: "Training",
     icon: "🏋️",
     color: "from-blue-400 to-blue-600",
     bg: "bg-blue-50",
@@ -22,10 +22,10 @@ export const PADDOCK_TYPES = {
     morale_bonus: 0,
     energy_recovery_rate: 6,
     capacity: 3,
-    description: "Enclos équipé pour l'effort. Récupération plus lente mais performances accrues.",
+    description: "Paddock equipped for effort. Slower recovery but increased performance.",
   },
   recovery: {
-    label: "Repos",
+    label: "Rest",
     icon: "💤",
     color: "from-purple-400 to-violet-500",
     bg: "bg-purple-50",
@@ -34,10 +34,10 @@ export const PADDOCK_TYPES = {
     morale_bonus: 5,
     energy_recovery_rate: 20,
     capacity: 4,
-    description: "Enclos calme et confortable. Récupération d'énergie maximale.",
+    description: "Calm and comfortable paddock. Maximum energy recovery.",
   },
   quarantine: {
-    label: "Quarantaine",
+    label: "Quarantine",
     icon: "🔒",
     color: "from-red-400 to-rose-500",
     bg: "bg-red-50",
@@ -46,10 +46,10 @@ export const PADDOCK_TYPES = {
     morale_bonus: -10,
     energy_recovery_rate: 8,
     capacity: 2,
-    description: "Isolement sanitaire. Moral réduit, prévient la propagation des maladies.",
+    description: "Sanitary isolation. Reduced morale, prevents disease spread.",
   },
   foaling: {
-    label: "Poulinage",
+    label: "Foaling",
     icon: "🐣",
     color: "from-pink-400 to-rose-400",
     bg: "bg-pink-50",
@@ -58,6 +58,6 @@ export const PADDOCK_TYPES = {
     morale_bonus: 15,
     energy_recovery_rate: 14,
     capacity: 2,
-    description: "Enclos douillet pour les juments gestantes. Excellent moral.",
+    description: "Cozy paddock for pregnant mares. Excellent morale.",
   },
 };

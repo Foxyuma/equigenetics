@@ -6,25 +6,25 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar
 } from 'recharts';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enGB } from 'date-fns/locale';
 
 const DISCIPLINE_LABELS = {
-  dressage: 'Dressage', show_jumping: 'Saut', cross_country: 'Cross', endurance: 'Endurance',
+  dressage: 'Dressage', show_jumping: 'Jumping', cross_country: 'Cross Country', endurance: 'Endurance',
   reining: 'Reining', barrel_racing: 'Barrel', polo: 'Polo', eventing: 'Eventing',
-  vaulting: 'Voltige', driving: 'Attelage', trail: 'Trail', western_pleasure: 'Western'
+  vaulting: 'Vaulting', driving: 'Driving', trail: 'Trail', western_pleasure: 'Western'
 };
 
 const RANK_MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 const TROPHIES = [
-  { id: 'first_win', label: 'Première Victoire', icon: '🏆', condition: (comps) => comps.some(c => c.rank === 1) },
+  { id: 'first_win', label: 'First Win', icon: '🏆', condition: (comps) => comps.some(c => c.rank === 1) },
   { id: 'hat_trick', label: 'Hat-Trick', icon: '🎩', condition: (comps) => comps.filter(c => c.rank === 1).length >= 3 },
   { id: 'podium_5', label: '5 Podiums', icon: '🎖️', condition: (comps) => comps.filter(c => c.rank <= 3).length >= 5 },
   { id: 'champion', label: 'Champion', icon: '👑', condition: (comps) => comps.filter(c => c.rank === 1).length >= 10 },
-  { id: 'veteran', label: 'Vétéran', icon: '⭐', condition: (comps) => comps.length >= 20 },
-  { id: 'versatile', label: 'Polyvalent', icon: '🌟', condition: (comps) => new Set(comps.map(c => c.discipline)).size >= 5 },
-  { id: 'elite', label: 'Élite', icon: '💎', condition: (comps) => comps.some(c => c.level === 'elite' && c.rank === 1) },
-  { id: 'olympic', label: 'Olympique', icon: '🏅', condition: (comps) => comps.some(c => c.is_olympic && c.rank <= 3) },
+  { id: 'veteran', label: 'Veteran', icon: '⭐', condition: (comps) => comps.length >= 20 },
+  { id: 'versatile', label: 'Versatile', icon: '🌟', condition: (comps) => new Set(comps.map(c => c.discipline)).size >= 5 },
+  { id: 'elite', label: 'Elite', icon: '💎', condition: (comps) => comps.some(c => c.level === 'elite' && c.rank === 1) },
+  { id: 'olympic', label: 'Olympic', icon: '🏅', condition: (comps) => comps.some(c => c.is_olympic && c.rank <= 3) },
 ];
 
 export default function CareerPanel({ competitions = [] }) {
@@ -35,7 +35,7 @@ export default function CareerPanel({ competitions = [] }) {
     const prev = i > 0 ? sorted.slice(0, i).reduce((acc, x) => acc + (x.prize || 0), 0) : 0;
     return {
       index: i + 1,
-      label: format(new Date(c.created_date), 'dd MMM', { locale: fr }),
+      label: format(new Date(c.created_date), 'dd MMM', { locale: enGB }),
       score: Math.round(c.score || 0),
       cumulativePrize: prev + (c.prize || 0),
       rank: c.rank,
@@ -71,8 +71,8 @@ export default function CareerPanel({ competitions = [] }) {
     return (
       <div className="text-center py-12">
         <Trophy className="w-12 h-12 mx-auto text-stone-200 mb-3" />
-        <h3 className="text-stone-500 font-medium">Aucune compétition</h3>
-        <p className="text-stone-400 text-sm mt-1">La carrière de ce cheval n'a pas encore commencé.</p>
+        <h3 className="text-stone-500 font-medium">No competitions</h3>
+        <p className="text-stone-400 text-sm mt-1">This horse's career hasn't started yet.</p>
       </div>
     );
   }
@@ -82,11 +82,11 @@ export default function CareerPanel({ competitions = [] }) {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: 'Compétitions', value: competitions.length, icon: Target, color: 'text-stone-600' },
-          { label: 'Victoires', value: wins, icon: Trophy, color: 'text-amber-500' },
+          { label: 'Competitions', value: competitions.length, icon: Target, color: 'text-stone-600' },
+          { label: 'Wins', value: wins, icon: Trophy, color: 'text-amber-500' },
           { label: 'Podiums', value: podiums, icon: Award, color: 'text-indigo-500' },
-          { label: 'Meilleur Score', value: bestScore.toFixed(1), icon: TrendingUp, color: 'text-emerald-500' },
-          { label: 'Gains totaux', value: `${totalPrize} pts`, icon: Star, color: 'text-rose-500' },
+          { label: 'Best Score', value: bestScore.toFixed(1), icon: TrendingUp, color: 'text-emerald-500' },
+          { label: 'Total winnings', value: `${totalPrize} pts`, icon: Star, color: 'text-rose-500' },
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label} className="border-0 bg-white/70">
             <CardContent className="p-4 text-center">
@@ -102,7 +102,7 @@ export default function CareerPanel({ competitions = [] }) {
       <Card className="border-0 bg-white/70">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-amber-500" /> Trophées
+            <Trophy className="w-4 h-4 text-amber-500" /> Trophies
             <Badge className="bg-amber-100 text-amber-700 border-0 ml-1">{earnedTrophies.length}/{TROPHIES.length}</Badge>
           </CardTitle>
         </CardHeader>
@@ -134,7 +134,7 @@ export default function CareerPanel({ competitions = [] }) {
         <Card className="border-0 bg-white/70">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-500" /> Progression des scores
+              <TrendingUp className="w-4 h-4 text-emerald-500" /> Score progression
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -165,7 +165,7 @@ export default function CareerPanel({ competitions = [] }) {
         <Card className="border-0 bg-white/70">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" /> Gains cumulés
+              <Zap className="w-4 h-4 text-amber-500" /> Cumulative winnings
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -182,7 +182,7 @@ export default function CareerPanel({ competitions = [] }) {
                 <YAxis tick={{ fontSize: 11, fill: '#78716c' }} />
                 <Tooltip
                   contentStyle={{ background: 'white', border: '1px solid #e7e5e4', borderRadius: 8, fontSize: 12 }}
-                  formatter={(v) => [`${v} pts`, 'Gains cumulés']}
+                  formatter={(v) => [`${v} pts`, 'Cumulative winnings']}
                 />
                 <Area type="monotone" dataKey="cumulativePrize" stroke="#f59e0b" fill="url(#prizeGrad)" strokeWidth={2} />
               </AreaChart>
@@ -195,7 +195,7 @@ export default function CareerPanel({ competitions = [] }) {
       {disciplineStats.length > 1 && (
         <Card className="border-0 bg-white/70">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Score moyen par discipline</CardTitle>
+            <CardTitle className="text-base">Average score by discipline</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={180}>
@@ -205,7 +205,7 @@ export default function CareerPanel({ competitions = [] }) {
                 <YAxis dataKey="discipline" type="category" tick={{ fontSize: 11, fill: '#78716c' }} width={70} />
                 <Tooltip
                   contentStyle={{ background: 'white', border: '1px solid #e7e5e4', borderRadius: 8, fontSize: 12 }}
-                  formatter={(v, n, p) => [`${v} pts (${p.payload.count} courses, ${p.payload.wins} victoires)`, 'Score moyen']}
+                  formatter={(v, n, p) => [`${v} pts (${p.payload.count} races, ${p.payload.wins} wins)`, 'Avg score']}
                 />
                 <Bar dataKey="avgScore" fill="#6366f1" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -217,7 +217,7 @@ export default function CareerPanel({ competitions = [] }) {
       {/* Competition history */}
       <Card className="border-0 bg-white/70">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Historique complet</CardTitle>
+          <CardTitle className="text-base">Full history</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -229,7 +229,7 @@ export default function CareerPanel({ competitions = [] }) {
                     <p className="font-medium text-stone-700">{c.name}</p>
                     <p className="text-xs text-stone-400">
                       {DISCIPLINE_LABELS[c.discipline] || c.discipline} · {c.level}
-                      {c.is_olympic && <span className="ml-1 text-amber-500">· Olympique</span>}
+                      {c.is_olympic && <span className="ml-1 text-amber-500">· Olympic</span>}
                     </p>
                   </div>
                 </div>

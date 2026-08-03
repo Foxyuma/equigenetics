@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Gavel } from 'lucide-react';
 
 const DURATIONS = [
-  { label: '1 heure', hours: 1 },
-  { label: '6 heures', hours: 6 },
-  { label: '12 heures', hours: 12 },
-  { label: '24 heures', hours: 24 },
-  { label: '48 heures', hours: 48 },
+  { label: '1 hour', hours: 1 },
+  { label: '6 hours', hours: 6 },
+  { label: '12 hours', hours: 12 },
+  { label: '24 hours', hours: 24 },
+  { label: '48 hours', hours: 48 },
 ];
 
 export default function CreateAuctionDialog({ myHorses, onCreate, isCreating }) {
@@ -34,21 +34,21 @@ export default function CreateAuctionDialog({ myHorses, onCreate, isCreating }) 
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-          <Plus className="w-4 h-4 mr-2" /> Créer une enchère
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+          <Plus className="w-4 h-4 mr-2" /> Create auction
+          </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+          <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gavel className="w-5 h-5 text-amber-600" />
-            Mettre un cheval aux enchères
+           Put a horse up for auction
           </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 pt-2">
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
           <div>
-            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Cheval à vendre</label>
-            <Select value={horseId} onValueChange={setHorseId}>
-              <SelectTrigger className="bg-white"><SelectValue placeholder="Choisir un cheval..." /></SelectTrigger>
+           <label className="text-sm font-medium text-stone-700 mb-1.5 block">Horse to sell</label>
+           <Select value={horseId} onValueChange={setHorseId}>
+             <SelectTrigger className="bg-white"><SelectValue placeholder="Choose a horse..." /></SelectTrigger>
               <SelectContent>
                 {myHorses.map(h => (
                   <SelectItem key={h.id} value={h.id}>
@@ -61,18 +61,18 @@ export default function CreateAuctionDialog({ myHorses, onCreate, isCreating }) 
               <div className="mt-2 p-2 bg-stone-50 rounded-lg flex items-center gap-2">
                 <Badge variant="outline">{selectedHorse.coat_color}</Badge>
                 <Badge className={selectedHorse.sex === 'male' ? 'bg-blue-100 text-blue-700 border-0' : 'bg-pink-100 text-pink-700 border-0'}>
-                  {selectedHorse.sex === 'male' ? '♂ Mâle' : '♀ Femelle'}
+                  {selectedHorse.sex === 'male' ? '♂ Male' : '♀ Female'}
                 </Badge>
-                <span className="text-xs text-stone-500">{selectedHorse.age} ans</span>
+                <span className="text-xs text-stone-500">{selectedHorse.age} yrs</span>
               </div>
             )}
           </div>
 
           <div>
-            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Prix de départ (pts)</label>
+            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Starting price (pts)</label>
             <Input
-              type="number"
-              placeholder="ex: 500"
+             type="number"
+             placeholder="e.g. 500"
               value={startingPrice}
               onChange={(e) => setStartingPrice(e.target.value)}
               className="bg-white"
@@ -81,7 +81,7 @@ export default function CreateAuctionDialog({ myHorses, onCreate, isCreating }) 
           </div>
 
           <div>
-            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Durée de l'enchère</label>
+            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Auction duration</label>
             <Select value={durationHours} onValueChange={setDurationHours}>
               <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -97,7 +97,7 @@ export default function CreateAuctionDialog({ myHorses, onCreate, isCreating }) 
             disabled={!horseId || !startingPrice || isCreating}
             className="w-full bg-amber-600 hover:bg-amber-700 text-white"
           >
-            {isCreating ? 'Création...' : 'Lancer l\'enchère'}
+            {isCreating ? 'Creating...' : 'Launch auction'}
           </Button>
         </div>
       </DialogContent>

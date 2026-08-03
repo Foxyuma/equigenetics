@@ -75,7 +75,7 @@ export default function WeeklyDopingControl() {
         competition_name: comp.name,
         level: comp.level,
         result,
-        substance: isDopingRisk ? 'Substances interdites détectées' : 'Aucune substance détectée',
+        substance: isDopingRisk ? 'Banned substances detected' : 'No substance detected',
         fine_amount: fine,
       };
 
@@ -102,23 +102,23 @@ export default function WeeklyDopingControl() {
           currency: 'genesis',
           amount: -fine,
           balance_after: newBalance,
-          reason: 'amende_antidopage',
+          reason: 'anti_doping_fine',
           reference_id: comp.id,
         });
         // Send bell notification
         await base44.entities.Message.create({
           sender_email: 'system@equigenesis.fr',
-          sender_name: 'Fédération Équestre',
+          sender_name: 'Equestrian Federation',
           recipient_email: user.email,
-          recipient_name: user.full_name || 'Joueur',
-          subject: `🚨 Contrôle antidopage positif : ${horse.name}`,
-          content: `Le cheval **${horse.name}** a été contrôlé positif lors de l'épreuve **${comp.name}** (niveau ${comp.level}).\n\n` +
-            `Substance détectée : ${control.substance}.\n\n` +
-            `Sanctions appliquées :\n` +
-            `• Disqualification de l'épreuve\n` +
-            `• Amende de **${fine.toLocaleString('fr-FR')} ₲**\n` +
-            `• Perte de réputation\n\n` +
-            `Veillez à respecter les délais d'élimination des substances après tout traitement médical.`,
+          recipient_name: user.full_name || 'Player',
+          subject: `🚨 Positive doping control: ${horse.name}`,
+          content: `The horse **${horse.name}** tested positive during the event **${comp.name}** (level ${comp.level}).\n\n` +
+           `Substance detected: ${control.substance}.\n\n` +
+           `Sanctions applied:\n` +
+           `• Disqualification from the event\n` +
+           `• Fine of **${fine.toLocaleString('en-GB')} ₲**\n` +
+           `• Reputation loss\n\n` +
+           `Please observe substance elimination times after any medical treatment.`,
           is_read: false,
         });
         positives.push({ horseName: horse.name, compName: comp.name, fine });
@@ -134,7 +134,7 @@ export default function WeeklyDopingControl() {
 
     positives.forEach(p => {
       toast.error(
-        `🚨 Contrôle antidopage POSITIF pour ${p.horseName} (${p.compName}) — amende de ${p.fine.toLocaleString('fr-FR')} ₲`,
+        `🚨 POSITIVE doping control for ${p.horseName} (${p.compName}) — fine of ${p.fine.toLocaleString('en-GB')} ₲`,
         { duration: 8000 }
       );
     });

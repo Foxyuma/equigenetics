@@ -19,13 +19,13 @@ export default function BreedingReputation({ reputation = 0, affixes = [] }) {
           <div className="flex items-center gap-2">
             <span className="text-2xl">{tier.icon}</span>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">Réputation d'Élevage</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">Breeding Reputation</p>
               <p className={`text-lg font-bold ${tier.color}`}>{tier.title}</p>
-              <p className="text-xs text-stone-400">Niveau {tier.level}</p>
+              <p className="text-xs text-stone-400">Level {tier.level}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className={`text-xl font-bold ${tier.color}`}>{reputation.toLocaleString('fr-FR')}</p>
+            <p className={`text-xl font-bold ${tier.color}`}>{reputation.toLocaleString('en-GB')}</p>
             <p className="text-xs text-stone-400">points</p>
           </div>
         </div>
@@ -39,16 +39,16 @@ export default function BreedingReputation({ reputation = 0, affixes = [] }) {
         </div>
         {next ? (
           <p className="text-xs text-stone-400">
-            <span className="font-semibold">{(next.min - reputation).toLocaleString('fr-FR')} pts</span> pour atteindre <span className={`font-semibold ${next.color}`}>{next.icon} {next.title}</span>
-          </p>
-        ) : (
-          <p className="text-xs text-stone-400">Rang maximum atteint 🏆</p>
+            <span className="font-semibold">{(next.min - reputation).toLocaleString('en-GB')} pts</span> to reach <span className={`font-semibold ${next.color}`}>{next.icon} {next.title}</span>
+            </p>
+            ) : (
+            <p className="text-xs text-stone-400">Maximum rank reached 🏆</p>
         )}
 
         {/* Affixes */}
         <div className="pt-2 border-t border-stone-200/80">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="text-xs font-semibold text-stone-600">🏷️ Affixes d'élevage</p>
+            <p className="text-xs font-semibold text-stone-600">🏷️ Breeding affixes</p>
             <p className="text-xs text-stone-400">{affixes.length} / {maxAffixes} slot{maxAffixes > 1 ? 's' : ''}</p>
           </div>
           {affixes.length > 0 ? (
@@ -60,10 +60,10 @@ export default function BreedingReputation({ reputation = 0, affixes = [] }) {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-stone-400 italic">Aucun affixe enregistré</p>
+            <p className="text-xs text-stone-400 italic">No affixes registered</p>
           )}
           {nextAffixLevel && tier.level % 5 !== 1 && (
-            <p className="text-xs text-stone-400 mt-1">Prochain affixe au niveau {nextAffixLevel > 15 ? 'max' : nextAffixLevel}</p>
+            <p className="text-xs text-stone-400 mt-1">Next affix at level {nextAffixLevel > 15 ? 'max' : nextAffixLevel}</p>
           )}
         </div>
 
@@ -73,10 +73,10 @@ export default function BreedingReputation({ reputation = 0, affixes = [] }) {
             {REPUTATION_TIERS.map(t => (
               <span
                 key={t.level}
-                title={`${t.title} — ${t.min.toLocaleString('fr-FR')} pts`}
+                title={`${t.title} — ${t.min.toLocaleString('en-GB')} pts`}
                 className={`text-xs px-1.5 py-0.5 rounded border font-medium cursor-default ${t.min <= reputation ? `${t.bg} ${t.color} ${t.border}` : 'bg-stone-100 text-stone-400 border-stone-200'}`}
               >
-                {t.icon} Niv.{t.level}
+                {t.icon} Lv.{t.level}
               </span>
             ))}
           </div>

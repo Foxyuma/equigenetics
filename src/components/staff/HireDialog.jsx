@@ -7,11 +7,11 @@ import { Plus, Zap, Shield, TrendingUp, Heart, Trophy } from 'lucide-react';
 import { ROLE_CONFIG, LEVEL_CONFIG, SPECIALITIES, buildStaffMember } from '@/lib/staffConfig';
 
 const BONUS_ICONS = {
-  energy_recovery_bonus: { icon: Zap, color: 'text-amber-500', label: 'Récup. énergie' },
-  illness_risk_reduction: { icon: Shield, color: 'text-blue-500', label: 'Risque maladie' },
-  training_success_bonus: { icon: TrendingUp, color: 'text-purple-500', label: 'Entraînement' },
-  breeding_success_bonus: { icon: Heart, color: 'text-pink-500', label: 'Élevage' },
-  competition_score_bonus: { icon: Trophy, color: 'text-emerald-500', label: 'Compétition' },
+  energy_recovery_bonus: { icon: Zap, color: 'text-amber-500', label: 'Energy recovery' },
+  illness_risk_reduction: { icon: Shield, color: 'text-blue-500', label: 'Disease risk' },
+  training_success_bonus: { icon: TrendingUp, color: 'text-purple-500', label: 'Training' },
+  breeding_success_bonus: { icon: Heart, color: 'text-pink-500', label: 'Breeding' },
+  competition_score_bonus: { icon: Trophy, color: 'text-emerald-500', label: 'Competition' },
 };
 
 const NAMES = {
@@ -41,17 +41,17 @@ export default function HireDialog({ balance, onHire }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-stone-800 hover:bg-stone-900">
-          <Plus className="w-4 h-4 mr-2" /> Embaucher
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Embaucher du personnel</DialogTitle>
+          <Plus className="w-4 h-4 mr-2" /> Hire
+          </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+          <DialogHeader>
+          <DialogTitle>Hire Staff</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-1">
           {/* Role */}
           <div>
-            <p className="text-xs font-medium text-stone-500 mb-2">Rôle</p>
+            <p className="text-xs font-medium text-stone-500 mb-2">Role</p>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(ROLE_CONFIG).map(([key, cfg]) => (
                 <button
@@ -67,7 +67,7 @@ export default function HireDialog({ balance, onHire }) {
 
           {/* Level */}
           <div>
-            <p className="text-xs font-medium text-stone-500 mb-2">Niveau</p>
+            <p className="text-xs font-medium text-stone-500 mb-2">Level</p>
             <div className="flex gap-2">
               {Object.entries(LEVEL_CONFIG).map(([key, cfg]) => (
                 <button
@@ -83,7 +83,7 @@ export default function HireDialog({ balance, onHire }) {
 
           {/* Speciality */}
           <div>
-            <p className="text-xs font-medium text-stone-500 mb-2">Spécialité</p>
+            <p className="text-xs font-medium text-stone-500 mb-2">Specialty</p>
             <div className="space-y-1.5">
               {SPECIALITIES[role].map(spec => (
                 <button
@@ -112,18 +112,18 @@ export default function HireDialog({ balance, onHire }) {
 
           {/* Name */}
           <div>
-            <p className="text-xs font-medium text-stone-500 mb-2">Nom</p>
+            <p className="text-xs font-medium text-stone-500 mb-2">Name</p>
             <Input value={name} onChange={e => setName(e.target.value)} />
           </div>
 
           {/* Preview & CTA */}
           <div className={`p-3 rounded-xl border ${canAfford ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-stone-600">Salaire mensuel</span>
+              <span className="text-stone-600">Monthly salary</span>
               <span className={`font-bold ${canAfford ? 'text-emerald-700' : 'text-red-600'}`}>💰 {preview.salary} pts</span>
-            </div>
-            <div className="flex items-center justify-between text-xs mt-1 text-stone-500">
-              <span>Solde actuel</span>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-1 text-stone-500">
+              <span>Current balance</span>
               <span>{balance} pts</span>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function HireDialog({ balance, onHire }) {
             disabled={!name || !canAfford}
             className="w-full bg-stone-800 hover:bg-stone-900"
           >
-            {canAfford ? 'Confirmer l\'embauche' : 'Solde insuffisant'}
+            {canAfford ? 'Confirm hire' : 'Insufficient balance'}
           </Button>
         </div>
       </DialogContent>

@@ -59,7 +59,7 @@ export default function PaddockCell({ paddock, allHorses, onAssign, onUnassign }
           </div>
         ))}
         {assignedCount === 0 && (
-          <p className="text-xs text-stone-400 italic">Aucun cheval</p>
+          <p className="text-xs text-stone-400 italic">No horse</p>
         )}
       </div>
 
@@ -68,12 +68,12 @@ export default function PaddockCell({ paddock, allHorses, onAssign, onUnassign }
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="ghost" size="sm" className="w-full border border-dashed border-stone-300 text-stone-500 hover:text-stone-700 hover:border-stone-400 text-xs h-8">
-              <Plus className="w-3 h-3 mr-1" /> Assigner un cheval
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Assigner à {paddock.name}</DialogTitle>
+              <Plus className="w-3 h-3 mr-1" /> Assign a horse
+              </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+              <DialogHeader>
+              <DialogTitle>Assign to {paddock.name}</DialogTitle>
             </DialogHeader>
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {availableHorses.map(horse => (

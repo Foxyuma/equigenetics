@@ -48,16 +48,16 @@ function BreedGridDialog({ horse, breakdown, onClose }) {
         <div className="space-y-4 text-sm">
           {/* Total */}
           <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 border border-stone-100">
-            <span className="font-semibold text-stone-700">Total général</span>
+            <span className="font-semibold text-stone-700">Overall total</span>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-stone-800">{total.toFixed(1)}/100</span>
-              <Badge className={`border-0 ${qualification.badgeClass}`}>
-                {qualification.label}
-              </Badge>
+             <span className="text-xl font-bold text-stone-800">{total.toFixed(1)}/100</span>
+             <Badge className={`border-0 ${qualification.badgeClass}`}>
+               {qualification.label}
+             </Badge>
             </div>
-          </div>
+            </div>
 
-          {/* Sections */}
+            {/* Sections */}
           {sections.map((section) => (
             <div key={section.name}>
               <p className="font-semibold text-stone-700 mb-2 border-b border-stone-200 pb-1">
@@ -111,13 +111,13 @@ function FCTGridDialog({ horse, breakdown, onClose }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-amber-600" />
-            Grille FCT — {horse.name}
+            FCT Grid — {horse.name}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 text-sm">
           <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 border border-stone-100">
-            <span className="font-semibold text-stone-700">Total général</span>
+            <span className="font-semibold text-stone-700">Overall total</span>
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-stone-800">{total.toFixed(1)}/100</span>
               <Badge className={`border-0 ${getQualification(total).badgeClass}`}>
@@ -126,30 +126,30 @@ function FCTGridDialog({ horse, breakdown, onClose }) {
             </div>
           </div>
 
-          <FCTSection title="Grille adulte (A) — 60%" total={adult.total}>
+          <FCTSection title="Adult grid (A) — 60%" total={adult.total}>
             {renderCriteria(adult.criteria)}
           </FCTSection>
 
-          <FCTSection title="Grille poulain (B) — 40%" total={foal.total}>
+          <FCTSection title="Foal grid (B) — 40%" total={foal.total}>
             {renderCriteria(foal.criteria)}
           </FCTSection>
 
-          <FCTSection title="Note de présentation (C)" total={presentation.total} max="/20">
+          <FCTSection title="Presentation score (C)" total={presentation.total} max="/20">
             <div className="flex items-center justify-between px-3 py-1.5 border-b border-stone-100">
-              <span className="text-stone-600">Cheval</span>
+              <span className="text-stone-600">Horse</span>
               <span className="font-mono text-stone-700">{presentation.cheval.toFixed(1)}/10</span>
             </div>
             <div className="flex items-center justify-between px-3 py-1.5">
-              <span className="text-stone-600">Présentateur</span>
+              <span className="text-stone-600">Presenter</span>
               <span className="font-mono text-stone-700">{presentation.presentateur.toFixed(1)}/10</span>
             </div>
           </FCTSection>
 
           <div className="p-3 rounded-lg bg-amber-50/60 border border-amber-100 text-xs text-stone-600 space-y-1">
-            <div className="flex justify-between"><span>Contribution adulte (A × 60%)</span><span className="font-mono">{adultContribution.toFixed(1)}</span></div>
-            <div className="flex justify-between"><span>Contribution poulain (B × 40%)</span><span className="font-mono">{foalContribution.toFixed(1)}</span></div>
-            <div className="flex justify-between"><span>Bonus présentation</span><span className="font-mono">+{presentationBonus.toFixed(1)}</span></div>
-            <div className="flex justify-between font-semibold text-stone-700 border-t border-amber-200 pt-1 mt-1"><span>Total général</span><span className="font-mono">{total.toFixed(1)}/100</span></div>
+            <div className="flex justify-between"><span>Adult contribution (A × 60%)</span><span className="font-mono">{adultContribution.toFixed(1)}</span></div>
+            <div className="flex justify-between"><span>Foal contribution (B × 40%)</span><span className="font-mono">{foalContribution.toFixed(1)}</span></div>
+            <div className="flex justify-between"><span>Presentation bonus</span><span className="font-mono">+{presentationBonus.toFixed(1)}</span></div>
+            <div className="flex justify-between font-semibold text-stone-700 border-t border-amber-200 pt-1 mt-1"><span>Overall total</span><span className="font-mono">{total.toFixed(1)}/100</span></div>
           </div>
         </div>
       </DialogContent>

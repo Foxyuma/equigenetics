@@ -79,7 +79,7 @@ export default function Trades() {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       setNewTradeOpen(false);
       resetForm();
-      toast.success('Offre d\'échange envoyée !');
+      toast.success('Trade offer sent!');
     },
   });
 
@@ -101,7 +101,7 @@ export default function Trades() {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       queryClient.invalidateQueries({ queryKey: ['my-horses'] });
       queryClient.invalidateQueries({ queryKey: ['my-inventory'] });
-      toast.success('Échange accepté !');
+      toast.success('Trade accepted!');
     },
   });
 
@@ -109,7 +109,7 @@ export default function Trades() {
     mutationFn: (id) => base44.entities.TradeOffer.update(id, { status: 'rejected' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
-      toast.success('Échange refusé');
+      toast.success('Trade declined');
     },
   });
 
@@ -126,9 +126,9 @@ export default function Trades() {
   const sentTrades = trades.filter(t => t.sender_email === currentUser?.email);
   
   const statusConfig = {
-    pending: { label: 'En attente', color: 'bg-amber-100 text-amber-700', icon: Clock },
-    accepted: { label: 'Accepté', color: 'bg-green-100 text-green-700', icon: CheckCircle },
-    rejected: { label: 'Refusé', color: 'bg-red-100 text-red-700', icon: XCircle },
+    pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700', icon: Clock },
+    accepted: { label: 'Accepted', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+    rejected: { label: 'Declined', color: 'bg-red-100 text-red-700', icon: XCircle },
   };
 
   const TradeCard = ({ trade, type }) => {
@@ -145,7 +145,7 @@ export default function Trades() {
                 {isReceived ? trade.sender_name : trade.recipient_name}
               </p>
               <p className="text-xs text-stone-400">
-                {format(new Date(trade.created_date), 'dd/MM/yyyy à HH:mm')}
+                {format(new Date(trade.created_date), 'dd/MM/yyyy HH:mm')}
               </p>
             </div>
             <Badge className={`${config.color} border-0 flex items-center gap-1`}>
@@ -161,7 +161,7 @@ export default function Trades() {
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
               <p className="font-semibold text-stone-600 mb-1">
-                {isReceived ? 'Vous recevez:' : 'Vous offrez:'}
+                {isReceived ? 'You receive:' : 'You offer:'}
               </p>
               <div className="space-y-1">
                 {(isReceived ? trade.offered_horses : trade.requested_horses)?.map(h => (
@@ -172,14 +172,14 @@ export default function Trades() {
                 ))}
                 {((isReceived ? trade.offered_horses : trade.requested_horses)?.length === 0) &&
                  ((isReceived ? trade.offered_items : trade.requested_items)?.length === 0) && (
-                  <div className="text-stone-400">Rien</div>
-                )}
-              </div>
-            </div>
+                  <div className="text-stone-400">Nothing</div>
+                  )}
+                  </div>
+                  </div>
 
-            <div>
-              <p className="font-semibold text-stone-600 mb-1">
-                {isReceived ? 'Vous donnez:' : 'Vous demandez:'}
+                  <div>
+                  <p className="font-semibold text-stone-600 mb-1">
+                  {isReceived ? 'You give:' : 'You request:'}
               </p>
               <div className="space-y-1">
                 {(isReceived ? trade.requested_horses : trade.offered_horses)?.map(h => (
@@ -190,8 +190,8 @@ export default function Trades() {
                 ))}
                 {((isReceived ? trade.requested_horses : trade.offered_horses)?.length === 0) &&
                  ((isReceived ? trade.requested_items : trade.offered_items)?.length === 0) && (
-                  <div className="text-stone-400">Rien</div>
-                )}
+                  <div className="text-stone-400">Nothing</div>
+                 )}
               </div>
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function Trades() {
                 className="flex-1 bg-green-600 hover:bg-green-700 text-sm"
                 size="sm"
               >
-                <CheckCircle className="w-3 h-3 mr-1" />Accepter
+                <CheckCircle className="w-3 h-3 mr-1" />Accept
               </Button>
               <Button
                 onClick={() => rejectTradeMutation.mutate(trade.id)}
@@ -211,7 +211,7 @@ export default function Trades() {
                 className="flex-1 text-red-500 text-sm"
                 size="sm"
               >
-                <XCircle className="w-3 h-3 mr-1" />Refuser
+                <XCircle className="w-3 h-3 mr-1" />Decline
               </Button>
             </div>
           )}
@@ -224,29 +224,29 @@ export default function Trades() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Échanges</h1>
-          <p className="text-stone-500 mt-1">Troquez chevaux et objets avec d'autres joueurs</p>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Trades</h1>
+          <p className="text-stone-500 mt-1">Trade horses and items with other players</p>
         </div>
         <Dialog open={newTradeOpen} onOpenChange={setNewTradeOpen}>
           <DialogTrigger asChild>
             <Button className="bg-indigo-600 hover:bg-indigo-700">
               <Send className="w-4 h-4 mr-2" />
-              Proposer un Échange
+              Propose a Trade
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Nouvelle Offre d'Échange</DialogTitle>
+              <DialogTitle>New Trade Offer</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-stone-600 mb-2 block">Joueur</label>
+                <label className="text-sm font-medium text-stone-600 mb-2 block">Player</label>
                 <select
                   value={selectedRecipient}
                   onChange={(e) => setSelectedRecipient(e.target.value)}
                   className="w-full px-3 py-2 rounded-md border border-stone-200 text-sm"
                 >
-                  <option value="">Sélectionner un joueur...</option>
+                  <option value="">Select a player...</option>
                   {users.filter(u => u.email !== currentUser?.email).map(u => (
                     <option key={u.id} value={u.email}>{u.full_name}</option>
                   ))}
@@ -257,9 +257,9 @@ export default function Trades() {
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <h3 className="font-semibold text-stone-700">Vous offrez</h3>
+                      <h3 className="font-semibold text-stone-700">You offer</h3>
                       <div>
-                        <label className="text-xs font-medium text-stone-600 mb-1 block">Chevaux</label>
+                        <label className="text-xs font-medium text-stone-600 mb-1 block">Horses</label>
                         <div className="space-y-1 max-h-40 overflow-y-auto border border-stone-200 rounded p-2">
                           {myHorses.map(h => (
                             <label key={h.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-stone-50 p-1 rounded">
@@ -282,9 +282,9 @@ export default function Trades() {
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="font-semibold text-stone-700">Vous demandez</h3>
+                      <h3 className="font-semibold text-stone-700">You request</h3>
                       <div>
-                        <label className="text-xs font-medium text-stone-600 mb-1 block">Chevaux</label>
+                        <label className="text-xs font-medium text-stone-600 mb-1 block">Horses</label>
                         <div className="space-y-1 max-h-40 overflow-y-auto border border-stone-200 rounded p-2">
                           {recipientHorses.map(h => (
                             <label key={h.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-stone-50 p-1 rounded">
@@ -308,11 +308,11 @@ export default function Trades() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-stone-600 mb-2 block">Message (optionnel)</label>
+                    <label className="text-sm font-medium text-stone-600 mb-2 block">Message (optional)</label>
                     <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Ajoutez un message à votre offre..."
+                      placeholder="Add a message to your offer..."
                       className="w-full px-3 py-2 rounded-md border border-stone-200 text-sm"
                       rows={3}
                     />
@@ -324,7 +324,7 @@ export default function Trades() {
                     className="w-full bg-indigo-600 hover:bg-indigo-700"
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    Envoyer l'Offre
+                    Send Offer
                   </Button>
                 </>
               )}
@@ -338,14 +338,14 @@ export default function Trades() {
           <CardContent className="p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-amber-600 mb-2" />
             <p className="text-2xl font-bold text-amber-800">{receivedTrades.length}</p>
-            <p className="text-xs text-amber-600">Offres reçues</p>
+            <p className="text-xs text-amber-600">Received offers</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-blue-50">
           <CardContent className="p-4 text-center">
             <Send className="w-6 h-6 mx-auto text-blue-600 mb-2" />
             <p className="text-2xl font-bold text-blue-800">{sentTrades.length}</p>
-            <p className="text-xs text-blue-600">Offres envoyées</p>
+            <p className="text-xs text-blue-600">Sent offers</p>
           </CardContent>
         </Card>
         <Card className="border-0 bg-green-50">
@@ -354,7 +354,7 @@ export default function Trades() {
             <p className="text-2xl font-bold text-green-800">
               {trades.filter(t => t.status === 'accepted').length}
             </p>
-            <p className="text-xs text-green-600">Échanges réussis</p>
+            <p className="text-xs text-green-600">Successful trades</p>
           </CardContent>
         </Card>
       </div>
@@ -362,10 +362,10 @@ export default function Trades() {
       <Tabs defaultValue="received" className="w-full">
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="received">
-            Offres Reçues ({receivedTrades.length})
+            Received Offers ({receivedTrades.length})
           </TabsTrigger>
           <TabsTrigger value="sent">
-            Offres Envoyées
+            Sent Offers
           </TabsTrigger>
         </TabsList>
 
@@ -375,7 +375,7 @@ export default function Trades() {
               <Card className="border-0 bg-stone-50">
                 <CardContent className="p-12 text-center">
                   <Package className="w-16 h-16 mx-auto text-stone-300 mb-4" />
-                  <p className="text-stone-400">Aucune offre reçue</p>
+                  <p className="text-stone-400">No offers received</p>
                 </CardContent>
               </Card>
             ) : (
@@ -390,7 +390,7 @@ export default function Trades() {
               <Card className="border-0 bg-stone-50">
                 <CardContent className="p-12 text-center">
                   <Send className="w-16 h-16 mx-auto text-stone-300 mb-4" />
-                  <p className="text-stone-400">Aucune offre envoyée</p>
+                  <p className="text-stone-400">No offers sent</p>
                 </CardContent>
               </Card>
             ) : (

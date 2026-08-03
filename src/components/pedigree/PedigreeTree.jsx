@@ -32,10 +32,10 @@ export default function PedigreeTree({ horse, ancestors }) {
     if (!horse) {
       return (
         <div className="p-3 rounded-lg bg-stone-100 border-2 border-dashed border-stone-300 text-center">
-          <p className="text-xs text-stone-400">Inconnu</p>
-        </div>
-      );
-    }
+          <p className="text-xs text-stone-400">Unknown</p>
+          </div>
+          );
+          }
 
     const bgColors = {
       0: "from-amber-50 to-yellow-50 border-amber-300",
@@ -73,7 +73,7 @@ export default function PedigreeTree({ horse, ancestors }) {
       {/* Subject Horse */}
       <div className="flex justify-center">
         <div className="w-full max-w-xs">
-          <HorseNode horse={horse} generation={0} label="Sujet" />
+          <HorseNode horse={horse} generation={0} label="Subject" />
         </div>
       </div>
 
@@ -86,8 +86,8 @@ export default function PedigreeTree({ horse, ancestors }) {
           <div className="absolute right-1/4 top-6 w-0.5 h-6 bg-stone-300" />
           
           <div className="grid grid-cols-2 gap-6 pt-12">
-            <HorseNode horse={father} generation={1} label="Père" />
-            <HorseNode horse={mother} generation={1} label="Mère" />
+            <HorseNode horse={father} generation={1} label="Sire" />
+            <HorseNode horse={mother} generation={1} label="Dam" />
           </div>
         </div>
       )}
@@ -105,10 +105,10 @@ export default function PedigreeTree({ horse, ancestors }) {
           <div className="absolute right-1/8 top-6 w-0.5 h-6 bg-stone-300" />
           
           <div className="grid grid-cols-4 gap-4 pt-12">
-            <HorseNode horse={paternalGrandfather} generation={2} label="Grand-père P" />
-            <HorseNode horse={paternalGrandmother} generation={2} label="Grand-mère P" />
-            <HorseNode horse={maternalGrandfather} generation={2} label="Grand-père M" />
-            <HorseNode horse={maternalGrandmother} generation={2} label="Grand-mère M" />
+            <HorseNode horse={paternalGrandfather} generation={2} label="Paternal Grand sire" />
+            <HorseNode horse={paternalGrandmother} generation={2} label="Paternal Grand dam" />
+            <HorseNode horse={maternalGrandfather} generation={2} label="Maternal Grand sire" />
+            <HorseNode horse={maternalGrandmother} generation={2} label="Maternal Grand dam" />
           </div>
         </div>
       )}
@@ -133,7 +133,7 @@ export default function PedigreeTree({ horse, ancestors }) {
                   </Link>
                 ) : (
                   <div className="p-2 rounded-lg bg-stone-50 border border-dashed border-stone-200">
-                    <p className="text-stone-300 text-xs">Inconnu</p>
+                    <p className="text-stone-300 text-xs">Unknown</p>
                   </div>
                 )}
               </div>
@@ -146,19 +146,19 @@ export default function PedigreeTree({ horse, ancestors }) {
       <div className="flex flex-wrap justify-center gap-4 pt-6 border-t border-stone-200">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-300" />
-          <span className="text-xs text-stone-600">Sujet</span>
-        </div>
-        <div className="flex items-center gap-2">
+          <span className="text-xs text-stone-600">Subject</span>
+          </div>
+          <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-300" />
           <span className="text-xs text-stone-600">Parents</span>
-        </div>
-        <div className="flex items-center gap-2">
+          </div>
+          <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-300" />
-          <span className="text-xs text-stone-600">Grands-parents</span>
-        </div>
-        <div className="flex items-center gap-2">
+          <span className="text-xs text-stone-600">Grandparents</span>
+          </div>
+          <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-300" />
-          <span className="text-xs text-stone-600">Arrière-grands-parents</span>
+          <span className="text-xs text-stone-600">Great-grandparents</span>
         </div>
       </div>
     </div>

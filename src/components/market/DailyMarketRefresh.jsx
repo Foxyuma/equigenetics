@@ -5,11 +5,11 @@ import { generateRandomGenotype, determineCoatColor, generateStarterHorse } from
 import { BREEDS } from '@/components/genetics/GeneticsEngine';
 import { generateNPCStallions } from '../../pages/StallionMarket';
 
-// Noms NPC pour les annonces
+// NPC names for listings
 const NPC_STABLES = [
-  "Haras du Moulin", "Écurie des Alpes", "Domaine Celtique", "Haras Impérial",
-  "Écurie Royale", "Haras du Soleil", "Élevage Bordelais", "Haras Normand",
-  "Écurie de la Forêt", "Domaine des Vents"
+  "Mill Stud", "Alpine Stable", "Celtic Domain", "Imperial Stud",
+  "Royal Stable", "Sun Stud", "Bordeaux Breeding", "Norman Stud",
+  "Forest Stable", "Winds Domain"
 ];
 
 const NPC_SELLER_EMAILS = [
@@ -20,23 +20,23 @@ const NPC_SELLER_EMAILS = [
 ];
 
 const MALE_NAMES = [
-  "Tornado", "Eclipse", "Sultan", "Orage", "Apollo", "Zéphyr", "Atlas", "Titan",
+  "Tornado", "Eclipse", "Sultan", "Storm", "Apollo", "Zephyr", "Atlas", "Titan",
   "Merlin", "Sirius", "Storm", "Midnight", "Thunder", "Blaze", "Comet",
-  "Nero", "Pharaon", "Caesar", "Viking", "Troyen", "Damasco", "Faucon",
-  "Kronos", "Ares", "Zeus", "Orion", "Ptolémée", "Hannibal"
+  "Nero", "Pharaoh", "Caesar", "Viking", "Troy", "Damasco", "Falcon",
+  "Kronos", "Ares", "Zeus", "Orion", "Ptolemy", "Hannibal"
 ];
 
 const FEMALE_NAMES = [
-  "Luna", "Aurore", "Perle", "Tempête", "Étoile", "Jade", "Iris", "Stella",
-  "Naya", "Olympe", "Cascade", "Mistral", "Sérénade", "Comète", "Galaxie",
-  "Harmonie", "Isabelle", "Jasmine", "Katia", "Léa", "Mélodie", "Nora",
-  "Ondine", "Pénélope", "Qinara", "Roxane", "Saphir", "Tara"
+  "Luna", "Aurora", "Pearl", "Tempest", "Star", "Jade", "Iris", "Stella",
+  "Naya", "Olympia", "Cascade", "Mistral", "Serenade", "Comet", "Galaxy",
+  "Harmony", "Isabelle", "Jasmine", "Katia", "Lea", "Melody", "Nora",
+  "Undine", "Penelope", "Qinara", "Roxane", "Sapphire", "Tara"
 ];
 
-// Clé localStorage pour tracker la dernière génération
+// localStorage key to track the last generation
 const LAST_REFRESH_KEY = 'market_last_refresh_day';
 
-// Générer un cheval NPC aléatoire
+// Generate a random NPC horse
 function generateNpcHorse() {
   const breed = BREEDS[Math.floor(Math.random() * BREEDS.length)];
   const sex = Math.random() < 0.5 ? 'male' : 'female';
@@ -46,13 +46,13 @@ function generateNpcHorse() {
 
   const { stats, coat_color, genotype, health_genes, character, mental_traits, morphology, genetic_potential } = generateStarterHorse(breed);
 
-  // Varier l'âge (0 à 12 ans)
+  // Vary age (0 to 12 years)
   const age = Math.floor(Math.random() * 13);
-  // Recalculer la robe selon l'âge : les poulains affichent leur couleur de naissance,
-  // les adultes (≥ 3 ans) grisonnent pour les chevaux gris.
+  // Recalculate coat based on age: foals show their birth color,
+  // adults (≥ 3 years) grey for grey horses.
   coat_color = determineCoatColor(genotype, age);
 
-  // Améliorer les stats selon l'âge (les chevaux plus vieux ont plus d'expérience)
+  // Improve stats based on age (older horses have more experience)
   if (age >= 3) {
     const boost = Math.min(age * 2, 20);
     Object.keys(stats).forEach(k => { stats[k] = Math.min(100, stats[k] + Math.floor(Math.random() * boost)); });
@@ -60,27 +60,27 @@ function generateNpcHorse() {
 
   const avgStat = Math.round(Object.values(stats).reduce((a, b) => a + b, 0) / 7);
 
-  // Prix variable selon qualité — de très bon marché à très cher
+  // Variable price by quality — from very cheap to very expensive
   let price;
   const tier = Math.random();
   if (tier < 0.25) {
-    // Bon marché : 300-1500
+    // Budget: 300-1500
     price = 300 + Math.floor(Math.random() * 1200);
   } else if (tier < 0.55) {
-    // Milieu de gamme : 1500-6000
+    // Mid-range: 1500-6000
     price = 1500 + Math.floor(Math.random() * 4500);
   } else if (tier < 0.80) {
-    // Supérieur : 6000-20000
+    // Superior: 6000-20000
     price = 6000 + Math.floor(Math.random() * 14000);
   } else if (tier < 0.95) {
-    // Premium : 20000-60000
+    // Premium: 20000-60000
     price = 20000 + Math.floor(Math.random() * 40000);
   } else {
-    // Élite rare : 60000-150000
+    // Rare elite: 60000-150000
     price = 60000 + Math.floor(Math.random() * 90000);
   }
 
-  // Arrondir au 50 le plus proche
+  // Round to nearest 50
   price = Math.round(price / 50) * 50;
 
   const stableIdx = Math.floor(Math.random() * NPC_STABLES.length);
@@ -108,9 +108,9 @@ function generateNpcHorse() {
   };
 }
 
-// Générer une enchère NPC
+// Generate an NPC auction
 function generateNpcAuction(horse, stableName, sellerEmail) {
-  // Prix de départ = 30-70% de la valeur
+  // Starting price = 30-70% of value
   const startRatio = 0.3 + Math.random() * 0.4;
   const startingPrice = Math.max(100, Math.round((horse.price * startRatio) / 50) * 50);
   const durationHours = [12, 24, 48][Math.floor(Math.random() * 3)];
@@ -143,26 +143,26 @@ export default function DailyMarketRefresh() {
     if (!gameClock?.length) return;
 
     const clock = gameClock[0];
-    // Clé unique par jour de jeu
+    // Unique key per game day
     const todayKey = `${clock.year}-${clock.month}-${clock.day}`;
     const lastKey = localStorage.getItem(LAST_REFRESH_KEY);
 
-    // Déclencher seulement si nouveau jour de jeu et pas déjà fait aujourd'hui
+    // Trigger only if new game day and not already done today
     if (lastKey === todayKey) return;
 
-    // Vérifier si c'est "2h du matin" en jeu — on le simule en vérifiant que le jour a changé
-    // (le GameClock avance par tick journalier, donc chaque nouveau jour = refresh)
+    // Check if it's "2am" in game — we simulate this by checking that the day has changed
+    // (GameClock advances by daily tick, so each new day = refresh)
     const runRefresh = async () => {
       try {
         localStorage.setItem(LAST_REFRESH_KEY, todayKey);
 
-        // Nettoyer les anciennes ventes NPC (owner_email commence par npc_)
+        // Clean up old NPC sales (owner_email starts with npc_)
         const existingNpcSales = await base44.entities.Horse.filter({ is_for_sale: true }, '-created_date', 200);
         const npcHorsesToRemove = existingNpcSales.filter(h =>
           h.owner_email?.startsWith('npc_') || h.created_by_id === 'npc'
         );
-        // On ne supprime pas les vrais chevaux de joueurs, juste les NPC qui durent > 3 jours
-        // (on les marque simplement hors vente)
+        // We don't delete real player horses, just NPCs lasting > 3 days
+        // (we simply mark them off-sale)
         const oldNpcIds = npcHorsesToRemove.filter(h => {
           const createdAt = new Date(h.created_date);
           const diffDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
@@ -173,7 +173,7 @@ export default function DailyMarketRefresh() {
           base44.entities.Horse.update(id, { is_for_sale: false })
         ));
 
-        // Générer 4-7 nouvelles ventes directes NPC
+        // Generate 4-7 new NPC direct sales
         const nbSales = 4 + Math.floor(Math.random() * 4);
         const salesPromises = Array.from({ length: nbSales }, async () => {
           const horse = generateNpcHorse();
@@ -181,8 +181,8 @@ export default function DailyMarketRefresh() {
         });
         await Promise.all(salesPromises);
 
-        // ─── MARCHÉ DES SAILLIES ──────────────────────────────
-        // Nettoyer les anciennes offres NPC
+        // ─── BREEDING MARKET ──────────────────────────────
+        // Clean up old NPC offers
         const existingStallions = await base44.entities.StallionOffer.filter(
           { is_npc: true, owner_email: "haras@national.equigenesis" },
           '-created_date', 200
@@ -197,7 +197,7 @@ export default function DailyMarketRefresh() {
           base44.entities.StallionOffer.delete(id)
         ));
 
-        // Vérifier combien d'étalons NPC restent
+        // Check how many NPC stallions remain
         const remaining = existingStallions.filter(s => !oldStallionIds.includes(s.id)).length;
         if (remaining < 12) {
           const newStallions = generateNPCStallions();
@@ -206,7 +206,7 @@ export default function DailyMarketRefresh() {
           await Promise.all(chosen.map(s => base44.entities.StallionOffer.create(s)));
         }
 
-        // Générer 3-5 nouvelles enchères NPC
+        // Generate 3-5 new NPC auctions
         const nbAuctions = 3 + Math.floor(Math.random() * 3);
         for (let i = 0; i < nbAuctions; i++) {
           const stableIdx = Math.floor(Math.random() * NPC_STABLES.length);
@@ -226,15 +226,15 @@ export default function DailyMarketRefresh() {
         }
 
       } catch (err) {
-        // Silencieux — ne pas bloquer l'app
-        console.warn('DailyMarketRefresh error:', err);
-        // Reset la clé pour retenter au prochain rendu
-        localStorage.removeItem(LAST_REFRESH_KEY);
+      // Silent — don't block the app
+      console.warn('DailyMarketRefresh error:', err);
+      // Reset key to retry on next render
+      localStorage.removeItem(LAST_REFRESH_KEY);
       }
     };
 
     runRefresh();
   }, [gameClock]);
 
-  return null; // Composant invisible
+  return null; // Invisible component
 }

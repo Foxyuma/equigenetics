@@ -16,14 +16,14 @@ function useCountdown(endsAt) {
     const update = () => {
       const diff = new Date(endsAt) - new Date();
       if (diff <= 0) {
-        setTimeLeft('Terminée');
+        setTimeLeft('Ended');
         setIsExpired(true);
         return;
-      }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`);
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setTimeLeft(h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`);
     };
     update();
     const interval = setInterval(update, 1000);
@@ -61,14 +61,14 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
         )}
         <div className="absolute top-3 left-3 flex flex-col gap-1">
           {isExpired ? (
-            <Badge className="bg-stone-500 text-white border-0">Terminée</Badge>
+            <Badge className="bg-stone-500 text-white border-0">Ended</Badge>
           ) : (
             <Badge className="bg-amber-500 text-white border-0 flex items-center gap-1">
               <Clock className="w-3 h-3" />{timeLeft}
             </Badge>
           )}
           {isLeading && !isExpired && (
-            <Badge className="bg-green-500 text-white border-0">Vous menez !</Badge>
+            <Badge className="bg-green-500 text-white border-0">You're leading!</Badge>
           )}
         </div>
         <Badge className="absolute top-3 right-3 bg-white text-stone-800 border border-stone-200 font-bold">
@@ -83,13 +83,13 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
         </div>
 
         <div className="flex items-center gap-3 text-xs text-stone-500">
-          <span className="flex items-center gap-1"><Gavel className="w-3 h-3" />{auction.bid_count || 0} mise(s)</span>
-          <span className="flex items-center gap-1"><Dna className="w-3 h-3" />Moy: {avgStat}</span>
+          <span className="flex items-center gap-1"><Gavel className="w-3 h-3" />{auction.bid_count || 0} bid(s)</span>
+          <span className="flex items-center gap-1"><Dna className="w-3 h-3" />Avg: {avgStat}</span>
         </div>
 
         {auction.current_bidder_name && (
           <p className="text-xs text-stone-500">
-            Meilleure mise: <span className="font-semibold text-stone-700">{auction.current_bidder_name}</span>
+            Top bid: <span className="font-semibold text-stone-700">{auction.current_bidder_name}</span>
           </p>
         )}
 
@@ -97,30 +97,30 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
 
         <div className="flex gap-2 pt-2">
           <Link to={`/HorseDetail?id=${auction.horse_id}`} className="flex-1">
-            <Button variant="outline" className="w-full text-sm">Voir</Button>
+            <Button variant="outline" className="w-full text-sm">View</Button>
           </Link>
           {!isOwner && !isExpired && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-sm">
-                  <Gavel className="w-4 h-4 mr-1" /> Enchérir
+                  <Gavel className="w-4 h-4 mr-1" /> Bid
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-sm">
+                </DialogTrigger>
+                <DialogContent className="max-w-sm">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Gavel className="w-5 h-5 text-amber-600" />
-                    Enchérir sur {auction.horse_name}
-                  </DialogTitle>
+                   Bid on {auction.horse_name}
+                 </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
-                  <div className="p-3 bg-amber-50 rounded-lg">
-                    <p className="text-sm text-stone-600">Mise actuelle : <span className="font-bold text-amber-700">{auction.current_bid || auction.starting_price} pts</span></p>
-                    <p className="text-xs text-stone-500 mt-1">Mise minimale : <span className="font-semibold">{minBid} pts</span></p>
+                 <div className="p-3 bg-amber-50 rounded-lg">
+                   <p className="text-sm text-stone-600">Current bid: <span className="font-bold text-amber-700">{auction.current_bid || auction.starting_price} pts</span></p>
+                   <p className="text-xs text-stone-500 mt-1">Minimum bid: <span className="font-semibold">{minBid} pts</span></p>
                   </div>
                   <Input
                     type="number"
-                    placeholder={`Minimum ${minBid} pts`}
+                    placeholder={`Min ${minBid} pts`}
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     min={minBid}
@@ -128,7 +128,7 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
                   />
                   {Number(bidAmount) > 0 && Number(bidAmount) < minBid && (
                     <p className="text-xs text-red-500 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> Mise trop basse
+                      <AlertTriangle className="w-3 h-3" /> Bid too low
                     </p>
                   )}
                   <Button
@@ -136,7 +136,7 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
                     disabled={!bidAmount || Number(bidAmount) < minBid || isBidding}
                     className="w-full bg-amber-600 hover:bg-amber-700 text-white"
                   >
-                    {isBidding ? 'Enchère en cours...' : `Placer ${bidAmount || '?'} pts`}
+                    {isBidding ? 'Bidding...' : `Place ${bidAmount || '?'} pts`}
                   </Button>
                 </div>
               </DialogContent>
@@ -144,7 +144,7 @@ export default function AuctionCard({ auction, currentUser, onBid, isBidding }) 
           )}
           {isOwner && (
             <Badge variant="outline" className="flex items-center gap-1 px-3">
-              Votre vente
+              Your sale
             </Badge>
           )}
         </div>

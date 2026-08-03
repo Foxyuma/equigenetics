@@ -50,19 +50,19 @@ export default function Pedigree() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Lignées & Prédictions</h1>
-        <p className="text-stone-500 mt-1">Explorez les arbres généalogiques et prédisez les résultats de croisements</p>
+        <h1 className="text-3xl font-bold text-stone-800 tracking-tight">Lineages & Predictions</h1>
+        <p className="text-stone-500 mt-1">Explore pedigree trees and predict breeding outcomes</p>
       </div>
 
       <Tabs defaultValue="pedigree" className="w-full">
         <TabsList className="bg-stone-100/80">
           <TabsTrigger value="pedigree">
             <GitBranch className="w-4 h-4 mr-2" />
-            Arbre Généalogique
+            Pedigree Tree
           </TabsTrigger>
           <TabsTrigger value="predictor">
             <Sparkles className="w-4 h-4 mr-2" />
-            Prédicteur Génétique
+            Genetic Predictor
           </TabsTrigger>
         </TabsList>
 
@@ -70,13 +70,13 @@ export default function Pedigree() {
         <TabsContent value="pedigree" className="mt-6 space-y-6">
           <Card className="border-0 bg-white/60">
             <CardHeader>
-              <CardTitle className="text-lg">Sélectionner un cheval</CardTitle>
+              <CardTitle className="text-lg">Select a horse</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <Input
-                  placeholder="Rechercher un cheval..."
+                  placeholder="Search for a horse..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -84,7 +84,7 @@ export default function Pedigree() {
               </div>
               <Select value={selectedHorseId} onValueChange={setSelectedHorseId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir un cheval pour voir son pedigree..." />
+                  <SelectValue placeholder="Choose a horse to view its pedigree..." />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredHorses.map(h => (
@@ -102,7 +102,7 @@ export default function Pedigree() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <GitBranch className="w-5 h-5 text-amber-600" />
-                  Pedigree de {selectedHorse.name}
+                  {selectedHorse.name}'s Pedigree
                 </CardTitle>
                 <p className="text-sm text-stone-500">
                   {selectedHorse.breed} — {selectedHorse.coat_color}
@@ -116,8 +116,8 @@ export default function Pedigree() {
             <Card className="border-0 bg-gradient-to-br from-stone-50 to-amber-50">
               <CardContent className="p-12 text-center">
                 <GitBranch className="w-16 h-16 mx-auto text-stone-300 mb-4" />
-                <h3 className="text-lg font-semibold text-stone-600 mb-2">Aucun cheval sélectionné</h3>
-                <p className="text-stone-400">Choisissez un cheval ci-dessus pour visualiser son arbre généalogique</p>
+                <h3 className="text-lg font-semibold text-stone-600 mb-2">No horse selected</h3>
+                <p className="text-stone-400">Choose a horse above to view its pedigree tree</p>
               </CardContent>
             </Card>
           )}
@@ -127,13 +127,13 @@ export default function Pedigree() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Card className="border-0 bg-blue-50">
                 <CardContent className="p-4 text-center">
-                  <p className="text-sm text-blue-600 mb-1">Ancêtres connus</p>
+                  <p className="text-sm text-blue-600 mb-1">Known ancestors</p>
                   <p className="text-3xl font-bold text-blue-800">{ancestors.length}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 bg-green-50">
                 <CardContent className="p-4 text-center">
-                  <p className="text-sm text-green-600 mb-1">Génération max</p>
+                  <p className="text-sm text-green-600 mb-1">Max generation</p>
                   <p className="text-3xl font-bold text-green-800">
                     {ancestors.length === 0 ? 0 : Math.ceil(Math.log2(ancestors.length + 1))}
                   </p>
@@ -141,7 +141,7 @@ export default function Pedigree() {
               </Card>
               <Card className="border-0 bg-purple-50">
                 <CardContent className="p-4 text-center">
-                  <p className="text-sm text-purple-600 mb-1">Races dans le pedigree</p>
+                  <p className="text-sm text-purple-600 mb-1">Breeds in pedigree</p>
                   <p className="text-3xl font-bold text-purple-800">
                     {new Set([selectedHorse.breed, ...ancestors.map(a => a.breed)]).size}
                   </p>
@@ -159,13 +159,13 @@ export default function Pedigree() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-bold">♂</span>
-                  Étalon
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Select value={predictorFatherId} onValueChange={setPredictorFatherId}>
+                  Stallion
+                  </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                  <Select value={predictorFatherId} onValueChange={setPredictorFatherId}>
                   <SelectTrigger className="bg-white">
-                    <SelectValue placeholder="Choisir un étalon..." />
+                    <SelectValue placeholder="Choose a stallion..." />
                   </SelectTrigger>
                   <SelectContent>
                     {males.map(h => (
@@ -197,13 +197,13 @@ export default function Pedigree() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <span className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 text-sm font-bold">♀</span>
-                  Jument
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Select value={predictorMotherId} onValueChange={setPredictorMotherId}>
+                  Mare
+                  </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                  <Select value={predictorMotherId} onValueChange={setPredictorMotherId}>
                   <SelectTrigger className="bg-white">
-                    <SelectValue placeholder="Choisir une jument..." />
+                    <SelectValue placeholder="Choose a mare..." />
                   </SelectTrigger>
                   <SelectContent>
                     {females.map(h => (
@@ -239,17 +239,17 @@ export default function Pedigree() {
             <CardContent className="p-6">
               <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-indigo-600" />
-                Comment fonctionne le prédicteur ?
+                How does the predictor work?
               </h3>
               <div className="space-y-2 text-sm text-stone-600">
                 <p>
-                  Le prédicteur génétique simule tous les croisements possibles entre les génotypes des deux parents en utilisant les <strong>lois de Mendel</strong>.
+                  The genetic predictor simulates all possible crossings between the two parents' genotypes using <strong>Mendel's laws</strong>.
                 </p>
                 <p>
-                  Il analyse 9 loci génétiques différents (Extension, Agouti, Crème, Gris, Tobiano, Roan, Dun, Champagne, Silver) pour calculer toutes les combinaisons de couleurs de robe possibles chez les descendants.
+                  It analyzes 9 different genetic loci (Extension, Agouti, Cream, Grey, Tobiano, Roan, Dun, Champagne, Silver) to calculate all possible coat color combinations in offspring.
                 </p>
                 <p className="pt-2 border-t border-indigo-200">
-                  💡 <strong>Astuce :</strong> Les prédictions sont particulièrement utiles pour planifier des croisements visant une couleur de robe spécifique ou pour éviter certaines combinaisons génétiques.
+                  💡 <strong>Tip:</strong> Predictions are especially useful for planning breedings targeting a specific coat color or for avoiding certain genetic combinations.
                 </p>
               </div>
             </CardContent>

@@ -35,6 +35,7 @@ import BreedingBook from './pages/BreedingBook';
 import PlayerProfile from './pages/PlayerProfile';
 import Landing from './pages/Landing';
 import Guide from './pages/Guide';
+import GeneticAchievements from './pages/GeneticAchievements';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -90,6 +91,7 @@ const AuthenticatedApp = () => {
         <Route path="/BreedingBook" element={<BreedingBook />} />
         <Route path="/PlayerProfile" element={<PlayerProfile />} />
         <Route path="/Guide" element={<Guide />} />
+        <Route path="/GeneticAchievements" element={<GeneticAchievements />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

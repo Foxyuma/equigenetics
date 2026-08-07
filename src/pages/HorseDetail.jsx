@@ -23,6 +23,7 @@ import ApprovalBenefits from '../components/breeding/ApprovalBenefits';
 import StallionOfferPanel from '../components/horse/StallionOfferPanel';
 import StudbookRegistration from '../components/horse/StudbookRegistration';
 import VetHistoryPanel from '../components/horse/VetHistoryPanel';
+import AchievementBadges from '../components/horse/AchievementBadges';
 
 export default function HorseDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -245,6 +246,8 @@ export default function HorseDetail() {
               </DialogContent>
             </Dialog>
           </div>
+
+          <AchievementBadges horse={horse} />
 
           {isDopingRisk && (
             <Card className="border border-orange-300 bg-orange-50">
